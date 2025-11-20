@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Skechers Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/loader.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo"><a href="index.html" style="color:var(--text-color);text-decoration:none;">SKECHERS</a></div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="category.html">Categories</a></li>
+            <li><a href="category.html">Collection</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button id="loginBtn" class="btn-primary">Login</button>
+            <a href="cart.html" class="cart-icon">🛒 <span id="cartCount">0</span></a>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 120px; padding-bottom: 50px; max-width: 800px; margin: 0 auto;">
+        <h1>My Profile</h1>
+
+        <div class="profile-card"
+            style="background: #f9f9f9; padding: 30px; border-radius: 15px; margin-top: 30px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+            <div style="display: flex; align-items: center; gap: 20px;">
+                <div
+                    style="width: 80px; height: 80px; background: #eee; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                    👤
+                </div>
+                <div>
+                    <h2 id="userName">Guest User</h2>
+                    <p id="userEmail" style="color: #666;">Please login to view details</p>
+                </div>
+            </div>
+
+            <hr style="border-color: #eee; margin: 30px 0;">
+
+            <h3>Order History</h3>
+            <div id="order-list" style="margin-top: 20px;">
+                <p style="color: #666;">No orders found.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal (Reused) -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="loginForm">
+                <h2>Login</h2>
+                <input type="email" id="loginEmail" placeholder="Email">
+                <input type="password" id="loginPassword" placeholder="Password">
+                <button onclick="login()">Login</button>
+                <p>New here? <a href="#" onclick="toggleAuthMode()">Register</a></p>
+            </div>
+            <div id="registerForm" style="display:none;">
+                <h2>Register</h2>
+                <input type="text" id="regName" placeholder="Name">
+                <input type="email" id="regEmail" placeholder="Email">
+                <input type="password" id="regPassword" placeholder="Password">
+                <button onclick="register()">Register</button>
+                <p>Already a member? <a href="#" onclick="toggleAuthMode()">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/loader.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user) {
+                document.getElementById('userName').textContent = user.name;
+                document.getElementById('userEmail').textContent = user.email;
+
+                // Simulate fetching orders
+                // In a real app, we would fetch from /api/orders
+                document.getElementById('order-list').innerHTML = `
+                <div style="background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                    <div style="display:flex; justify-content:space-between;">
+                        <strong>Order #12345</strong>
+                        <span style="color: #28a745;">Delivered</span>
+                    </div>
+                    <p style="color: #666; font-size: 14px;">Placed on Nov 18, 2025</p>
+                </div>
+                `;
+            }
+        });
+    </script>
+</body>
+
+</html>

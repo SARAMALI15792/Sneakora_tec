@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories - Skechers Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/loader.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo"><a href="index.html" style="color:var(--text-color);text-decoration:none;">SKECHERS</a></div>
+        <ul class="nav-links">
+            <aside class="filters" style="width: 250px; padding: 20px; border-right: 1px solid #ddd;">
+                <h3>Filters</h3>
+                <div class="filter-group">
+                    <h4>Category</h4>
+                    <label><input type="checkbox" name="category" value="Men"> Men</label><br>
+                    <label><input type="checkbox" name="category" value="Women"> Women</label><br>
+                    <label><input type="checkbox" name="category" value="Kids"> Kids</label>
+                </div>
+                <div class="filter-group" style="margin-top: 20px;">
+                    <h4>Price Range</h4>
+                    <input type="range" id="priceRange" min="0" max="200" value="200" style="width:100%">
+                    <p>Max Price: $<span id="priceValue">200</span></p>
+                </div>
+                <button onclick="applyFilters()" class="btn-primary"
+                    style="margin-top: 20px; width: 100%;">Apply</button>
+            </aside>
+
+            <!-- Product Grid -->
+            <main style="flex: 1; padding: 20px;">
+                <div class="search-bar" style="margin-bottom: 20px; display: flex; gap: 10px;">
+                    <input type="text" id="searchInput" placeholder="Search products..."
+                        style="flex:1; padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                    <button onclick="searchProducts()" class="btn-primary">Search</button>
+                </div>
+                <h2>All Products</h2>
+                <div class="product-grid" id="category-products">
+                    <!-- Products injected here -->
+                </div>
+            </main>
+            </div>
+
+            <!-- Login Modal (Reused) -->
+            <div id="authModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <div id="loginForm">
+                        <h2>Login</h2>
+                        <input type="email" id="loginEmail" placeholder="Email">
+                        <input type="password" id="loginPassword" placeholder="Password">
+                        <button onclick="login()">Login</button>
+                        <p>New here? <a href="#" onclick="toggleAuthMode()">Register</a></p>
+                    </div>
+                    <div id="registerForm" style="display:none;">
+                        <h2>Register</h2>
+                        <input type="text" id="regName" placeholder="Name">
+                        <input type="email" id="regEmail" placeholder="Email">
+                        <input type="password" id="regPassword" placeholder="Password">
+                        <button onclick="register()">Register</button>
+                        <p>Already a member? <a href="#" onclick="toggleAuthMode()">Login</a></p>
+                    </div>
+                </div>
+            </div>
+
+            <script src="js/auth.js"></script>
+            <script src="js/loader.js"></script>
+            <script src="js/app.js"></script>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    loadCategoryProducts();
+
+                    // Price range listener
+                    document.getElementById('priceRange').addEventListener('input', (e) => {
+                        document.getElementById('priceValue').textContent = e.target.value;
+                    });
+                });
+            </script>
+</body>
+
+</html>

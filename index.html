@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skechers Store - Step into Comfort</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/loader.css">
+    <link rel="stylesheet" href="css/toast.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r150/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo"><a href="index.html" style="color:var(--text-color);text-decoration:none;">SKECHERS</a></div>
+        <ul class="nav-links">
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="category.html">Categories</a></li>
+            <li><a href="category.html">Collection</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button id="loginBtn" class="btn-primary">Login</button>
+            <button id="logoutBtn" class="btn-primary" style="display: none;">Logout</button>
+            <a href="cart.html" class="cart-icon">🛒 <span id="cartCount">0</span></a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Step into <br> <span style="color:var(--accent-color)">Future</span></h1>
+            <p>Experience the ultimate comfort and style with our latest collection. Designed for those who never stop
+                moving.</p>
+
+            <div class="cta-group" style="margin-top: 30px;">
+                <button class="btn-cta">Shop Now</button>
+            </div>
+
+            <!-- Interactive Color Controls moved under Shop Now button -->
+            <div class="color-controls">
+                <p>Choose your style:</p>
+                <div class="thumbs">
+                    <img src="images/shoe_pink.png" onclick="changeShoeImage('pink')" alt="Pink">
+                    <img src="images/shoe_cyan.png" onclick="changeShoeImage('cyan')" alt="Cyan">
+                    <img src="images/shoe_green.png" onclick="changeShoeImage('green')" alt="Green">
+                    <img src="images/shoe_purple.png" onclick="changeShoeImage('purple')" alt="Purple">
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <!-- Large Hero Shoe Image -->
+            <img src="images/hero_shoe_main.png" alt="Featured Shoe" class="hero-shoe-image">
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="featured">
+        <h2>Featured Collection</h2>
+        <div class="product-grid" id="featured-products">
+            <!-- Products injected by JS -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section footer-brand">
+                <h2>SKECHERS</h2>
+                <p>Step into the future with our premium collection of comfortable and stylish footwear designed for
+                    those who never stop moving.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="Facebook">📘</a>
+                    <a href="#" aria-label="Instagram">📷</a>
+                    <a href="#" aria-label="Twitter">🐦</a>
+                    <a href="#" aria-label="LinkedIn">💼</a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>Company</h3>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Our Story</a></li>
+                    <li><a href="category.html">Collections</a></li>
+                    <li><a href="#">Terms & Conditions</a></li>
+                    <li><a href="#">Careers</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="contact.html">Contact Us</a></li>
+                    <li><a href="#">Customer Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Shipping Info</a></li>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Returns</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Join Our Community</h3>
+                <button class="community-btn">
+                    <span>📧</span> Newsletter Signup
+                </button>
+                <p class="community-text">Join our newsletter for latest updates, exclusive offers & new arrivals.</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© Copyright 2025 Skechers, Inc.</p>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="loginForm">
+                <h2>Login</h2>
+                <input type="email" id="loginEmail" placeholder="Email">
+                <input type="password" id="loginPassword" placeholder="Password">
+                <button onclick="login()">Login</button>
+                <p>New here? <a href="#" onclick="toggleAuthMode()">Register</a></p>
+            </div>
+            <div id="registerForm" style="display:none;">
+                <h2>Register</h2>
+                <input type="text" id="regName" placeholder="Name">
+                <input type="email" id="regEmail" placeholder="Email">
+                <input type="password" id="regPassword" placeholder="Password">
+                <button onclick="register()">Register</button>
+                <p>Already a member? <a href="#" onclick="toggleAuthMode()">Login</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/toast.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/loader.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/shoe-switcher.js"></script>
+</body>
+
+</html>

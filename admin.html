@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Skechers Store</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/loader.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="logo"><a href="index.html" style="color:var(--text-color);text-decoration:none;">SKECHERS ADMIN</a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Back to Store</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button onclick="logout()" class="btn-primary">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container" style="padding-top: 120px; padding-bottom: 50px; max-width: 1200px; margin: 0 auto;">
+        <h1>Product Management</h1>
+
+        <div style="display: flex; gap: 30px; margin-top: 30px;">
+            <!-- Add Product Form -->
+            <div
+                style="flex: 1; background: #f9f9f9; padding: 30px; border-radius: 15px; height: fit-content; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                <h2>Add New Product</h2>
+                <form id="addProductForm" onsubmit="addProduct(event)">
+                    <input type="text" id="pName" placeholder="Product Name" required
+                        style="width:100%; padding:10px; margin:10px 0; background:white; border:1px solid #ddd; color:black; border-radius:5px;">
+                    <input type="number" id="pPrice" placeholder="Price" required
+                        style="width:100%; padding:10px; margin:10px 0; background:white; border:1px solid #ddd; color:black; border-radius:5px;">
+                    <select id="pCategory"
+                        style="width:100%; padding:10px; margin:10px 0; background:white; border:1px solid #ddd; color:black; border-radius:5px;">
+                        <option value="Men">Men</option>
+                        <option value="Women">Women</option>
+                        <option value="Kids">Kids</option>
+                    </select>
+                    <input type="text" id="pImage" placeholder="Image URL" required
+                        style="width:100%; padding:10px; margin:10px 0; background:white; border:1px solid #ddd; color:black; border-radius:5px;">
+                    <button type="submit" class="btn-primary" style="width:100%; margin-top:10px;">Add Product</button>
+                </form>
+            </div>
+
+            <!-- Product List -->
+            <div
+                style="flex: 1; background: #f9f9f9; padding: 30px; border-radius: 15px; height: fit-content; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
+                <h2>Existing Products</h2>
+                <div id="admin-product-list"
+                    style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
+                    <!-- Products injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/loader.js"></script>
+    <script>
+        const API_URL = '/api/products';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAdmin();
+            loadAdminProducts();
+        });
+
+        function checkAdmin() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            // Simple client-side check (In real app, protect via backend middleware)
+            if (!user || user.role !== 'admin') {
+                // For demo purposes, we allow anyone to access if they manually go to admin.html
+                // But ideally: window.location.href = 'index.html';
+                console.warn('Accessing Admin Panel without explicit admin role for demo.');
+            }
+        }
+
+        async function loadAdminProducts() {
+            const res = await fetch(API_URL);
+            const products = await res.json();
+
+            const container = document.getElementById('admin-product-list');
+            container.innerHTML = products.map(p => `
+            <div
+                style="background: white; padding: 15px; border-radius: 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                <img src="${p.image}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;">
+                <div style="flex: 1;">
+                    <strong>${p.name}</strong>
+                    <div style="color: #666; font-size: 14px;">${p.category} - $${p.price}</div>
+                </div>
+                <button onclick="deleteProduct(${p.id})"
+                    style="background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Delete</button>
+            </div>
+            `).join('');
+        }
+
+        async function addProduct(e) {
+            e.preventDefault();
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            const category = document.getElementById('pCategory').value;
+            const image = document.getElementById('pImage').value;
+
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price, category, image })
+            });
+
+            if (res.ok) {
+                alert('Product Added');
+                document.getElementById('addProductForm').reset();
+                loadAdminProducts();
+            } else {
+                alert('Error adding product');
+            }
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Are you sure?')) return;
+
+            const res = await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                loadAdminProducts();
+            } else {
+                alert('Error deleting product');
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+
+</html>
