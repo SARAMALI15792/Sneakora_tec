@@ -2,6 +2,8 @@
 
 A modern, full-stack e-commerce web application for browsing and purchasing Skechers shoes. Built with Node.js, Express, and vanilla JavaScript with a beautiful, responsive UI.
 
+![Skechers Store Preview](images/project_preview.png)
+
 ![Project Status](https://img.shields.io/badge/status-active-success.svg)
 ![Node Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
