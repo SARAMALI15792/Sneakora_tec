@@ -251,4 +251,4 @@ For support, email saramali15792@gmail.com or open an issue in the repository.
 
 ---
 
-**Made with ❤️ using Node.js and vanilla JavaScript**
+
