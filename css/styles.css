@@ -2,7 +2,7 @@
     --bg-color: #F3F5F9;
     --text-color: #111111;
     --card-bg: #FFFFFF;
-    --accent-color: #6C63FF;
+    --accent-color: #d151e3;
     --gradient-primary: linear-gradient(135deg, #c471ed 0%, #f64f59 100%);
     --gradient-hover: linear-gradient(135deg, #f64f59 0%, #c471ed 100%);
     --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.05);
@@ -30,6 +30,7 @@ body {
     padding: 20px 50px;
     position: fixed;
     width: 100%;
+    gap: 30px;
     top: 0;
     z-index: 1000;
     background: rgba(243, 245, 249, 0.8);
@@ -37,10 +38,26 @@ body {
 }
 
 .logo a {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text-color) !important;
-    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-logo {
+    height: 50px;
+    width: 50px;
+    object-fit: cover; /* Use cover to ensure it fills the circle */
+    border-radius: 50%;
+    background: transparent;
+}
+
+.logo img {
+    /* Old styles, will be overridden by .navbar-logo if class is present */
+    height: 50px;
+    width: 50px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: transparent;
+    mix-blend-mode: multiply;
 }
 
 .nav-links {
@@ -111,7 +128,6 @@ body {
     font-size: 18px;
     border-radius: 50px;
     cursor: pointer;
-    margin-top: 20px;
     transition: transform 0.2s;
 }
 
@@ -125,7 +141,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 100px 100px 80px 100px;
+    padding: 80px 100px 80px 100px;
     position: relative;
     overflow: hidden;
 }
@@ -138,6 +154,7 @@ body {
 
 .hero h1 {
     font-size: 80px;
+    margin-top: -35px;
 }
 
 .hero-right {
@@ -151,9 +168,23 @@ body {
     gap: 30px;
 }
 
+.hero-image-card {
+    background: white;
+    padding: 40px;
+    border-radius: 30px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    aspect-ratio: 1;
+    position: relative; /* Added for ribbon positioning */
+    overflow: hidden; /* Clip content outside the card for the ribbon */
+}
+
 .hero-shoe-image {
     width: 100%;
-    max-width: 950px;
     height: auto;
     object-fit: contain;
     animation: float 3s ease-in-out infinite;
@@ -170,6 +201,35 @@ body {
     50% {
         transform: translateY(-20px);
     }
+}
+
+/* Deal Ribbon */
+.deal-ribbon {
+    position: absolute;
+    top: 15px; /* Position slightly below the top edge of the card, adjusted */
+    left: 20px; /* Align to the left edge with more padding/inset */
+    width: fit-content; /* Adjust width to fit content, making it shorter */
+    min-width: 180px; /* Minimum width for the content */
+    background: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%); /* Modern gradient color */
+    color: #333; /* Darker text for better contrast on light gradient */
+    padding: 8px 20px; /* Increased padding */
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-radius: 20px; /* More rounded corners for modern look */
+    transform: none; /* No rotation */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Softer, more pronounced shadow */
+    z-index: 10;
+    white-space: nowrap;
+    text-align: center; /* Center the text now that it's shorter */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ribbon-icon {
+    margin-right: 8px;
+    font-size: 18px;
 }
 
 /* Featured Section */
@@ -211,6 +271,8 @@ body {
     object-fit: cover;
     border-radius: 15px;
     margin-bottom: 15px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.02);
 }
 
 .product-card h3 {
@@ -219,8 +281,9 @@ body {
 }
 
 .product-card p {
-    color: #888;
+    color: #777;
     font-size: 14px;
+    line-height: 1.5;
 }
 
 .product-card .price {
@@ -252,7 +315,7 @@ body {
     width: 90%;
     max-width: 400px;
     position: relative;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
     text-align: center;
 }
 
@@ -262,28 +325,60 @@ body {
     top: 15px;
     font-size: 28px;
     cursor: pointer;
-    color: #aaa;
+    color: #888;
+    transition: color 0.3s ease, background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.modal .close:hover,
+.modal .close:focus {
+    color: var(--text-color); /* Transition to near black on hover */
+    opacity: 0.8; /* Subtle opacity change */
+    cursor: pointer;
 }
 
 .modal input {
     width: 100%;
-    padding: 12px;
+    padding: 12px 20px; /* Changed from 12px */
     margin: 10px 0;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    background: #f9f9f9;
+    border: 1px solid #e0e0e0; /* Changed from #eee */
+    border-radius: 50px; /* Changed from 8px */
+    background: var(--card-bg); /* Changed from #f9f9f9 */
+}
+
+.modal input:focus {
+    border-color: var(--accent-color); /* Highlight with accent color on focus */
+    box-shadow: 0 0 0 2px rgba(209, 81, 227, 0.2); /* Subtle focus ring */
 }
 
 .modal button {
     width: 100%;
-    padding: 12px;
+    padding: 12px 25px; /* Changed from 12px */
     margin-top: 10px;
     background: var(--gradient-primary);
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 50px; /* Changed from 8px */
     cursor: pointer;
     font-weight: 600;
+    font-size: 16px; /* Added */
+    transition: all 0.3s ease; /* Added */
+}
+
+.modal button:hover {
+    transform: translateY(-2px); /* Lift effect on hover */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Soften shadow on hover */
+    background: var(--gradient-hover); /* Apply existing hover gradient */
+}
+
+.modal p a {
+    color: var(--accent-color); /* Ensure accent color */
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal p a:hover {
+    opacity: 0.8; /* Subtle hover effect */
+    text-decoration: underline;
 }
 
 /* Size Selector */
@@ -328,7 +423,7 @@ body {
 
 .color-controls .thumbs {
     display: flex;
-    gap: 15px;
+    gap: 25px;
     justify-content: center;
 }
 
@@ -508,8 +603,9 @@ body {
         padding: 15px 30px;
     }
 
-    .logo a {
-        font-size: 20px;
+    .logo img {
+        height: 40px;
+        width: 40px;
     }
 
     .nav-links {
@@ -563,17 +659,29 @@ body {
         gap: 20px;
     }
 
+    .product-card {
+        padding: 15px;
+    }
+
+    .product-card img {
+        height: 200px;
+    }
+
+    .product-card h3 {
+        font-size: 18px;
+    }
+
+    .product-card .price {
+        font-size: 16px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 30px 20px;
+    }
+
     .footer {
         padding: 40px 30px 20px 30px;
-    }
-
-    .footer-content {
-        grid-template-columns: 1fr;
-        gap: 30px;
-    }
-
-    .footer-brand {
-        grid-column: 1;
     }
 
     .footer-section h2 {
@@ -587,8 +695,9 @@ body {
         padding: 12px 20px;
     }
 
-    .logo a {
-        font-size: 18px;
+    .logo img {
+        height: 35px;
+        width: 35px;
     }
 
     .nav-actions {
@@ -687,33 +796,6 @@ body {
     .footer-section h2 {
         font-size: 20px;
     }
-
-    .footer-section h3 {
-        font-size: 16px;
-    }
-
-    .footer-brand p,
-    .footer-section ul li a,
-    .community-text {
-        font-size: 13px;
-    }
-
-    .social-links a {
-        width: 35px;
-        height: 35px;
-        font-size: 18px;
-    }
-
-    .community-btn {
-        padding: 10px 20px;
-        font-size: 13px;
-        width: 100%;
-        justify-content: center;
-    }
-
-    .footer-bottom p {
-        font-size: 12px;
-    }
 }
 
 /* Extra Small Devices (max-width: 320px) */
@@ -751,3 +833,313 @@ body {
         max-width: 300px;
     }
 }
+.content-fade-out {
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+}
+
+/* Contact Form Styling */
+.contact-section {
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: var(--shadow-soft);
+}
+
+.contact-form div {
+    margin-bottom: 15px;
+}
+
+.contact-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.contact-form input[type="text"],
+.contact-form input[type="email"],
+.contact-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-family: var(--font-main);
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.contact-form input[type="text"]:focus,
+.contact-form input[type="email"]:focus,
+.contact-form textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+    outline: none;
+}
+
+.contact-form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.contact-form .btn-primary {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    margin-top: 20px;
+}
+
+/* Social Media Icons Styling */
+.social-media-section {
+    margin-top: 50px;
+    text-align: center;
+}
+
+.social-media-section h2 {
+    font-size: 28px;
+    margin-bottom: 25px;
+    color: var(--text-color);
+}
+
+.social-media-section .social-links a {
+    font-size: 32px;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    color: var(--accent-color);
+    box-shadow: var(--shadow-soft);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 10px;
+}
+
+.social-media-section .social-links a:hover {
+    background: var(--gradient-primary);
+    color: white;
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 8px 20px rgba(108, 99, 255, 0.3);
+}
+
+.story-section {
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+}
+
+.story-section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* New category page styles */
+.category-main-content {
+    display: flex;
+    padding: 100px 50px 80px 50px; /* Adjust padding to account for fixed navbar */
+    gap: 30px;
+}
+
+.category-main-content aside.filters {
+    width: 280px;
+    padding: 40px;
+    border-radius: 15px;
+    background: var(--card-bg);
+    box-shadow: var(--shadow-soft);
+    border: none;
+    align-self: flex-start;
+}
+
+.category-main-content .filter-group {
+    margin-top: 20px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.category-main-content .filter-group:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.category-main-content .filter-group h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 15px;
+}
+
+.category-main-content .filter-group label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    cursor: pointer;
+    color: #555;
+    transition: color 0.3s;
+}
+
+.category-main-content .filter-group label:hover {
+    color: var(--accent-color);
+}
+
+.category-main-content .filter-group input[type="checkbox"] {
+    opacity: 0;
+    position: absolute;
+}
+
+.category-main-content .filter-group label span::before {
+    content: '';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1; /* Adjust line height to center checkmark */
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    margin-right: 10px;
+    vertical-align: middle;
+    transition: all 0.2s ease-in-out;
+}
+
+.category-main-content .filter-group input[type="checkbox"]:checked + span::before {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    content: '✓';
+    color: white;
+    text-align: center;
+    line-height: 18px;
+    font-size: 14px;
+}
+
+.category-main-content .filter-group input[type="checkbox"]:checked + span {
+    color: var(--accent-color);
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+.category-main-content .filter-group input[type="checkbox"]:checked + span::before {
+    content: '✓';
+    color: white;
+    text-align: center;
+    line-height: 18px;
+    font-size: 14px;
+    background-color: transparent; /* Remove background from checkmark itself */
+    border-color: transparent; /* Remove border from checkmark itself */
+    margin-right: 8px; /* Adjust spacing */
+}
+
+.category-main-content aside.filters input[type="range"] {
+    width: 100%;
+    -webkit-appearance: none; /* Remove default styling for Chrome/Safari */
+    appearance: none;
+    height: 8px; /* Height of the slider track */
+    background: linear-gradient(to right, #E0E0E0, #F0F0F0); /* Light gradient for the track */
+    outline: none;
+    border-radius: 5px;
+    border: 0.5px solid #ccc;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+    transition: opacity .2s;
+    opacity: 0.9;
+}
+
+.category-main-content aside.filters input[type="range"]:hover {
+    opacity: 1; /* Increase opacity on hover */
+}
+
+/* Styling for the thumb (the draggable part) for WebKit browsers */
+.category-main-content aside.filters input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--accent-color); /* Use accent color for the thumb */
+    cursor: pointer;
+    border-radius: 50%;
+    margin-top: -6px; /* Adjust to vertically align thumb with track */
+    box-shadow: var(--shadow-soft); /* Add shadow to the thumb */
+    border: 2px solid var(--card-bg); /* White border for definition */
+}
+
+/* Styling for the thumb for Mozilla Firefox */
+.category-main-content aside.filters input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--accent-color);
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow: var(--shadow-soft);
+    border: 2px solid var(--card-bg);
+}
+
+/* Styling for the track for WebKit browsers */
+.category-main-content aside.filters input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(to right, #E0E0E0, #F0F0F0); /* Consistent track background */
+    border-radius: 5px;
+    border: 0.5px solid #ccc;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Styling for the track for Mozilla Firefox */
+.category-main-content aside.filters input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: 8px;
+    background: linear-gradient(to right, #E0E0E0, #F0F0F0);
+    border-radius: 5px;
+    border: 0.5px solid #ccc;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.category-main-content aside.filters p span#priceValue {
+    font-weight: 700;
+    color: var(--accent-color);
+}
+
+.category-main-content aside.filters .btn-primary {
+    margin-top: 20px;
+    width: 100%;
+}
+
+.category-main-content main {
+    flex: 1;
+    padding: 20px;
+}
+
+.category-main-content .search-bar {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    background: var(--card-bg);
+    border-radius: 15px;
+    box-shadow: var(--shadow-soft);
+    padding: 20px;
+    border: none; /* Removed */
+    align-items: center;
+}
+
+.category-main-content .search-bar input[type="text"] {
+    flex: 1;
+    padding: 12px;
+    border-radius: 50px;
+    background-color: #f8f8f8;
+    border: 1px solid #e0e0e0;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.category-main-content .search-bar input[type="text"]::placeholder {
+    color: #a0a0a0;
+}
+
+.category-main-content .search-bar input[type="text"]:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.2);
+    outline: none;
+}
+
+.category-main-content .search-bar .btn-primary {
+    padding: 12px 24px;
+}
+

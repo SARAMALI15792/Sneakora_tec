@@ -19,12 +19,12 @@
 
     <!-- Navigation -->
     <nav class="navbar">
-        <div class="logo"><a href="index.html" style="color:var(--text-color);text-decoration:none;">SKECHERS</a></div>
+        <div class="logo"><a href="index.html"><img src="images/logo_skh.png" alt="SKH Logo" class="navbar-logo"></a></div>
         <ul class="nav-links">
             <li><a href="index.html" class="active">Home</a></li>
-            <li><a href="category.html">Categories</a></li>
-            <li><a href="category.html">Collection</a></li>
-            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="category.html" target="_blank">Categories</a></li>
+            <li><a href="category.html" target="_blank">Collection</a></li>
+            <li><a href="contact.html" target="_blank">Contact Us</a></li>
         </ul>
         <div class="nav-actions">
             <button id="loginBtn" class="btn-primary">Login</button>
@@ -36,12 +36,12 @@
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>Step into <br> <span style="color:var(--accent-color)">Future</span></h1>
+            <h1>Step into <br> <span style="color:rgb(5, 243, 45)">Future</span></h1>
             <p>Experience the ultimate comfort and style with our latest collection. Designed for those who never stop
                 moving.</p>
 
             <div class="cta-group" style="margin-top: 30px;">
-                <button class="btn-cta">Shop Now</button>
+                <a href="category.html" target="_blank" class="btn-cta">Shop Now</a>
             </div>
 
             <!-- Interactive Color Controls moved under Shop Now button -->
@@ -58,7 +58,12 @@
 
         <div class="hero-right">
             <!-- Large Hero Shoe Image -->
-            <img src="images/hero_shoe_main.png" alt="Featured Shoe" class="hero-shoe-image">
+            <div class="hero-image-card">
+                <img src="images/hero_shoe_main.png" alt="Featured Shoe" class="hero-shoe-image">
+                <div class="deal-ribbon" id="dealRibbon">
+                    <span class="ribbon-icon">🔥</span> <span id="ribbonText"></span><span id="countdownText"></span>
+                </div>
+            </div>
         </div>
     </section>
 

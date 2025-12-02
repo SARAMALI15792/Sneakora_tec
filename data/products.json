@@ -38,5 +38,21 @@
     "category": "Women",
     "image": "https://image.pollinations.ai/prompt/skechers%20arch%20fit%20shoes%20sneakers%20product%20photo?width=400&height=400&seed=5&nologo=true",
     "color": "#ff00ff"
+  },
+  {
+    "id": 6,
+    "name": "Skechers Go Run",
+    "price": 110,
+    "category": "Sports",
+    "image": "https://image.pollinations.ai/prompt/skechers%20go%20run%20shoes%20sneakers%20product%20photo?width=400&height=400&seed=6&nologo=true",
+    "color": "#00bfff"
+  },
+  {
+    "id": 7,
+    "name": "Skechers Street",
+    "price": 70,
+    "category": "Casual",
+    "image": "https://image.pollinations.ai/prompt/skechers%20street%20shoes%20sneakers%20product%20photo?width=400&height=400&seed=7&nologo=true",
+    "color": "#a0522d"
   }
 ]
