@@ -78,23 +78,55 @@
     <script src="js/loader.js"></script>
     <script src="js/app.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        function esc(str) {
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
             const user = JSON.parse(localStorage.getItem('user'));
             if (user) {
                 document.getElementById('userName').textContent = user.name;
                 document.getElementById('userEmail').textContent = user.email;
 
-                // Simulate fetching orders
-                // In a real app, we would fetch from /api/orders
-                document.getElementById('order-list').innerHTML = `
-                <div style="background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                    <div style="display:flex; justify-content:space-between;">
-                        <strong>Order #12345</strong>
-                        <span style="color: #28a745;">Delivered</span>
-                    </div>
-                    <p style="color: #666; font-size: 14px;">Placed on Nov 18, 2025</p>
-                </div>
-                `;
+                try {
+                    const res = await fetch(`/api/orders/${user.id}`);
+                    const orders = await res.json();
+                    const container = document.getElementById('order-list');
+
+                    if (!orders.length) {
+                        container.textContent = 'No orders found.';
+                        return;
+                    }
+
+                    const grouped = orders.reduce((acc, row) => {
+                        if (!acc[row.id]) acc[row.id] = { ...row, items: [] };
+                        acc[row.id].items.push({ name: row.product_name, image: row.image, price: row.price });
+                        return acc;
+                    }, {});
+
+                    container.innerHTML = Object.values(grouped).map(order => `
+                        <div style="background:white;padding:15px;border-radius:10px;margin-bottom:10px;box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+                            <div style="display:flex;justify-content:space-between;">
+                                <strong>Order #${esc(String(order.id))}</strong>
+                                <span style="color:#28a745;text-transform:capitalize;">${esc(order.status)}</span>
+                            </div>
+                            <p style="color:#666;font-size:14px;">Placed on ${esc(new Date(order.created_at).toLocaleDateString())}</p>
+                            <p style="font-weight:bold;">Total: $${esc(String(order.total))}</p>
+                            <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;">
+                                ${order.items.map(item => `
+                                    <div style="display:flex;align-items:center;gap:8px;background:#f9f9f9;padding:8px;border-radius:8px;">
+                                        <img src="${esc(item.image)}" style="width:40px;height:40px;object-fit:cover;border-radius:5px;">
+                                        <span style="font-size:13px;">${esc(item.name)} — $${esc(String(item.price))}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `).join('');
+                } catch (e) {
+                    document.getElementById('order-list').textContent = 'Could not load orders.';
+                }
             }
         });
     </script>

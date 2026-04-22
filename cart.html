@@ -141,20 +141,43 @@
             document.getElementById('total').textContent = '$' + total.toFixed(2);
         }
 
-        function checkout() {
-            const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            if (cart.length === 0) {
+        async function checkout() {
+            const cartIds = JSON.parse(localStorage.getItem('cart') || '[]');
+            if (cartIds.length === 0) {
                 alert('Cart is empty!');
                 return;
             }
 
-            // Simulate checkout
-            alert('Processing Payment...');
-            setTimeout(() => {
-                alert('Order Placed Successfully!');
-                localStorage.removeItem('cart');
-                window.location.href = 'index.html';
-            }, 2000);
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user) {
+                alert('Please login to place an order.');
+                return;
+            }
+
+            try {
+                const productsRes = await fetch('/api/products');
+                const allProducts = await productsRes.json();
+
+                const cartProducts = cartIds.map(id => allProducts.find(p => p.id == id)).filter(Boolean);
+                const total = cartProducts.reduce((sum, p) => sum + parseFloat(p.price), 0);
+                const items = cartProducts.map(p => ({ product_id: p.id, price: p.price }));
+
+                const res = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: user.id, items, total: total.toFixed(2) })
+                });
+
+                if (res.ok) {
+                    alert('Order Placed Successfully!');
+                    localStorage.removeItem('cart');
+                    window.location.href = 'profile.html';
+                } else {
+                    alert('Error placing order. Please try again.');
+                }
+            } catch (e) {
+                alert('Error placing order. Please try again.');
+            }
         }
     </script>
 </body>
