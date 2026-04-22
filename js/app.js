@@ -35,7 +35,7 @@ async function loadCategoryProducts() {
 function renderProducts(products, container) {
     container.innerHTML = products.map(p => `
         <div class="product-card" onclick="window.location.href='product.html?id=${p.id}'" style="cursor:pointer;">
-            <img src="${p.image}" alt="${p.name}" style="width:100%; height:200px; object-fit:cover; background:#333; border-radius:10px;">
+            <img src="${p.image}" alt="${p.name}" onerror="this.src='images/shoe_texture.png'" style="width:100%; height:200px; object-fit:cover; background:#333; border-radius:10px;">
             <h3>${p.name}</h3>
             <p style="color:#aaa;">${p.category}</p>
             <p style="font-size:18px; font-weight:bold;">$${p.price}</p>

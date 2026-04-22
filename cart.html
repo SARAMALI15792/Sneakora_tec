@@ -109,7 +109,7 @@
                 container.innerHTML = cartProducts.map((p, index) => `
                 <div class="cart-item"
                     style="display: flex; gap: 20px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 10px; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                    <img src="${p.image}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 5px;">
+                    <img src="${p.image}" onerror="this.src='images/shoe_texture.png'" style="width: 80px; height: 80px; object-fit: cover; border-radius: 5px;">
                     <div style="flex: 1;">
                         <h3>${p.name}</h3>
                         <p style="color: #666;">${p.category}</p>
