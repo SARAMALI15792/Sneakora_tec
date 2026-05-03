@@ -616,11 +616,31 @@ SCHEMAS
 
 ### In MySQL Command Line
 
-Open a terminal and type:
+**IMPORTANT — Two-step process. You cannot type SQL directly in Windows CMD.**
+
+```
+Windows CMD / PowerShell            MySQL Shell
+────────────────────────            ─────────────
+Runs programs (node, npm)           Runs SQL (SELECT, USE, SHOW)
+Prompt looks like:  C:\>            Prompt looks like:  mysql>
+```
+
+**Step 1 — Connect to MySQL first (run this in Windows CMD or PowerShell):**
+
+If MySQL is in your PATH:
 ```bash
 mysql -u root -p
 ```
-Type your password → press Enter → prompt changes to `mysql>`
+
+If it says `'mysql' is not recognized` — use the full path:
+```bash
+"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p
+```
+
+Type your password when asked → press Enter.
+Your prompt changes from `C:\>` to `mysql>` — you are now inside MySQL.
+
+**Step 2 — NOW type SQL commands:**
 
 ```sql
 -- See all databases
@@ -1532,6 +1552,43 @@ db.query(`SELECT * FROM products ORDER BY price ASC`, ...
 ---
 
 ## SECTION 12 — Troubleshooting — Every Error Explained
+
+---
+
+### `'USE' is not recognized` or `'SELECT' is not recognized`
+
+**Cause:** You typed a SQL command directly into Windows CMD or PowerShell.
+SQL commands only work inside the MySQL shell — not in regular terminal.
+
+**What went wrong:**
+```
+C:\Users\xyzsa\Desktop\Sneakora_tec> USE sneakora_db;
+'USE' is not recognized as an internal or external command
+```
+
+**Fix — connect to MySQL first, THEN type SQL:**
+
+```bash
+"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p
+```
+
+Type your password → Enter. Prompt becomes `mysql>` — now type SQL:
+
+```sql
+USE sneakora_db;
+SELECT * FROM users;
+```
+
+**Or run a query in one line without entering the shell:**
+```bash
+"C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p sneakora_db -e "SELECT * FROM users;"
+```
+
+**Easiest alternative — use MySQL Workbench:**
+```
+Open MySQL Workbench → connect → paste SQL in the editor → press F5
+No terminal needed at all.
+```
 
 ---
 
