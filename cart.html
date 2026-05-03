@@ -89,49 +89,128 @@
             loadCart();
         });
 
+        // Build one cart item row using DOM (safe, no innerHTML injection)
+        function buildCartRow(name, category, image, price, removeId, mode) {
+            const row = document.createElement('div');
+            row.className = 'cart-item';
+            row.style.cssText = 'display:flex;gap:20px;margin-bottom:20px;background:white;padding:15px;border-radius:10px;align-items:center;box-shadow:0 2px 5px rgba(0,0,0,0.05);';
+
+            const img = document.createElement('img');
+            img.src = image;
+            img.onerror = () => { img.src = 'images/shoe_texture.png'; };
+            img.style.cssText = 'width:80px;height:80px;object-fit:cover;border-radius:5px;';
+
+            const info = document.createElement('div');
+            info.style.flex = '1';
+
+            const nameEl = document.createElement('h3');
+            nameEl.textContent = name;
+
+            const catEl = document.createElement('p');
+            catEl.textContent = category;
+            catEl.style.color = '#666';
+
+            info.appendChild(nameEl);
+            info.appendChild(catEl);
+
+            const priceEl = document.createElement('div');
+            priceEl.textContent = '$' + parseFloat(price).toFixed(2);
+            priceEl.style.fontWeight = 'bold';
+
+            const btn = document.createElement('button');
+            btn.textContent = 'Remove';
+            btn.style.cssText = 'background:#ff4444;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer;';
+            btn.addEventListener('click', () => removeFromCart(removeId, mode));
+
+            row.appendChild(img);
+            row.appendChild(info);
+            row.appendChild(priceEl);
+            row.appendChild(btn);
+            return row;
+        }
+
         async function loadCart() {
-            const cartIds = JSON.parse(localStorage.getItem('cart') || '[]');
             const container = document.getElementById('cart-items-container');
+            const user = JSON.parse(localStorage.getItem('user'));
 
-            if (cartIds.length === 0) {
-                container.innerHTML = '<p>Your cart is empty.</p>';
-                updateSummary(0);
-                return;
-            }
+            if (user) {
+                // Logged in — load from MySQL
+                try {
+                    const res = await fetch('/api/cart/' + user.id);
+                    const cartItems = await res.json();
 
-            try {
-                const res = await fetch('/api/products');
-                const allProducts = await res.json();
+                    container.textContent = '';
 
-                // Map IDs to product objects
-                const cartProducts = cartIds.map(id => allProducts.find(p => p.id == id)).filter(Boolean);
+                    if (cartItems.length === 0) {
+                        const msg = document.createElement('p');
+                        msg.textContent = 'Your cart is empty.';
+                        container.appendChild(msg);
+                        updateSummary(0);
+                        return;
+                    }
 
-                container.innerHTML = cartProducts.map((p, index) => `
-                <div class="cart-item"
-                    style="display: flex; gap: 20px; margin-bottom: 20px; background: white; padding: 15px; border-radius: 10px; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                    <img src="${p.image}" onerror="this.src='images/shoe_texture.png'" style="width: 80px; height: 80px; object-fit: cover; border-radius: 5px;">
-                    <div style="flex: 1;">
-                        <h3>${p.name}</h3>
-                        <p style="color: #666;">${p.category}</p>
-                    </div>
-                    <div style="font-weight: bold;">$${p.price}</div>
-                    <button onclick="removeFromCart(${index})"
-                        style="background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Remove</button>
-                </div>
-                `).join('');
+                    cartItems.forEach(item => {
+                        // item.id = cart_items.id (used to delete the specific row)
+                        container.appendChild(
+                            buildCartRow(item.name, item.category, item.image, item.price, item.id, 'db')
+                        );
+                    });
 
-                const total = cartProducts.reduce((sum, p) => sum + p.price, 0);
-                updateSummary(total);
+                    const total = cartItems.reduce((sum, item) => sum + parseFloat(item.price), 0);
+                    updateSummary(total);
 
-            } catch (e) {
-                console.error('Error loading cart', e);
+                    // Keep localStorage count in sync with MySQL
+                    localStorage.setItem('cart', JSON.stringify(cartItems.map(i => i.product_id)));
+                    updateCartCount();
+
+                } catch (e) {
+                    console.error('Error loading cart from database', e);
+                    container.textContent = 'Error loading cart. Please refresh.';
+                }
+
+            } else {
+                // Guest — load from localStorage
+                const cartIds = JSON.parse(localStorage.getItem('cart') || '[]');
+                container.textContent = '';
+
+                if (cartIds.length === 0) {
+                    const msg = document.createElement('p');
+                    msg.textContent = 'Your cart is empty.';
+                    container.appendChild(msg);
+                    updateSummary(0);
+                    return;
+                }
+
+                try {
+                    const res = await fetch('/api/products');
+                    const allProducts = await res.json();
+                    const cartProducts = cartIds.map(id => allProducts.find(p => p.id == id)).filter(Boolean);
+
+                    cartProducts.forEach((p, index) => {
+                        container.appendChild(
+                            buildCartRow(p.name, p.category, p.image, p.price, index, 'local')
+                        );
+                    });
+
+                    const total = cartProducts.reduce((sum, p) => sum + parseFloat(p.price), 0);
+                    updateSummary(total);
+
+                } catch (e) {
+                    console.error('Error loading cart', e);
+                }
             }
         }
 
-        function removeFromCart(index) {
-            let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-            cart.splice(index, 1);
-            localStorage.setItem('cart', JSON.stringify(cart));
+        async function removeFromCart(id, mode) {
+            if (mode === 'db') {
+                // id = cart_items.id — delete this specific row from MySQL
+                await fetch('/api/cart/' + id, { method: 'DELETE' });
+            } else {
+                // id = array index in localStorage
+                const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+                cart.splice(id, 1);
+                localStorage.setItem('cart', JSON.stringify(cart));
+            }
             loadCart();
             updateCartCount();
         }
@@ -142,12 +221,6 @@
         }
 
         async function checkout() {
-            const cartIds = JSON.parse(localStorage.getItem('cart') || '[]');
-            if (cartIds.length === 0) {
-                alert('Cart is empty!');
-                return;
-            }
-
             const user = JSON.parse(localStorage.getItem('user'));
             if (!user) {
                 alert('Please login to place an order.');
@@ -155,12 +228,17 @@
             }
 
             try {
-                const productsRes = await fetch('/api/products');
-                const allProducts = await productsRes.json();
+                // Read cart from MySQL — single source of truth for logged-in users
+                const cartRes = await fetch('/api/cart/' + user.id);
+                const cartItems = await cartRes.json();
 
-                const cartProducts = cartIds.map(id => allProducts.find(p => p.id == id)).filter(Boolean);
-                const total = cartProducts.reduce((sum, p) => sum + parseFloat(p.price), 0);
-                const items = cartProducts.map(p => ({ product_id: p.id, price: p.price }));
+                if (cartItems.length === 0) {
+                    alert('Cart is empty!');
+                    return;
+                }
+
+                const total = cartItems.reduce((sum, item) => sum + parseFloat(item.price), 0);
+                const items = cartItems.map(item => ({ product_id: item.product_id, price: item.price }));
 
                 const res = await fetch('/api/orders', {
                     method: 'POST',
@@ -169,8 +247,9 @@
                 });
 
                 if (res.ok) {
-                    alert('Order Placed Successfully!');
                     localStorage.removeItem('cart');
+                    updateCartCount();
+                    alert('Order Placed Successfully!');
                     window.location.href = 'profile.html';
                 } else {
                     alert('Error placing order. Please try again.');
