@@ -22,6 +22,7 @@ SECTION 13 →  Print ALL Tables + All Their Data at Once
 SECTION 14 →  Table Schemas — Every Column with Type and Comment
 SECTION 15 →  Advanced SQL — GROUP BY, ORDER BY, WHERE, HAVING, LIKE + More
 SECTION 16 →  Tricks to Pick and Run Any Specific CRUD Operation
+SECTION 17 →  WHY Queries Don't Appear in MySQL Workbench — And How to See + Edit Them
 ```
 
 ---
@@ -2686,3 +2687,322 @@ JOIN products p ON oi.product_id = p.id;
   DELETE FROM users WHERE id = X;
 ═══════════════════════════════════════════════════════
 ```
+
+---
+
+## SECTION 17 — WHY Queries Don't Appear in MySQL Workbench — And How to See + Edit Them
+
+---
+
+### The Core Confusion — Where Do Queries Live?
+
+When you open MySQL Workbench and look at `sneakora_db`, you see:
+
+```
+sneakora_db
+  └── Tables
+        ├── cart_items     ← visible
+        ├── order_items    ← visible
+        ├── orders         ← visible
+        ├── products       ← visible
+        └── users          ← visible
+```
+
+But you do NOT see the queries like `SELECT * FROM products` or
+`INSERT INTO users`. This is not a bug. This is how it works.
+
+**The reason:** The queries in this project are written in `server.js`
+as JavaScript code. They are NOT stored inside MySQL. MySQL Workbench
+only shows what is INSIDE MySQL — tables, data, stored procedures, views.
+Application code that sends queries stays in the app files, not in the database.
+
+---
+
+### The Analogy
+
+```
+MySQL Workbench                         server.js (your Node.js app)
+═══════════════════════════════         ════════════════════════════════════
+Like looking at a filing cabinet   ←→  Like the person who opens the cabinet,
+                                        reads files, and puts new ones in
+
+You see:                                You write:
+  - The cabinet (sneakora_db)             db.query('SELECT * FROM products')
+  - The folders (tables)                  db.query('INSERT INTO orders ...')
+  - The papers inside (rows)              db.query('DELETE FROM cart_items')
+
+You do NOT see:                         These queries only run when someone
+  - Who opened the cabinet               uses the website. They are instructions
+  - What they read or wrote              sent TO MySQL, not stored IN MySQL.
+```
+
+---
+
+### What MySQL Workbench Actually Shows You
+
+| What You See in Workbench       | What It Is                                   |
+|---------------------------------|----------------------------------------------|
+| sneakora_db (schema)            | The database container                       |
+| Tables folder                   | All 5 tables (users, products, orders…)      |
+| Columns inside a table          | The structure — field names and types        |
+| Data in a table (Select Rows)   | The actual rows — what's been inserted       |
+| Stored Procedures folder        | SQL saved inside MySQL (this app has none)   |
+| Views folder                    | Saved SELECT queries inside MySQL (none here)|
+
+**What it does NOT show:**
+The `db.query(...)` calls in `server.js` — those are Node.js code,
+not MySQL objects.
+
+---
+
+### How to SEE the Queries — 3 Ways
+
+---
+
+#### Way 1 — Open server.js (The Source of All Queries)
+
+Every query this app runs is in `server.js`. Open it in VS Code.
+
+```
+server.js
+│
+├── Line 22   → INSERT INTO users            (register)
+├── Line 34   → SELECT * FROM users          (login)
+├── Line 50   → SELECT * FROM products       (load products)
+├── Line 57   → SELECT * FROM products WHERE id = ?   (one product)
+├── Line 65   → INSERT INTO products         (admin: add)
+├── Line 78   → UPDATE products SET ...      (admin: edit)
+├── Line 89   → DELETE FROM products         (admin: delete)
+├── Line 98   → SELECT cart JOIN products    (load cart)
+├── Line 111  → INSERT INTO cart_items       (add to cart)
+├── Line 122  → DELETE FROM cart_items       (remove item)
+├── Line 130  → DELETE FROM cart_items       (clear cart)
+├── Line 141  → INSERT INTO orders           (checkout step 1)
+├── Line 149  → INSERT INTO order_items      (checkout step 2)
+├── Line 154  → DELETE FROM cart_items       (checkout step 3)
+└── Line 163  → SELECT orders JOIN items JOIN products  (order history)
+```
+
+To find any query: press `Ctrl+F` in VS Code → search for the table name
+like `products` or `orders` → every `db.query(...)` call appears.
+
+---
+
+#### Way 2 — Enable MySQL General Query Log (See Every Query Live)
+
+This turns on a log file that records every SQL query MySQL receives.
+Useful to see queries as they come in from Node.js in real time.
+
+**Step 1:** Open MySQL Workbench → connect to Local instance.
+
+**Step 2:** Click the SQL editor and run:
+```sql
+-- See if logging is on right now
+SHOW VARIABLES LIKE 'general_log';
+
+-- Turn on query logging
+SET GLOBAL general_log = 'ON';
+
+-- See where the log file is being saved
+SHOW VARIABLES LIKE 'general_log_file';
+```
+
+**Step 3:** Start your Node.js server and use the website (register, browse, etc.)
+
+**Step 4:** Open the log file path shown above — it's a `.log` text file.
+Every query Node.js sent to MySQL is listed there in real time.
+
+**Example of what the log shows:**
+```
+2026-05-03T22:03:09  Query  SELECT * FROM products
+2026-05-03T22:03:11  Query  SELECT * FROM users WHERE email = 'testuser@sneakora.com'
+2026-05-03T22:03:15  Query  INSERT INTO users (name,email,password,role) VALUES (...)
+```
+
+**Turn logging off when done (it slows MySQL slightly):**
+```sql
+SET GLOBAL general_log = 'OFF';
+```
+
+---
+
+#### Way 3 — Run the Queries Yourself in Workbench
+
+You can copy any query from `server.js`, paste it into MySQL Workbench,
+fill in real values instead of `?`, and run it manually to see the result.
+
+**Example:**
+
+Node.js query in `server.js`:
+```js
+db.query(`SELECT * FROM products WHERE category = ?`, [category], ...)
+```
+
+Manually in Workbench (replace `?` with a real value):
+```sql
+USE sneakora_db;
+SELECT * FROM products WHERE category = 'Men';
+```
+
+This lets you test and inspect any query without running the whole app.
+
+---
+
+### How to EDIT the Queries
+
+There are two places where you can edit queries depending on what you want:
+
+---
+
+#### Edit in server.js — Changes How the APP Works
+
+This is the normal way. The query is changed in the Node.js code.
+
+**Where:** Open `server.js` in VS Code.
+
+**How:**
+```
+1. Press Ctrl+F → search for the table name you want (e.g. "products")
+2. Find the db.query(...) call
+3. Edit the SQL string inside the backticks
+4. Save (Ctrl+S)
+5. Restart server: Ctrl+C → node server.js
+6. The app now uses the new query
+```
+
+**Example — change GET /api/products to sort by price:**
+```js
+// BEFORE (line ~50 in server.js):
+db.query(`SELECT * FROM products`, (err, rows) => {
+
+// AFTER:
+db.query(`SELECT * FROM products ORDER BY price ASC`, (err, rows) => {
+```
+
+---
+
+#### Edit in MySQL Workbench — Run One-Off Queries Manually
+
+This is for testing, checking data, or running admin operations.
+Changes made here do NOT affect the Node.js code — only the data changes.
+
+**Example — manually update a product price:**
+```sql
+USE sneakora_db;
+UPDATE products SET price = 99.99 WHERE id = 1;
+SELECT * FROM products WHERE id = 1;   -- verify
+```
+
+This changes the data in MySQL. When the app next loads the page,
+it reads the new price automatically — no code change needed.
+
+---
+
+### What Are "Stored Procedures"? (Queries Stored INSIDE MySQL)
+
+MySQL has a feature called **Stored Procedures** — these are SQL queries
+saved inside MySQL itself. They DO show up in MySQL Workbench under
+the "Stored Procedures" folder.
+
+This project does NOT use stored procedures. All queries are in `server.js`.
+
+But if you wanted to create one, here is what it would look like:
+
+```sql
+USE sneakora_db;
+
+-- Create a stored procedure called "GetMensProducts"
+DELIMITER //
+CREATE PROCEDURE GetMensProducts()
+BEGIN
+    SELECT * FROM products WHERE category = 'Men';
+END //
+DELIMITER ;
+
+-- Run it
+CALL GetMensProducts();
+```
+
+After creating this, you would see `GetMensProducts` under:
+```
+sneakora_db → Stored Procedures → GetMensProducts
+```
+
+This project keeps queries in `server.js` instead — simpler for a
+Node.js app and easier to version-control with Git.
+
+---
+
+### Visual Summary — Where Everything Lives
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║  YOUR PROJECT FILES (you edit these)                        ║
+║                                                              ║
+║  backend/database.js                                         ║
+║    → connection settings (host, user, password)              ║
+║    → auto-create database + tables on startup                ║
+║                                                              ║
+║  server.js                                                   ║
+║    → ALL 15 queries (SELECT, INSERT, UPDATE, DELETE)         ║
+║    → API routes (/api/products, /api/orders, etc.)           ║
+╚══════════════════════════════════════════════════════════════╝
+                        │ sends SQL queries ↓
+╔══════════════════════════════════════════════════════════════╗
+║  MYSQL DATABASE (MySQL Workbench shows this)                 ║
+║                                                              ║
+║  sneakora_db                                                 ║
+║    ├── Tables: users, products, orders, order_items,         ║
+║    │           cart_items                                    ║
+║    ├── Data: the actual rows inserted by the app             ║
+║    ├── Stored Procedures: (none in this project)             ║
+║    └── Views: (none in this project)                         ║
+╚══════════════════════════════════════════════════════════════╝
+```
+
+---
+
+### Step-by-Step: How to Edit a Query and See It Work in Workbench
+
+This is the full workflow:
+
+```
+Step 1: Open server.js in VS Code
+        Press Ctrl+F → search "SELECT * FROM products"
+        Find the query you want to change
+
+Step 2: Edit the SQL
+        Change: SELECT * FROM products
+        To:     SELECT * FROM products ORDER BY price ASC
+
+Step 3: Save server.js (Ctrl+S)
+
+Step 4: Restart the server
+        In terminal → Ctrl+C → node server.js
+
+Step 5: Open the website or call the API
+        http://localhost:3000/api/products
+        Products now come back sorted by price
+
+Step 6: Verify in MySQL Workbench
+        Open Workbench → sneakora_db → products → Select Rows
+        The DATA is the same — only the ORDER changed
+        MySQL Workbench shows the data, not the query that fetched it
+```
+
+---
+
+### Quick Checklist — "Can I Edit This in Workbench?"
+
+| Task                                   | Where to Edit          |
+|----------------------------------------|------------------------|
+| Change which columns a query returns   | server.js              |
+| Change how results are sorted          | server.js              |
+| Add a WHERE filter to a query          | server.js              |
+| Add a new API route                    | server.js              |
+| Change the database password           | backend/database.js    |
+| Change a product's price in the data   | MySQL Workbench (UPDATE)|
+| Delete a row from a table              | MySQL Workbench (DELETE)|
+| Add a row manually for testing         | MySQL Workbench (INSERT)|
+| See what queries the app is running    | General Query Log      |
+| See all data in a table                | MySQL Workbench (SELECT)|
