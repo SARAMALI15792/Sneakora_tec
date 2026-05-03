@@ -87,13 +87,27 @@ async function loadProductDetails(id) {
 }
 
 // Cart Logic
-function addToCart(id) {
+async function addToCart(id) {
+    // Always save to localStorage (works for guests too)
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
     cart.push(id);
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
 
-    // Show toast notification
+    // If logged in, ALSO save to MySQL immediately
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) {
+        try {
+            await fetch('/api/cart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: user.id, product_id: id })
+            });
+        } catch (e) {
+            console.error('Cart save to database failed:', e);
+        }
+    }
+
     showToast('Product added to cart successfully!', 'success');
 
     // Button animation
