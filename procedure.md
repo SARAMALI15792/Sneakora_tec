@@ -18,6 +18,10 @@ SECTION 9  →  ALL Queries in This Project — Fully Explained
 SECTION 10 →  CRUD Scenarios — Real Examples
 SECTION 11 →  How to Change a Query and Re-Apply It
 SECTION 12 →  Troubleshooting — Every Error Explained
+SECTION 13 →  Print ALL Tables + All Their Data at Once
+SECTION 14 →  Table Schemas — Every Column with Type and Comment
+SECTION 15 →  Advanced SQL — GROUP BY, ORDER BY, WHERE, HAVING, LIKE + More
+SECTION 16 →  Tricks to Pick and Run Any Specific CRUD Operation
 ```
 
 ---
@@ -1672,6 +1676,949 @@ Server running on http://localhost:3000
                                                  │ image        │
                                                  │ description  │
                                                  └──────────────┘
+```
+
+---
+
+## SECTION 13 — Print ALL Tables + All Their Data at Once
+
+Run this block in MySQL Workbench or the terminal. It prints every table
+and every row in one go — useful to verify everything is saved correctly.
+
+---
+
+### One-Command Dump — All Tables, All Rows
+
+```sql
+USE sneakora_db;
+
+-- ─── TABLE 1: users ───────────────────────────────────────────────
+SELECT '=== USERS ===' AS '';
+SELECT id, name, email, role, created_at FROM users;
+
+-- ─── TABLE 2: products ────────────────────────────────────────────
+SELECT '=== PRODUCTS ===' AS '';
+SELECT id, name, price, category, image, description, created_at FROM products;
+
+-- ─── TABLE 3: orders ──────────────────────────────────────────────
+SELECT '=== ORDERS ===' AS '';
+SELECT id, user_id, total, status, created_at FROM orders;
+
+-- ─── TABLE 4: order_items ─────────────────────────────────────────
+SELECT '=== ORDER_ITEMS ===' AS '';
+SELECT id, order_id, product_id, price FROM order_items;
+
+-- ─── TABLE 5: cart_items ──────────────────────────────────────────
+SELECT '=== CART_ITEMS ===' AS '';
+SELECT id, user_id, product_id, added_at FROM cart_items;
+```
+
+Run the whole block at once: **select all → F5** in MySQL Workbench.
+Each table's data appears one after another in the results panel.
+
+---
+
+### Verify Everything Is in the Database — Joined View
+
+This single query shows users + their orders + the products they ordered,
+all in one readable table:
+
+```sql
+USE sneakora_db;
+
+SELECT
+    u.id          AS user_id,
+    u.name        AS customer_name,
+    u.email,
+    u.role,
+    o.id          AS order_id,
+    o.total       AS order_total,
+    o.status,
+    o.created_at  AS order_date,
+    p.name        AS product_name,
+    p.price       AS product_price,
+    p.category
+FROM users u
+LEFT JOIN orders      o  ON u.id          = o.user_id
+LEFT JOIN order_items oi ON o.id          = oi.order_id
+LEFT JOIN products    p  ON oi.product_id = p.id
+ORDER BY u.id, o.id;
+```
+
+`LEFT JOIN` means: even users with NO orders appear in the results.
+If a user has no orders, the order columns will show NULL.
+
+**Expected output (example):**
+```
+user_id | customer_name | email                 | order_id | total  | product_name      | price
+────────┼───────────────┼───────────────────────┼──────────┼────────┼───────────────────┼──────
+1       | Test User     | testuser@sneakora.com | 1        | 160.00 | Skechers Go Walk  | 75.00
+1       | Test User     | testuser@sneakora.com | 1        | 160.00 | Skechers D'Lites  | 85.00
+```
+
+---
+
+### Count How Many Rows Are in Each Table
+
+```sql
+USE sneakora_db;
+
+SELECT 'users'       AS table_name, COUNT(*) AS row_count FROM users
+UNION ALL
+SELECT 'products',                   COUNT(*)             FROM products
+UNION ALL
+SELECT 'orders',                     COUNT(*)             FROM orders
+UNION ALL
+SELECT 'order_items',                COUNT(*)             FROM order_items
+UNION ALL
+SELECT 'cart_items',                 COUNT(*)             FROM cart_items;
+```
+
+**Example output:**
+```
+table_name   | row_count
+─────────────┼──────────
+users        |    1
+products     |    7
+orders       |    1
+order_items  |    2
+cart_items   |    0
+```
+
+This is the fastest way to confirm everything was inserted correctly.
+
+---
+
+### Print the Structure of Every Table
+
+```sql
+USE sneakora_db;
+
+DESCRIBE users;
+DESCRIBE products;
+DESCRIBE orders;
+DESCRIBE order_items;
+DESCRIBE cart_items;
+```
+
+Output for each table shows: column name, data type, nullable, key, default.
+
+---
+
+## SECTION 14 — Table Schemas — Every Column with Type and Comment
+
+This section shows each table exactly as MySQL stores it, with every
+column's data type and a plain-English explanation of what it is for.
+
+---
+
+### Table 1: `users`
+
+```sql
+CREATE TABLE users (
+
+    -- Auto-generated unique number for each user.
+    -- MySQL picks 1, 2, 3... automatically. You never set this manually.
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+
+    -- The user's display name. VARCHAR(100) = text up to 100 characters.
+    -- NOT NULL = this field is required, cannot be empty.
+    name       VARCHAR(100) NOT NULL,
+
+    -- The login email. UNIQUE = no two users can have the same email.
+    -- VARCHAR(100) = up to 100 characters.
+    email      VARCHAR(100) UNIQUE NOT NULL,
+
+    -- The bcrypt-hashed password. Never the real password — always a hash.
+    -- VARCHAR(255) needed because bcrypt hashes are ~60 characters long.
+    password   VARCHAR(255) NOT NULL,
+
+    -- Either 'user' or 'admin'. DEFAULT 'user' means if not specified,
+    -- the value is automatically set to 'user'.
+    role       VARCHAR(20) DEFAULT 'user',
+
+    -- Automatically set to the current date+time when the row is inserted.
+    -- You never need to set this manually.
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+);
+```
+
+**Column types at a glance:**
+| Column     | Type           | Max Size      | Required? | Auto-set? |
+|------------|----------------|---------------|-----------|-----------|
+| id         | INT            | 2 billion     | auto      | yes       |
+| name       | VARCHAR(100)   | 100 chars     | yes       | no        |
+| email      | VARCHAR(100)   | 100 chars     | yes       | no        |
+| password   | VARCHAR(255)   | 255 chars     | yes       | no        |
+| role       | VARCHAR(20)    | 20 chars      | no        | 'user'    |
+| created_at | TIMESTAMP      | date + time   | no        | now()     |
+
+---
+
+### Table 2: `products`
+
+```sql
+CREATE TABLE products (
+
+    -- Auto-generated product ID. Starts at 1, increments forever.
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+
+    -- Product name like "Skechers D-Lites". Up to 200 characters.
+    name        VARCHAR(200) NOT NULL,
+
+    -- Price like 89.99. DECIMAL(10,2) means:
+    --   10 = total digits allowed
+    --    2 = exactly 2 digits after the decimal point
+    -- So valid values: 0.00 to 99999999.99
+    price       DECIMAL(10,2) NOT NULL,
+
+    -- Category like 'Men', 'Women', 'Kids', 'Sports', 'Casual'.
+    -- No restriction on values — any text is allowed.
+    category    VARCHAR(100),
+
+    -- File path to the shoe image, e.g. 'images/shoe_cyan.png'.
+    -- VARCHAR(500) allows long file paths or URLs.
+    image       VARCHAR(500),
+
+    -- Longer description text. TEXT type = up to 65,535 characters.
+    -- No limit like VARCHAR — good for paragraphs.
+    description TEXT,
+
+    -- Auto-set to current timestamp when row is created.
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
+);
+```
+
+**Column types at a glance:**
+| Column      | Type          | What It Stores             | Required? |
+|-------------|---------------|----------------------------|-----------|
+| id          | INT           | unique product number      | auto      |
+| name        | VARCHAR(200)  | shoe name                  | yes       |
+| price       | DECIMAL(10,2) | price with 2 decimal places| yes       |
+| category    | VARCHAR(100)  | Men / Women / Kids etc.    | no        |
+| image       | VARCHAR(500)  | path to image file         | no        |
+| description | TEXT          | long description text      | no        |
+| created_at  | TIMESTAMP     | when product was added     | auto      |
+
+---
+
+### Table 3: `orders`
+
+```sql
+CREATE TABLE orders (
+
+    -- Auto-generated order number. Unique per order.
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+
+    -- Which user placed this order. Points to users.id.
+    -- FOREIGN KEY means: this value MUST exist in the users table.
+    -- You cannot create an order for a user that doesn't exist.
+    user_id    INT NOT NULL,
+
+    -- Total price of the order, e.g. 160.00.
+    total      DECIMAL(10,2) NOT NULL,
+
+    -- Current state of the order. Values used in this app:
+    -- 'pending'    = just placed, not processed yet
+    -- 'processing' = being prepared
+    -- 'delivered'  = completed
+    status     VARCHAR(50) DEFAULT 'pending',
+
+    -- Auto-set when order is created.
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    -- Link to users table. If you try to insert user_id = 99
+    -- and user 99 doesn't exist, MySQL will reject the insert.
+    FOREIGN KEY (user_id) REFERENCES users(id)
+
+);
+```
+
+**Column types at a glance:**
+| Column     | Type          | What It Stores       | Required? |
+|------------|---------------|----------------------|-----------|
+| id         | INT           | unique order number  | auto      |
+| user_id    | INT           | links to users.id    | yes       |
+| total      | DECIMAL(10,2) | order total price    | yes       |
+| status     | VARCHAR(50)   | pending/processing…  | 'pending' |
+| created_at | TIMESTAMP     | when order was placed| auto      |
+
+---
+
+### Table 4: `order_items`
+
+```sql
+CREATE TABLE order_items (
+
+    -- Auto-generated ID for each line item in an order.
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+
+    -- Which order this item belongs to. Points to orders.id.
+    -- One order can have many order_items.
+    order_id   INT NOT NULL,
+
+    -- Which product was ordered. Points to products.id.
+    product_id INT NOT NULL,
+
+    -- The price AT THE TIME of ordering. Stored separately from
+    -- products.price because the product price might change later —
+    -- but the historical order price must stay fixed.
+    price      DECIMAL(10,2) NOT NULL,
+
+    FOREIGN KEY (order_id)   REFERENCES orders(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+
+);
+```
+
+**Column types at a glance:**
+| Column     | Type          | What It Stores              | Why Separate from products? |
+|------------|---------------|-----------------------------|-----------------------------|
+| id         | INT           | unique line item ID         | auto-generated              |
+| order_id   | INT           | links to orders.id          | which order this belongs to |
+| product_id | INT           | links to products.id        | which product was bought    |
+| price      | DECIMAL(10,2) | price at time of purchase   | product price can change    |
+
+---
+
+### Table 5: `cart_items`
+
+```sql
+CREATE TABLE cart_items (
+
+    -- Auto-generated ID for each item saved in a cart.
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+
+    -- Which user's cart this item is in.
+    user_id    INT NOT NULL,
+
+    -- Which product was added to the cart.
+    product_id INT NOT NULL,
+
+    -- When the item was added to the cart.
+    added_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id)    REFERENCES users(id),
+    FOREIGN KEY (product_id) REFERENCES products(id)
+
+);
+```
+
+**Note:** In this app, the homepage cart uses `localStorage` (browser storage).
+`cart_items` table is for server-side cart persistence — used when checking out.
+
+---
+
+### MySQL Data Types Quick Reference
+
+| Type              | What It Stores                  | Example Value       |
+|-------------------|---------------------------------|---------------------|
+| `INT`             | Whole number                    | 1, 42, 9999         |
+| `VARCHAR(n)`      | Text, max n characters          | 'Hamza', 'Men'      |
+| `TEXT`            | Long text, up to 65,535 chars   | 'A great shoe...'   |
+| `DECIMAL(10,2)`   | Exact decimal number            | 89.99, 160.00       |
+| `TIMESTAMP`       | Date + time                     | 2026-05-03 22:03:09 |
+| `BOOLEAN`         | True or false (stored as 0/1)   | 1 (true), 0 (false) |
+| `AUTO_INCREMENT`  | Counts up automatically         | 1, 2, 3, 4...       |
+| `PRIMARY KEY`     | Unique identifier for each row  | No duplicates       |
+| `UNIQUE`          | No two rows can have same value | email column        |
+| `NOT NULL`        | Value is required               | Cannot be empty     |
+| `DEFAULT`         | Value used if none provided     | DEFAULT 'user'      |
+| `FOREIGN KEY`     | Links to another table's column | user_id → users.id  |
+
+---
+
+## SECTION 15 — Advanced SQL — GROUP BY, ORDER BY, WHERE, HAVING, LIKE + More
+
+These are the most useful SQL operations. All examples use the Sneakora database.
+Run them in MySQL Workbench after: `USE sneakora_db;`
+
+---
+
+### WHERE — Filter Rows by Condition
+
+`WHERE` narrows down which rows you get. It runs BEFORE results are returned.
+
+```sql
+USE sneakora_db;
+
+-- Get only Men's products
+SELECT * FROM products WHERE category = 'Men';
+
+-- Get products cheaper than $80
+SELECT * FROM products WHERE price < 80;
+
+-- Get products between $70 and $100
+SELECT * FROM products WHERE price BETWEEN 70 AND 100;
+
+-- Get a specific user by email
+SELECT * FROM users WHERE email = 'testuser@sneakora.com';
+
+-- Get orders that are still pending
+SELECT * FROM orders WHERE status = 'pending';
+
+-- Get orders with total above $150
+SELECT * FROM orders WHERE total > 150;
+
+-- Multiple conditions with AND
+SELECT * FROM products WHERE category = 'Men' AND price < 90;
+
+-- Multiple conditions with OR
+SELECT * FROM products WHERE category = 'Kids' OR category = 'Sports';
+
+-- Exclude a category
+SELECT * FROM products WHERE category != 'Casual';
+```
+
+---
+
+### LIKE — Search for Text Patterns
+
+`LIKE` is used for partial text matching. The `%` means "anything here."
+
+```sql
+USE sneakora_db;
+
+-- Products whose name contains "walk" anywhere
+SELECT * FROM products WHERE name LIKE '%walk%';
+
+-- Products whose name STARTS WITH "Skechers"
+SELECT * FROM products WHERE name LIKE 'Skechers%';
+
+-- Products whose name ENDS WITH "Fit"
+SELECT * FROM products WHERE name LIKE '%Fit';
+
+-- Users whose email is from gmail
+SELECT * FROM users WHERE email LIKE '%@gmail.com';
+
+-- Case-insensitive: finds "walk", "Walk", "WALK"
+SELECT * FROM products WHERE LOWER(name) LIKE '%walk%';
+```
+
+---
+
+### ORDER BY — Sort Results
+
+```sql
+USE sneakora_db;
+
+-- Sort products cheapest first
+SELECT id, name, price FROM products ORDER BY price ASC;
+
+-- Sort products most expensive first
+SELECT id, name, price FROM products ORDER BY price DESC;
+
+-- Sort products alphabetically by name
+SELECT id, name, price FROM products ORDER BY name ASC;
+
+-- Sort orders newest first
+SELECT id, user_id, total, created_at FROM orders ORDER BY created_at DESC;
+
+-- Sort by category first, then by price within each category
+SELECT name, category, price FROM products ORDER BY category ASC, price ASC;
+```
+
+---
+
+### LIMIT — Control How Many Rows Come Back
+
+```sql
+USE sneakora_db;
+
+-- Get only the 3 cheapest products
+SELECT name, price FROM products ORDER BY price ASC LIMIT 3;
+
+-- Get the most expensive product only
+SELECT name, price FROM products ORDER BY price DESC LIMIT 1;
+
+-- Pagination: skip 0, get rows 1–5 (page 1)
+SELECT * FROM products LIMIT 5 OFFSET 0;
+
+-- Pagination: skip 5, get rows 6–10 (page 2)
+SELECT * FROM products LIMIT 5 OFFSET 5;
+```
+
+---
+
+### GROUP BY — Summarize Rows into Groups
+
+`GROUP BY` collapses many rows into one row per group.
+Always use an aggregate function with it: `COUNT`, `SUM`, `AVG`, `MAX`, `MIN`.
+
+```sql
+USE sneakora_db;
+
+-- Count how many products are in each category
+SELECT category, COUNT(*) AS product_count
+FROM products
+GROUP BY category;
+-- Output:
+-- Men    → 2
+-- Women  → 2
+-- Kids   → 1
+-- Sports → 1
+-- Casual → 1
+
+-- Average price per category
+SELECT category, AVG(price) AS avg_price
+FROM products
+GROUP BY category
+ORDER BY avg_price DESC;
+
+-- Total amount spent per user
+SELECT user_id, COUNT(id) AS total_orders, SUM(total) AS total_spent
+FROM orders
+GROUP BY user_id;
+
+-- Most expensive product per category
+SELECT category, MAX(price) AS highest_price, MIN(price) AS lowest_price
+FROM products
+GROUP BY category;
+
+-- How many items are in each order
+SELECT order_id, COUNT(*) AS items_in_order, SUM(price) AS subtotal
+FROM order_items
+GROUP BY order_id;
+```
+
+---
+
+### HAVING — Filter Groups (like WHERE but for GROUP BY results)
+
+`HAVING` filters AFTER grouping. Use it when you want to filter on an aggregate.
+
+```sql
+USE sneakora_db;
+
+-- Categories that have MORE than 1 product
+SELECT category, COUNT(*) AS product_count
+FROM products
+GROUP BY category
+HAVING COUNT(*) > 1;
+
+-- Users who spent more than $100 total
+SELECT user_id, SUM(total) AS total_spent
+FROM orders
+GROUP BY user_id
+HAVING SUM(total) > 100;
+
+-- Orders that contain more than 1 product
+SELECT order_id, COUNT(*) AS item_count
+FROM order_items
+GROUP BY order_id
+HAVING COUNT(*) > 1;
+```
+
+**WHERE vs HAVING — When to use which:**
+```
+WHERE  → filters individual rows BEFORE grouping
+HAVING → filters grouped results AFTER grouping
+
+-- WRONG: cannot use COUNT in WHERE
+SELECT category, COUNT(*) FROM products WHERE COUNT(*) > 1 GROUP BY category;
+
+-- CORRECT: use HAVING for aggregate filters
+SELECT category, COUNT(*) FROM products GROUP BY category HAVING COUNT(*) > 1;
+```
+
+---
+
+### IN — Match Against a List of Values
+
+```sql
+USE sneakora_db;
+
+-- Products in specific categories
+SELECT * FROM products WHERE category IN ('Men', 'Women');
+
+-- Get specific orders by ID
+SELECT * FROM orders WHERE id IN (1, 2, 5);
+
+-- Products NOT in these categories
+SELECT * FROM products WHERE category NOT IN ('Kids', 'Casual');
+```
+
+---
+
+### BETWEEN — Match a Range
+
+```sql
+USE sneakora_db;
+
+-- Products priced between $70 and $90 (inclusive)
+SELECT name, price FROM products WHERE price BETWEEN 70 AND 90;
+
+-- Orders placed in a specific date range
+SELECT * FROM orders
+WHERE created_at BETWEEN '2026-01-01' AND '2026-12-31';
+```
+
+---
+
+### COUNT / SUM / AVG / MAX / MIN — Aggregate Functions
+
+```sql
+USE sneakora_db;
+
+-- Total number of products
+SELECT COUNT(*) AS total_products FROM products;
+
+-- Total revenue from all orders
+SELECT SUM(total) AS total_revenue FROM orders;
+
+-- Average order value
+SELECT AVG(total) AS average_order FROM orders;
+
+-- Cheapest and most expensive product
+SELECT MIN(price) AS cheapest, MAX(price) AS most_expensive FROM products;
+
+-- Count users vs count orders
+SELECT
+    (SELECT COUNT(*) FROM users)    AS total_users,
+    (SELECT COUNT(*) FROM products) AS total_products,
+    (SELECT COUNT(*) FROM orders)   AS total_orders;
+```
+
+---
+
+### JOIN Types — Combining Tables
+
+```sql
+USE sneakora_db;
+
+-- INNER JOIN: only rows that match in BOTH tables
+-- (users who have placed at least one order)
+SELECT u.name, o.id AS order_id, o.total
+FROM users u
+INNER JOIN orders o ON u.id = o.user_id;
+
+-- LEFT JOIN: all users, even those with no orders
+-- (missing order columns show as NULL)
+SELECT u.name, o.id AS order_id, o.total
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id;
+
+-- Three-table JOIN: orders + items + products
+SELECT o.id, u.name, p.name AS product, oi.price
+FROM orders o
+JOIN users u ON o.user_id = u.id
+JOIN order_items oi ON o.id = oi.order_id
+JOIN products p ON oi.product_id = p.id;
+```
+
+---
+
+### Subqueries — A Query Inside a Query
+
+```sql
+USE sneakora_db;
+
+-- Find products that are above average price
+SELECT name, price
+FROM products
+WHERE price > (SELECT AVG(price) FROM products);
+
+-- Find users who have placed at least one order
+SELECT name, email FROM users
+WHERE id IN (SELECT DISTINCT user_id FROM orders);
+
+-- Find products that have never been ordered
+SELECT name FROM products
+WHERE id NOT IN (SELECT DISTINCT product_id FROM order_items);
+```
+
+---
+
+### DISTINCT — Remove Duplicate Values
+
+```sql
+USE sneakora_db;
+
+-- See all unique categories (no duplicates)
+SELECT DISTINCT category FROM products;
+
+-- See all users who have placed orders (each user only once)
+SELECT DISTINCT user_id FROM orders;
+```
+
+---
+
+### Combining Everything — Complex Query Example
+
+```sql
+USE sneakora_db;
+
+-- "Top 3 most popular product categories by revenue,
+--  only for products priced over $70"
+SELECT
+    p.category,
+    COUNT(oi.id)    AS times_ordered,
+    SUM(oi.price)   AS total_revenue,
+    AVG(oi.price)   AS avg_price
+FROM order_items oi
+JOIN products p ON oi.product_id = p.id
+WHERE p.price > 70                    -- WHERE filters rows before grouping
+GROUP BY p.category                   -- GROUP BY collapses into one per category
+HAVING SUM(oi.price) > 0             -- HAVING filters groups after grouping
+ORDER BY total_revenue DESC          -- ORDER BY sorts the final result
+LIMIT 3;                             -- LIMIT takes only top 3
+```
+
+**Order of clauses (always this order):**
+```
+SELECT   → what columns to return
+FROM     → which table
+JOIN     → combine with other tables
+WHERE    → filter individual rows
+GROUP BY → collapse into groups
+HAVING   → filter the groups
+ORDER BY → sort the results
+LIMIT    → how many rows to return
+```
+
+---
+
+## SECTION 16 — Tricks to Pick and Run Any Specific CRUD Operation
+
+This section gives you a decision tree — look up what you want to do,
+find the exact SQL, copy and run it.
+
+---
+
+### Decision Tree — "What do I want to do?"
+
+```
+I want to...
+│
+├── SEE data
+│     ├── All rows of one table      → SELECT * FROM tablename;
+│     ├── Specific columns only      → SELECT col1, col2 FROM tablename;
+│     ├── One specific row           → SELECT * FROM tablename WHERE id = X;
+│     ├── Rows matching a condition  → SELECT * FROM tablename WHERE col = 'value';
+│     ├── Sorted results             → SELECT * FROM tablename ORDER BY col ASC;
+│     ├── Limited results            → SELECT * FROM tablename LIMIT 10;
+│     ├── Data from multiple tables  → SELECT ... FROM t1 JOIN t2 ON ...;
+│     └── Count / sum rows           → SELECT COUNT(*) FROM tablename;
+│
+├── ADD data
+│     ├── One new row                → INSERT INTO tablename (cols) VALUES (vals);
+│     └── Multiple rows at once      → INSERT INTO tablename (cols) VALUES (v1),(v2);
+│
+├── CHANGE data
+│     ├── One specific row           → UPDATE tablename SET col=val WHERE id = X;
+│     ├── All rows in a table        → UPDATE tablename SET col=val; (no WHERE!)
+│     └── Rows matching condition    → UPDATE tablename SET col=val WHERE col2='x';
+│
+└── REMOVE data
+      ├── One specific row           → DELETE FROM tablename WHERE id = X;
+      ├── Rows matching condition    → DELETE FROM tablename WHERE col = 'value';
+      └── ALL rows (keep structure)  → DELETE FROM tablename;
+```
+
+---
+
+### Trick 1 — Always SELECT Before You UPDATE or DELETE
+
+Before changing or removing anything, see it first:
+
+```sql
+-- Step 1: See what you're about to change
+SELECT * FROM products WHERE category = 'Kids';
+
+-- Step 2: If that looks right, run the update
+UPDATE products SET price = 55.00 WHERE category = 'Kids';
+
+-- Step 3: Verify after
+SELECT * FROM products WHERE category = 'Kids';
+```
+
+Never run an UPDATE or DELETE without a SELECT first.
+
+---
+
+### Trick 2 — Test Your WHERE Clause with SELECT First
+
+```sql
+-- You want to delete all 'pending' orders older than 30 days
+-- Test it with SELECT first — see what would be deleted:
+SELECT * FROM orders
+WHERE status = 'pending'
+  AND created_at < DATE_SUB(NOW(), INTERVAL 30 DAY);
+
+-- Only if that result looks right → run DELETE:
+DELETE FROM orders
+WHERE status = 'pending'
+  AND created_at < DATE_SUB(NOW(), INTERVAL 30 DAY);
+```
+
+---
+
+### Trick 3 — Use LIMIT 1 to Test on One Row First
+
+```sql
+-- Instead of updating all products at once, test on one row first:
+UPDATE products SET price = ROUND(price * 1.10, 2) WHERE id = 1;
+SELECT id, name, price FROM products WHERE id = 1;
+
+-- If correct, apply to all:
+UPDATE products SET price = ROUND(price * 1.10, 2);
+```
+
+---
+
+### Trick 4 — Use COUNT to Confirm Before and After
+
+```sql
+-- Before delete: count what you have
+SELECT COUNT(*) AS before_count FROM cart_items WHERE user_id = 1;
+
+-- Run the delete
+DELETE FROM cart_items WHERE user_id = 1;
+
+-- After delete: confirm it's gone
+SELECT COUNT(*) AS after_count FROM cart_items WHERE user_id = 1;
+-- Should show 0
+```
+
+---
+
+### Trick 5 — The EXPLAIN Keyword (See How MySQL Runs a Query)
+
+Put `EXPLAIN` before any SELECT to see how MySQL is going to execute it.
+Useful for understanding why a query is slow.
+
+```sql
+EXPLAIN SELECT * FROM products WHERE category = 'Men';
+-- Shows: type, rows scanned, index used, etc.
+```
+
+---
+
+### Trick 6 — Use Aliases to Make Results Readable
+
+```sql
+USE sneakora_db;
+
+-- Without aliases — column names are unclear
+SELECT u.name, COUNT(o.id), SUM(o.total)
+FROM users u LEFT JOIN orders o ON u.id = o.user_id GROUP BY u.id;
+
+-- With aliases — crystal clear
+SELECT
+    u.name           AS customer_name,
+    COUNT(o.id)      AS number_of_orders,
+    SUM(o.total)     AS total_spent,
+    AVG(o.total)     AS average_order_value
+FROM users u
+LEFT JOIN orders o ON u.id = o.user_id
+GROUP BY u.id
+ORDER BY total_spent DESC;
+```
+
+---
+
+### Trick 7 — Quick Sanity Checks (Run These Anytime)
+
+```sql
+USE sneakora_db;
+
+-- Is the database connected and working?
+SELECT 1 + 1 AS test;                     -- should return 2
+
+-- What time does MySQL think it is?
+SELECT NOW() AS current_time;
+
+-- How many rows in each table?
+SELECT 'users' AS tbl, COUNT(*) AS rows FROM users UNION ALL
+SELECT 'products',     COUNT(*)          FROM products UNION ALL
+SELECT 'orders',       COUNT(*)          FROM orders UNION ALL
+SELECT 'order_items',  COUNT(*)          FROM order_items UNION ALL
+SELECT 'cart_items',   COUNT(*)          FROM cart_items;
+
+-- Are there any orphaned order_items (pointing to deleted orders)?
+SELECT * FROM order_items
+WHERE order_id NOT IN (SELECT id FROM orders);
+
+-- Are there any orphaned cart_items (pointing to deleted users)?
+SELECT * FROM cart_items
+WHERE user_id NOT IN (SELECT id FROM users);
+```
+
+---
+
+### Trick 8 — Find Exactly What Changed (Before vs After)
+
+```sql
+USE sneakora_db;
+
+-- Save current state
+SELECT id, name, price FROM products;
+
+-- Make a change
+UPDATE products SET price = 99.99 WHERE id = 2;
+
+-- See the updated row only
+SELECT id, name, price FROM products WHERE id = 2;
+
+-- See all rows where price was recently updated
+-- (if you have an updated_at column — add one if needed)
+SELECT id, name, price FROM products ORDER BY created_at DESC LIMIT 5;
+```
+
+---
+
+### Cheat Sheet — Every Operation in One Place
+
+```sql
+USE sneakora_db;
+
+-- ── CREATE ──────────────────────────────────────────────────
+INSERT INTO products (name, price, category, image, description)
+VALUES ('New Shoe', 99.99, 'Men', 'images/shoe_cyan.png', 'A great shoe');
+
+-- ── READ (all) ──────────────────────────────────────────────
+SELECT * FROM products;
+
+-- ── READ (filtered) ─────────────────────────────────────────
+SELECT * FROM products WHERE category = 'Men' AND price < 100;
+
+-- ── READ (sorted + limited) ─────────────────────────────────
+SELECT name, price FROM products ORDER BY price DESC LIMIT 5;
+
+-- ── READ (search) ────────────────────────────────────────────
+SELECT * FROM products WHERE name LIKE '%walk%';
+
+-- ── READ (grouped) ───────────────────────────────────────────
+SELECT category, COUNT(*) AS count, AVG(price) AS avg_price
+FROM products GROUP BY category ORDER BY avg_price DESC;
+
+-- ── UPDATE (one row) ─────────────────────────────────────────
+UPDATE products SET price = 79.99 WHERE id = 1;
+
+-- ── UPDATE (all matching) ────────────────────────────────────
+UPDATE products SET price = ROUND(price * 0.90, 2) WHERE category = 'Sale';
+
+-- ── DELETE (one row) ─────────────────────────────────────────
+DELETE FROM products WHERE id = 7;
+
+-- ── DELETE (all matching) ────────────────────────────────────
+DELETE FROM cart_items WHERE user_id = 1;
+
+-- ── COUNT ────────────────────────────────────────────────────
+SELECT COUNT(*) AS total FROM products WHERE category = 'Men';
+
+-- ── JOIN (two tables) ────────────────────────────────────────
+SELECT u.name, o.total, o.status
+FROM orders o JOIN users u ON o.user_id = u.id;
+
+-- ── JOIN (three tables) ──────────────────────────────────────
+SELECT u.name, p.name AS product, oi.price
+FROM orders o
+JOIN users u ON o.user_id = u.id
+JOIN order_items oi ON o.id = oi.order_id
+JOIN products p ON oi.product_id = p.id;
 ```
 
 ---
