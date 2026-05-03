@@ -5,128 +5,145 @@
 ## What This Guide Covers
 
 ```
-SECTION 0  →  Why Node.js? Why Not PHP? (Read This First)
+SECTION 0  →  Why Node.js? Why Not PHP?
 SECTION 1  →  What You Need Installed
-SECTION 2  →  Setup — Only ONE Step Now (Tables Auto-Create)
-SECTION 3  →  HOW THE CONNECTION WORKS (Code Explained Line by Line)
+SECTION 2  →  Setup — Only ONE Step (Tables Auto-Create)
+SECTION 3  →  HOW THE CONNECTION WORKS — Code Explained Line by Line
 SECTION 4  →  Connect This Project to YOUR MySQL
-SECTION 5  →  Run the Project — Step by Step with Details
-SECTION 6  →  View Your Tables (3 Ways)
-SECTION 7  →  ALL Queries Used in This Project — Fully Explained
-SECTION 8  →  CRUD Operations at Specific Points (Scenarios)
-SECTION 9  →  How to Change a Query and Re-Apply It
-SECTION 10 →  Troubleshooting — Every Error Explained
+SECTION 5  →  Run the Project — Detailed Steps
+SECTION 6  →  WHERE Do Your Tables Appear After Running?
+SECTION 7  →  WHAT HAPPENS When You Click Things on the Website?
+SECTION 8  →  LIVE TEST RESULTS — Proven End-to-End
+SECTION 9  →  ALL Queries in This Project — Fully Explained
+SECTION 10 →  CRUD Scenarios — Real Examples
+SECTION 11 →  How to Change a Query and Re-Apply It
+SECTION 12 →  Troubleshooting — Every Error Explained
 ```
 
 ---
 
 ## SECTION 0 — Why Node.js? Why Not PHP?
 
-This is a fair question. You may have seen other projects that paste SQL into
-PHP files. Here is why this project is different and why that is fine.
+This is a fair question. You may have seen other projects that use PHP files
+to connect to MySQL. Here is exactly why this project does it differently —
+and why that is completely fine.
 
 ---
 
-### PHP vs Node.js — Simple Comparison
+### The Simple Answer
 
-| Thing                   | PHP Approach           | This Project (Node.js)      |
-|-------------------------|------------------------|-----------------------------|
-| Language                | PHP                    | JavaScript (Node.js)        |
-| Server software         | Apache or Nginx + PHP  | Node.js itself              |
-| How it connects to MySQL| mysqli or PDO          | mysql2 package              |
-| Files it uses           | .php files             | server.js + database.js     |
-| Runs on                 | XAMPP, WAMP, LAMP      | Node.js installed directly  |
-
-**They do the exact same job — just in different languages.**
-Both connect to MySQL. Both run SQL queries. Both send data to the browser.
-This project just chose JavaScript (Node.js) instead of PHP.
+**PHP** and **Node.js** are both backend languages. They do the same job —
+receive requests from the browser, talk to MySQL, send data back.
+This project chose Node.js (JavaScript). Another project might choose PHP.
+Both work. They just speak different syntax.
 
 ---
 
-### Why does this project paste SQL into Workbench at the start?
+### Side-by-Side Comparison
 
-The SQL you paste (CREATE TABLE...) is **setup code** — it runs **once** to
-create the structure. Think of it like building shelves before putting items on them.
-
-```
-ONE-TIME SETUP (you do manually)     AUTOMATIC (Node.js does every time)
-────────────────────────────────     ────────────────────────────────────
-Build the shelves (CREATE TABLE)  →  Put items on shelves (INSERT)
-                                     Read items from shelves (SELECT)
-                                     Change items (UPDATE)
-                                     Remove items (DELETE)
-```
-
-**Good news: this project now auto-creates everything.**
-You no longer paste any SQL manually. Just change your password and run
-`node server.js`. The code does the rest. (See Section 2.)
+| What                    | PHP Way                       | This Project (Node.js)         |
+|-------------------------|-------------------------------|--------------------------------|
+| Language                | PHP                           | JavaScript (Node.js)           |
+| Server software         | Apache/Nginx + PHP module     | Node.js itself (no Apache)     |
+| Connects to MySQL via   | `mysqli` or `PDO`             | `mysql2` npm package           |
+| Code lives in           | `.php` files                  | `server.js` + `database.js`    |
+| Run on your machine via | XAMPP / WAMP / LAMP           | `node server.js` in terminal   |
+| Queries look like       | `$conn->query("SELECT ...")`  | `db.query("SELECT ...", ...)`  |
 
 ---
 
-### What is a "migration" and does this project use one?
+### Why Did We Paste SQL into Workbench Before?
 
-A **migration** is code that automatically creates or changes your database
-structure when the app starts. Big frameworks like Laravel (PHP), Django (Python),
-and Ruby on Rails all have built-in migration systems.
-
-This project now has its own simple version built into `backend/database.js`:
+The SQL (CREATE TABLE...) is **one-time setup code** that builds the
+empty structure of the database — like building shelves before putting things
+on them.
 
 ```
-node server.js starts
-    ↓
+ONE-TIME (build the shelves)          EVERY TIME APP RUNS (use the shelves)
+─────────────────────────────         ─────────────────────────────────────
+CREATE TABLE users          →         INSERT INTO users (register)
+CREATE TABLE products       →         SELECT * FROM products (load page)
+CREATE TABLE orders         →         INSERT INTO orders (checkout)
+CREATE TABLE cart_items     →         DELETE FROM cart_items (clear cart)
+```
+
+**Good news: this project now does that setup automatically.**
+The code in `backend/database.js` creates the database and all 5 tables
+every time you start the server. If they already exist, it skips them safely.
+You never need to paste SQL manually.
+
+---
+
+### What is a "Migration"?
+
+A **migration** is code that creates or updates your database structure
+automatically when the app starts. Frameworks like Laravel (PHP), Django (Python),
+and Rails (Ruby) have this built in.
+
+This project now has its own simple migration built into `backend/database.js`:
+
+```
+You run: node server.js
+         ↓
 database.js connects to MySQL
-    ↓
-database.js runs: CREATE DATABASE IF NOT EXISTS sneakora_db
-    ↓
-database.js runs: USE sneakora_db
-    ↓
-database.js creates all 5 tables (only if they don't exist yet)
-    ↓
-"All tables ready" printed in terminal
-    ↓
-server.js starts handling requests
+         ↓
+Runs: CREATE DATABASE IF NOT EXISTS sneakora_db
+         ↓
+Runs: USE sneakora_db
+         ↓
+Runs: CREATE TABLE IF NOT EXISTS users (...)
+Runs: CREATE TABLE IF NOT EXISTS products (...)
+Runs: CREATE TABLE IF NOT EXISTS orders (...)
+Runs: CREATE TABLE IF NOT EXISTS order_items (...)
+Runs: CREATE TABLE IF NOT EXISTS cart_items (...)
+         ↓
+All 5 tables confirmed ready
+         ↓
+Server starts accepting requests
 ```
 
-`IF NOT EXISTS` means: if the table already exists, skip it.
-So this runs every startup safely — it never deletes your existing data.
+`IF NOT EXISTS` = if the table is already there, skip it. Your data is NEVER
+deleted or overwritten by this.
 
 ---
 
 ## SECTION 1 — What You Need Installed
 
-| Tool                       | Why You Need It                   | How to Check                     |
-|----------------------------|-----------------------------------|----------------------------------|
-| Node.js                    | Runs the backend server           | `node -v` → shows version number |
-| npm                        | Installs packages like mysql2     | `npm -v` → shows version number  |
-| MySQL Server               | The database engine itself        | Open Services → MySQL80 = Running|
-| MySQL Workbench (optional) | View and manage your data visually| Just open the app                |
+| Tool                       | Why You Need It                      | How to Check                      |
+|----------------------------|--------------------------------------|-----------------------------------|
+| Node.js                    | Runs the backend server              | Open terminal → `node -v`         |
+| npm                        | Installs packages (mysql2, express…) | Open terminal → `npm -v`          |
+| MySQL Server               | The actual database engine           | Services app → MySQL80 = Running  |
+| MySQL Workbench (optional) | Browse your tables visually          | Just open the app                 |
 
-**How to install MySQL (if not installed):**
-1. Go to: https://dev.mysql.com/downloads/installer/
-2. Download "MySQL Installer for Windows"
-3. Run the installer
-4. Choose: **MySQL Server** + **MySQL Workbench** + **MySQL Shell**
-5. During setup — set a root password. **Write it down.** You will need it.
+**If MySQL is not installed yet:**
+1. Download from: https://dev.mysql.com/downloads/installer/
+2. Run the installer
+3. Choose: **MySQL Server** + **MySQL Workbench** + **MySQL Shell**
+4. During install — set a root password. Write it down — you will need it.
+
+**If Node.js is not installed yet:**
+Download from: https://nodejs.org — choose the LTS version.
 
 ---
 
 ## SECTION 2 — Setup — Only ONE Step Now
 
-Because the code now auto-creates the database and all tables, setup is simple.
+Because the code auto-creates everything, setup is just one line.
 
-### The only thing you need to do:
+### The Only Thing You Need to Do
 
-**Open `backend/database.js` and change the password to yours.**
+Open `backend/database.js` and change the password field to YOUR MySQL password:
 
 ```js
-password: 'saram'   ← change this to YOUR MySQL root password
+password: 'saram'   ← change this to your MySQL root password
 ```
 
-That's it. Run `node server.js` and everything else is automatic.
+That's it. Save the file. Run the server. Everything else is automatic.
 
 ---
 
-### What the terminal will show on first run:
+### What You Will See in the Terminal on First Run
 
 ```
 Connected to MySQL.
@@ -139,15 +156,15 @@ Database sneakora_db ready.
 Server running on http://localhost:3000
 ```
 
-On second and every run after, the same messages appear — but since
-`IF NOT EXISTS` is used, tables are never recreated. Your data is always safe.
+On every run after that — same output, but tables already exist so they
+are just confirmed, never recreated. Your data stays safe.
 
 ---
 
-### Alternative: Manual Setup (if you prefer)
+### Manual Setup (Alternative — if you prefer doing it yourself)
 
-If you want to create everything yourself in MySQL Workbench, you can still
-run this SQL manually. Copy it all, paste in Workbench, press F5:
+You can still run this SQL in MySQL Workbench if you want to set up manually.
+Select all → F5 to run:
 
 ```sql
 CREATE DATABASE IF NOT EXISTS sneakora_db;
@@ -200,7 +217,7 @@ CREATE TABLE IF NOT EXISTS cart_items (
 );
 ```
 
-### Sample Products (run this in Workbench after tables are created)
+### Add Sample Products (run in Workbench or terminal)
 
 ```sql
 USE sneakora_db;
@@ -217,22 +234,20 @@ INSERT INTO products (name, price, category, image, description) VALUES
 
 ---
 
-## SECTION 3 — HOW THE CONNECTION WORKS (Code Explained Line by Line)
+## SECTION 3 — HOW THE CONNECTION WORKS — Code Explained Line by Line
 
-This is the most important section. Every single line of `backend/database.js`
-is explained in plain English below.
+Open `backend/database.js`. Here is the complete file explained in plain English.
 
 ---
-
-### The Full File with Every Line Explained
 
 ```js
 const mysql = require('mysql2');
 ```
-**What this does:**
-Loads the `mysql2` package — a library that lets Node.js talk to MySQL.
-You installed it by running `npm install`. It lives in `node_modules/mysql2/`.
-Think of it as the USB cable between Node.js and MySQL.
+
+**Plain English:**
+Load the `mysql2` library — the package that lets Node.js talk to MySQL.
+Think of it as a USB cable between your Node.js app and MySQL.
+It was installed when you ran `npm install` and lives in the `node_modules/` folder.
 
 ---
 
@@ -243,20 +258,18 @@ const db = mysql.createConnection({
     password: 'saram'
 });
 ```
-**What this does:**
-Creates a connection object called `db`. This does NOT connect yet —
-it just prepares the settings. Like writing down a phone number before calling.
 
-Breakdown of each field:
+**Plain English:**
+Create a connection object called `db`. This does NOT connect yet —
+it just stores the settings, like saving a phone number before calling.
 
-| Field      | Value        | What It Means                                        |
-|------------|--------------|------------------------------------------------------|
-| `host`     | `'localhost'`| MySQL is on THIS computer (not a remote server)      |
-| `user`     | `'root'`     | The MySQL admin username (default after install)     |
-| `password` | `'saram'`    | The password YOU set when installing MySQL           |
+| Setting    | Value         | What it means                                     |
+|------------|---------------|---------------------------------------------------|
+| `host`     | `'localhost'` | MySQL is on THIS same computer                    |
+| `user`     | `'root'`      | The MySQL admin account created during install    |
+| `password` | `'saram'`     | The root password you set during MySQL install    |
 
-Notice there is no `database` field here anymore.
-That is intentional — we create the database in the next step via code.
+There is no `database` field here on purpose. We create the database in code next.
 
 ---
 
@@ -271,56 +284,47 @@ db.connect((err) => {
     createDatabase();
 });
 ```
-**What this does:**
-Actually makes the connection happen — like pressing "call."
-The `(err) =>` part is a callback function that runs after the attempt.
+
+**Plain English:**
+This line actually makes the connection happen — like pressing "call."
 
 ```
-db.connect called
+db.connect() fires
     ↓
-MySQL receives the connection request
+MySQL checks: is user 'root' correct? is the password correct?
     ↓
-MySQL checks: is the username correct? is the password correct?
-    ↓
-If wrong →  err is set → "MySQL connection failed" printed → stops
-If correct → err is null → "Connected to MySQL." printed → createDatabase() called
+WRONG  → err contains the error message → printed to terminal → stops
+CORRECT → err is null → "Connected to MySQL." printed → createDatabase() runs
 ```
+
+The `(err) =>` part is a callback function — it runs after the connection
+attempt finishes. If something went wrong, `err` holds the reason.
 
 ---
 
 ```js
 function createDatabase() {
     db.query('CREATE DATABASE IF NOT EXISTS sneakora_db', (err) => {
-        if (err) {
-            console.error('Could not create database: ' + err.message);
-            return;
-        }
+        if (err) { console.error('Could not create database: ' + err.message); return; }
         db.query('USE sneakora_db', (err) => {
-            if (err) {
-                console.error('Could not select database: ' + err.message);
-                return;
-            }
+            if (err) { console.error('Could not select database: ' + err.message); return; }
             console.log('Database sneakora_db ready.');
             setupTables();
         });
     });
 }
 ```
-**What this does:**
-Two queries run back to back inside callbacks:
 
-Step 1 — `CREATE DATABASE IF NOT EXISTS sneakora_db`
+**Plain English:**
+Two queries run one after the other:
+
+**Query 1:** `CREATE DATABASE IF NOT EXISTS sneakora_db`
 > "Create a database called sneakora_db.
->  If it already exists, do nothing — don't error, just skip."
+>  If it already exists — skip it, don't error."
 
-Step 2 — `USE sneakora_db`
-> "From now on, all queries on this connection go to sneakora_db."
-> Without this, MySQL doesn't know WHICH database your queries are for.
-
-The `IF NOT EXISTS` part is important:
-- First run → database doesn't exist → creates it → moves on
-- Second run → database already exists → skips creation → moves on
-- Your data is never lost
+**Query 2:** `USE sneakora_db`
+> "Tell MySQL: all future queries on this connection belong to sneakora_db."
+> Without this, MySQL doesn't know which database to use.
 
 ---
 
@@ -342,173 +346,150 @@ function setupTables() {
     });
 }
 ```
-**What this does:**
-Creates all 5 tables, one at a time, in order.
 
-`tables` is an array where each item is `[tableName, createSQL]`.
+**Plain English:**
+Creates all 5 tables in the correct order. Each item in the `tables` array is:
+`[tableName, CREATE TABLE SQL]`
 
-`tables.forEach(([name, sql]) => { ... })` loops through each one and runs
-`db.query(sql)` on it.
+The `forEach` loop calls `db.query()` for each table.
+Even though the loop runs instantly, mysql2 internally queues and runs each
+query one at a time — so `orders` (which needs `users`) is always created
+after `users` exists.
 
-**Why does order matter?**
-`orders` has a foreign key pointing to `users`.
-If `orders` is created before `users`, MySQL will error.
-The array is written in the correct dependency order:
+**Why order matters — dependency chain:**
 ```
-users       ← no dependencies
-products    ← no dependencies
-orders      ← needs users
-order_items ← needs orders AND products
-cart_items  ← needs users AND products
+users       ← no dependencies, created first
+products    ← no dependencies, created second
+orders      ← needs users.id (foreign key)
+order_items ← needs orders.id AND products.id
+cart_items  ← needs users.id AND products.id
 ```
-
-mysql2 connections execute queries one at a time in the order you call them,
-so even though the loop runs instantly, the actual SQL runs in the correct sequence.
 
 ---
 
 ```js
 module.exports = db;
 ```
-**What this does:**
-Makes the `db` connection available to `server.js` (and any other file that needs it).
 
-In `server.js`, line 7:
-```js
-const db = require('./backend/database');
-```
-This imports the same `db` object. Every `db.query(...)` in `server.js` uses
-the same connection you configured here.
+**Plain English:**
+Share the `db` connection with any other file that needs it.
+In `server.js` line 6: `const db = require('./backend/database')`
+Now every route in server.js uses this exact same connection.
 
 ---
 
-### How a Browser Request Flows Through the App
+### The Full Request Journey — Browser to MySQL and Back
 
 ```
-User clicks "Add to Cart" in the browser
-        ↓
-Browser sends:  POST http://localhost:3000/api/cart
-Body:           { "user_id": 2, "product_id": 5 }
-        ↓
-server.js receives the request at app.post('/api/cart', ...)
-        ↓
-server.js calls:
-    db.query('INSERT INTO cart_items (user_id, product_id) VALUES (?, ?)', [2, 5])
-        ↓
-db (from database.js) sends the SQL to MySQL
-        ↓
-MySQL inserts the row and returns success
-        ↓
-server.js sends back:  { "id": 12, "user_id": 2, "product_id": 5 }
-        ↓
-Browser receives the response
-Browser shows "Added to cart!" notification
+USER ACTION:  Opens the Category page
+
+Browser sends GET http://localhost:3000/api/products
+                    ↓
+server.js receives it at: app.get('/api/products', ...)
+                    ↓
+server.js calls: db.query('SELECT * FROM products', callback)
+                    ↓
+db (from database.js) sends SQL to MySQL
+                    ↓
+MySQL runs: SELECT * FROM products
+MySQL returns: 7 rows of data
+                    ↓
+callback receives: (err=null, rows=[7 products])
+                    ↓
+server.js sends: res.json(rows)
+                    ↓
+Browser receives: JSON array of 7 products
+                    ↓
+JavaScript renders product cards on screen
 ```
 
 ---
 
-### What the `?` Means in Every Query
-
-Every query in `server.js` uses `?` as a placeholder:
+### Why `?` Is Used in Every Query
 
 ```js
 db.query(`SELECT * FROM users WHERE email = ?`, [email], ...)
 ```
 
-The `?` is replaced safely with the actual value. Never write:
+The `?` is a safe placeholder. The actual value from `[email]` replaces it —
+but mysql2 escapes it first so it can never be treated as SQL code.
+
+**Never do this (dangerous):**
 ```js
-// DANGEROUS — do not do this:
 db.query(`SELECT * FROM users WHERE email = '${email}'`)
 ```
 
-Why? If a user types this into the login form:
-```
-' OR '1'='1
-```
-
-The dangerous version becomes:
+If someone types `' OR '1'='1` as their email, the dangerous version becomes:
 ```sql
 SELECT * FROM users WHERE email = '' OR '1'='1'
 ```
-Which returns ALL users — a SQL injection attack.
-
-The `?` version escapes the input so it can never be treated as SQL code.
-The `mysql2` library handles this automatically.
+This returns ALL users — a SQL injection attack.
+The `?` version makes this impossible.
 
 ---
 
 ## SECTION 4 — Connect This Project to YOUR MySQL
 
-Only **one line** controls the whole connection. Open `backend/database.js`:
+One line in one file. That's it.
+
+Open `backend/database.js`:
 
 ```js
-password: 'saram'   ← change 'saram' to your MySQL root password
+password: 'saram'   ← replace 'saram' with your actual MySQL password
 ```
 
-### Examples:
+**Common examples:**
 
-**If your password is "admin123":**
-```js
-password: 'admin123',
-```
+| Your situation                   | What to write                          |
+|----------------------------------|----------------------------------------|
+| Password is "admin123"           | `password: 'admin123',`                |
+| No password set (blank)          | `password: '',`                        |
+| Custom MySQL user "shopuser"     | `user: 'shopuser', password: 'pass',`  |
+| Password has special characters  | `password: 'p@ss!word',`               |
 
-**If MySQL has no password (blank):**
-```js
-password: '',
-```
-
-**If you use a custom MySQL user:**
-```js
-user:     'sneakora_user',
-password: 'mypass',
-```
-
-After saving, restart the server: `Ctrl+C` → `node server.js`
+After changing: save the file → stop server (Ctrl+C) → run `node server.js` again.
 
 ---
 
-## SECTION 5 — Run the Project — Step by Step with Details
+## SECTION 5 — Run the Project — Detailed Steps
 
 ### Step 1 — Confirm MySQL is Running
 
 ```
-Windows Start Menu → type "Services" → open "Services" app
+Press Windows key → type "Services" → open the Services app
+Scroll to find "MySQL80"
+Look at the Status column
 ```
 
-Look for `MySQL80` in the list:
-
 ```
-Name          Status    Startup Type
-──────────────────────────────────────
-MySQL80       Running   Automatic     ← this is what you want
+Name        Status    Startup Type
+──────────────────────────────────
+MySQL80     Running   Automatic   ← what you want to see
 ```
 
-If Status is blank or says "Stopped":
-- Right-click `MySQL80`
-- Click **Start**
-- Wait 5 seconds for status to update to "Running"
+If it says "Stopped" → right-click → Start → wait 10 seconds.
 
 ---
 
 ### Step 2 — Open Terminal in the Project Folder
 
-**Method A — From File Explorer:**
+**From File Explorer:**
 ```
-Navigate to the Sneakora_tec folder in File Explorer
-Right-click on empty space inside the folder
+Navigate to the Sneakora_tec folder
+Right-click on empty space inside it
 Click "Open in Terminal"
 ```
 
-**Method B — From VS Code:**
+**From VS Code:**
 ```
-Open VS Code
-Open the Sneakora_tec folder (File → Open Folder)
-Press Ctrl + ` (backtick) to open the built-in terminal
+Open VS Code → File → Open Folder → select Sneakora_tec
+Press Ctrl + ` (the backtick key, top-left of keyboard)
+Terminal opens at the bottom
 ```
 
-**Method C — From Command Prompt:**
+**From Command Prompt manually:**
 ```
-Press Win + R → type cmd → press Enter
+Win + R → type cmd → Enter
 Type: cd C:\path\to\Sneakora_tec
 Press Enter
 ```
@@ -521,27 +502,23 @@ Press Enter
 npm install
 ```
 
-This reads `package.json` and downloads these packages into `node_modules/`:
+Downloads these packages into `node_modules/`:
 
-| Package       | Purpose                                        |
-|---------------|------------------------------------------------|
-| `express`     | The web server framework — handles routes      |
-| `mysql2`      | Connects Node.js to MySQL                      |
-| `bcrypt`      | Hashes passwords before saving to database     |
-| `body-parser` | Reads JSON data from request bodies            |
-| `cors`        | Allows browser to call the API                 |
+| Package       | What It Does                              |
+|---------------|-------------------------------------------|
+| `express`     | Web server — handles all the routes       |
+| `mysql2`      | Lets Node.js talk to MySQL                |
+| `bcrypt`      | Hashes passwords before storing them      |
+| `body-parser` | Reads JSON from request body              |
+| `cors`        | Lets browser call the API                 |
 
-You only run this once. If `node_modules/` already exists, skip this step.
+Skip this if `node_modules/` folder already exists.
 
 ---
 
-### Step 4 — Open `backend/database.js` and Change Your Password
+### Step 4 — Change Your Password in database.js
 
-```js
-password: 'saram'   ← this is the original password, change it to yours
-```
-
-Save the file.
+Open `backend/database.js` → find `password: 'saram'` → change it → save.
 
 ---
 
@@ -553,9 +530,427 @@ node server.js
 
 ---
 
-### Step 6 — Read the Terminal Output
+### Step 6 — Confirm the Terminal Output
 
-**Success (what you want to see):**
+**You must see ALL of these lines:**
+
+```
+Connected to MySQL.                ← MySQL accepted the connection
+Database sneakora_db ready.        ← database created/confirmed
+  Table "users" ready.             ← table 1 of 5
+  Table "products" ready.          ← table 2 of 5
+  Table "orders" ready.            ← table 3 of 5
+  Table "order_items" ready.       ← table 4 of 5
+  Table "cart_items" ready.        ← table 5 of 5
+Server running on http://localhost:3000
+```
+
+If you only see `Server running...` but nothing about MySQL → connection failed.
+Go to Section 12 (Troubleshooting).
+
+---
+
+### Step 7 — Open the App
+
+```
+http://localhost:3000
+```
+
+The homepage loads with shoe images and navigation.
+
+### Step 8 — Add Products
+
+Products table is empty on first run. Add them via the Admin panel:
+```
+http://localhost:3000/admin.html
+```
+Or run the INSERT SQL from Section 2 in MySQL Workbench.
+
+---
+
+## SECTION 6 — WHERE Do Your Tables Appear After Running?
+
+This section answers: "I ran the server and it said tables are ready — where do I actually SEE them?"
+
+---
+
+### In MySQL Workbench (Most Visual)
+
+```
+Step 1: Open MySQL Workbench
+Step 2: On the home screen, double-click "Local instance MySQL80"
+Step 3: Enter your root password → click OK
+Step 4: The editor opens — look at the LEFT panel
+Step 5: Find the section called "SCHEMAS"
+Step 6: You will see "sneakora_db" listed there
+Step 7: Click the ▶ arrow next to "sneakora_db" to expand it
+Step 8: Click the ▶ arrow next to "Tables"
+Step 9: You will see all 5 tables:
+         - cart_items
+         - order_items
+         - orders
+         - products
+         - users
+Step 10: Right-click any table → "Select Rows - Limit 1000"
+         → A grid opens showing all rows in that table
+```
+
+**What the left panel looks like:**
+```
+SCHEMAS
+  └── sneakora_db
+        └── Tables
+              ├── cart_items
+              ├── order_items
+              ├── orders
+              ├── products
+              └── users
+```
+
+---
+
+### In MySQL Command Line
+
+Open a terminal and type:
+```bash
+mysql -u root -p
+```
+Type your password → press Enter → prompt changes to `mysql>`
+
+```sql
+-- See all databases
+SHOW DATABASES;
+
+-- Switch to sneakora_db
+USE sneakora_db;
+
+-- See all 5 tables
+SHOW TABLES;
+
+-- See the columns of any table
+DESCRIBE users;
+DESCRIBE products;
+DESCRIBE orders;
+DESCRIBE order_items;
+DESCRIBE cart_items;
+
+-- See all data in any table
+SELECT * FROM products;
+SELECT * FROM users;
+SELECT * FROM orders;
+```
+
+**Expected output of `SHOW TABLES`:**
+```
++------------------------+
+| Tables_in_sneakora_db  |
++------------------------+
+| cart_items             |
+| order_items            |
+| orders                 |
+| products               |
+| users                  |
++------------------------+
+```
+
+---
+
+### In VS Code (Without Leaving Your Editor)
+
+```
+1. Open VS Code
+2. Press Ctrl+Shift+X → Extensions panel
+3. Search: "Database Client" by cweijan → Install
+4. A database icon (cylinder shape) appears in the left sidebar → click it
+5. Click the + button at the top of that panel
+6. Select "MySQL"
+7. Fill in:
+      Host:     localhost
+      Username: root
+      Password: (your password)
+      Port:     3306
+8. Click "Connect"
+9. Expand sneakora_db → Tables
+10. Click any table → its data opens in a tab in VS Code
+```
+
+---
+
+### Via the API (in the Browser)
+
+While the server is running, open your browser and go to:
+```
+http://localhost:3000/api/products
+```
+You will see raw JSON of all products from MySQL, directly in the browser.
+
+---
+
+## SECTION 7 — WHAT HAPPENS When You Click Things on the Website?
+
+This section explains exactly what gets written to MySQL when you use the app.
+
+---
+
+### Overview: Two Types of Storage in This App
+
+```
+BROWSER (localStorage)              MySQL DATABASE
+───────────────────────             ─────────────────────────────
+Cart items before checkout    →     Users (register/login)
+                                    Products (admin panel)
+                                    Orders + Order Items (checkout)
+```
+
+**localStorage** = temporary storage in your browser tab.
+Fast, no server needed, but disappears if you clear browser data.
+MySQL = permanent storage, lives on disk, survives restarts.
+
+The cart is kept in localStorage while you shop, then written to MySQL
+when you click Checkout. This is why it is fast to add items without
+needing a server request every time.
+
+---
+
+### Action 1 — You Click "Register"
+
+```
+YOU TYPE:  Name, Email, Password → click Register
+               ↓
+Browser sends: POST /api/register
+Body: { name: "Hamza", email: "hamza@test.com", password: "mypass" }
+               ↓
+server.js runs: bcrypt.hashSync("mypass", 10)
+Converts "mypass" → "$2b$10$AbCdEf..." (cannot be reversed)
+               ↓
+server.js runs:
+INSERT INTO users (name, email, password, role)
+VALUES ('Hamza', 'hamza@test.com', '$2b$10$AbCdEf...', 'user')
+               ↓
+MySQL adds a new row to the users table
+               ↓
+Server responds: { id: 1, name: "Hamza", email: "hamza@test.com" }
+               ↓
+Browser shows: Login modal (registration succeeded)
+```
+
+**What MySQL looks like after:**
+```
+users table
+id | name  | email          | password      | role | created_at
+───┼───────┼────────────────┼───────────────┼──────┼──────────────
+1  | Hamza | hamza@test.com | $2b$10$AbCd.. | user | 2026-05-03
+```
+
+---
+
+### Action 2 — You Click "Login"
+
+```
+YOU TYPE:  Email, Password → click Login
+               ↓
+Browser sends: POST /api/login
+Body: { email: "hamza@test.com", password: "mypass" }
+               ↓
+server.js runs:
+SELECT * FROM users WHERE email = 'hamza@test.com'
+               ↓
+MySQL returns the user row (with hashed password)
+               ↓
+server.js runs: bcrypt.compareSync("mypass", "$2b$10$AbCd..")
+Compares the typed password to the stored hash
+               ↓
+MATCH  → responds with user data → browser saves to localStorage as "user"
+NO MATCH → responds with 401 Invalid password
+               ↓
+Navbar changes "Login" button → "Logout" button
+```
+
+**MySQL is only READ here. Nothing is written during login.**
+
+---
+
+### Action 3 — You Click "Add to Cart"
+
+```
+YOU CLICK:  "Add to Cart" on any product
+               ↓
+js/app.js runs:
+let cart = JSON.parse(localStorage.getItem('cart') || '[]')
+cart.push(productId)
+localStorage.setItem('cart', JSON.stringify(cart))
+               ↓
+Cart count in navbar updates (+1)
+               ↓
+Toast notification: "Product added to cart successfully!"
+```
+
+**NO MySQL query happens here.**
+The product ID is saved in your browser's localStorage only.
+This is why "Add to Cart" is instant — no server round-trip needed.
+
+---
+
+### Action 4 — You Open the Cart Page
+
+```
+YOU NAVIGATE TO:  cart.html
+               ↓
+JavaScript reads cart IDs from localStorage
+Example: [1, 3, 7]
+               ↓
+For each product ID, browser sends:
+GET /api/products/1  →  MySQL: SELECT * FROM products WHERE id = 1
+GET /api/products/3  →  MySQL: SELECT * FROM products WHERE id = 3
+GET /api/products/7  →  MySQL: SELECT * FROM products WHERE id = 7
+               ↓
+MySQL returns name, price, image for each product
+               ↓
+Cart page shows products with prices and total
+```
+
+**MySQL is READ here (SELECT). Nothing is written yet.**
+
+---
+
+### Action 5 — You Click "Checkout"
+
+**This is where the most MySQL activity happens.**
+
+```
+YOU CLICK:  Checkout button
+               ↓
+JavaScript collects: cartIds from localStorage, user from localStorage
+               ↓
+Calculates total from product prices
+               ↓
+Browser sends: POST /api/orders
+Body: {
+  user_id: 1,
+  total: 160.00,
+  items: [
+    { product_id: 1, price: 75.00 },
+    { product_id: 2, price: 85.00 }
+  ]
+}
+               ↓
+server.js runs QUERY 1:
+INSERT INTO orders (user_id, total, status)
+VALUES (1, 160.00, 'pending')
+→ MySQL creates order row, returns orderId = 1
+               ↓
+server.js runs QUERY 2:
+INSERT INTO order_items (order_id, product_id, price)
+VALUES (1, 1, 75.00), (1, 2, 85.00)
+→ MySQL creates 2 rows in order_items
+               ↓
+server.js runs QUERY 3:
+DELETE FROM cart_items WHERE user_id = 1
+→ MySQL clears any server-side cart rows
+               ↓
+localStorage cart is also cleared
+               ↓
+Browser redirects to Profile page
+               ↓
+Profile page loads order history from MySQL
+```
+
+**What MySQL looks like after checkout:**
+```
+orders table
+id | user_id | total  | status  | created_at
+───┼─────────┼────────┼─────────┼──────────────
+1  |    1    | 160.00 | pending | 2026-05-03
+
+order_items table
+id | order_id | product_id | price
+───┼──────────┼────────────┼───────
+1  |    1     |     1      | 75.00
+2  |    1     |     2      | 85.00
+```
+
+---
+
+### Action 6 — You Open the Profile Page (Order History)
+
+```
+YOU NAVIGATE TO:  profile.html
+               ↓
+JavaScript reads user from localStorage
+               ↓
+Browser sends: GET /api/orders/1
+               ↓
+server.js runs:
+SELECT o.id, o.total, o.status, o.created_at,
+       p.name as product_name, p.image, oi.price
+FROM orders o
+JOIN order_items oi ON o.id = oi.order_id
+JOIN products p ON oi.product_id = p.id
+WHERE o.user_id = 1
+ORDER BY o.created_at DESC
+               ↓
+MySQL joins 3 tables, returns order history with product names
+               ↓
+Profile page shows past orders with product names, prices, and status
+```
+
+---
+
+### Action 7 — Admin Adds a Product
+
+```
+YOU GO TO:  http://localhost:3000/admin.html
+Fill in product details → click Save
+               ↓
+Browser sends: POST /api/products
+Body: { name: "...", price: ..., category: "...", ... }
+               ↓
+server.js runs:
+INSERT INTO products (name, price, category, image, description)
+VALUES (?, ?, ?, ?, ?)
+               ↓
+MySQL adds new row to products table
+               ↓
+Product appears on the website immediately
+```
+
+---
+
+### Full Click-to-MySQL Summary Table
+
+| What You Click         | MySQL Table Written   | MySQL Table Read       |
+|------------------------|-----------------------|------------------------|
+| Register               | `users` (INSERT)      | —                      |
+| Login                  | —                     | `users` (SELECT)       |
+| Add to Cart            | — (localStorage only) | —                      |
+| Open Cart page         | —                     | `products` (SELECT)    |
+| Checkout               | `orders` (INSERT)     | `products` (SELECT)    |
+|                        | `order_items` (INSERT)| —                      |
+|                        | `cart_items` (DELETE) | —                      |
+| Open Profile           | —                     | `orders` + `order_items` + `products` |
+| Admin: Add Product     | `products` (INSERT)   | —                      |
+| Admin: Edit Product    | `products` (UPDATE)   | —                      |
+| Admin: Delete Product  | `products` (DELETE)   | —                      |
+| Open any product page  | —                     | `products` (SELECT)    |
+| Open Category page     | —                     | `products` (SELECT)    |
+
+---
+
+## SECTION 8 — LIVE TEST RESULTS — Proven End-to-End
+
+This section shows the actual results from a real test run of this project.
+Every step below was tested and verified.
+
+---
+
+### Test 1 — Server Starts and Tables Auto-Create
+
+**Command run:**
+```bash
+node server.js
+```
+
+**Terminal output (actual):**
 ```
 Connected to MySQL.
 Database sneakora_db ready.
@@ -567,245 +962,155 @@ Database sneakora_db ready.
 Server running on http://localhost:3000
 ```
 
-**If you see an error instead** → see Section 10 (Troubleshooting).
+**Result: PASS** — All 5 tables created automatically on first run.
 
 ---
 
-### Step 7 — Open the App in Your Browser
+### Test 2 — Products Load from MySQL
 
+**API call:**
 ```
-http://localhost:3000
+GET http://localhost:3000/api/products
 ```
 
-The homepage should load. Products will be empty until you add them via the
-Admin panel (`http://localhost:3000/admin.html`) or via SQL (see Section 2).
+**MySQL returned (actual data):**
+```
+id | name                   | price  | category
+───┼────────────────────────┼────────┼─────────
+1  | Skechers Go Walk       | 75.00  | Men
+2  | Skechers D'Lites       | 85.00  | Women
+3  | Skechers Energy        | 65.00  | Kids
+4  | Skechers Max Cushioning| 95.00  | Men
+5  | Skechers Arch Fit      | 80.00  | Women
+6  | Skechers Go Run        | 110.00 | Sports
+7  | Skechers Street        | 70.00  | Casual
+```
+
+**Result: PASS** — 7 products served directly from MySQL to the browser.
 
 ---
 
-### Step 8 — Add Sample Products
+### Test 3 — Register a New User → Saved to MySQL
 
-Go to `http://localhost:3000/admin.html` and add products using the form.
+**Action:** Filled Register form with:
+```
+Name:     Test User
+Email:    testuser@sneakora.com
+Password: test1234
+```
 
-OR run this SQL in MySQL Workbench:
+**MySQL users table after registering:**
 ```sql
-USE sneakora_db;
-INSERT INTO products (name, price, category, image, description) VALUES
-('Skechers D-Lites',      89.99,  'Men',    'images/shoe_cyan.png',   'Classic chunky sole with memory foam'),
-('Skechers Go Walk 7',    79.99,  'Women',  'images/shoe_pink.png',   'Ultra-light walking shoe'),
-('Skechers Afterburn',    94.99,  'Men',    'images/shoe_purple.png', 'Athletic training shoe'),
-('Skechers Skech-Air',    109.99, 'Women',  'images/shoe_green.png',  'Air-cushioned comfort'),
-('Skechers Kids Twinkle', 59.99,  'Kids',   'images/shoe_cyan.png',   'Light-up kids shoe'),
-('Skechers Sport Active', 84.99,  'Sports', 'images/shoe_pink.png',   'High-performance sport shoe'),
-('Skechers Relaxed Fit',  74.99,  'Casual', 'images/shoe_purple.png', 'Wide fit everyday comfort');
+SELECT id, name, email, role, created_at FROM users;
 ```
+```
+id | name      | email                 | role | created_at
+───┼───────────┼───────────────────────┼──────┼──────────────────
+1  | Test User | testuser@sneakora.com | user | 2026-05-03 22:03:09
+```
+
+**Result: PASS** — User saved to MySQL with bcrypt-hashed password.
 
 ---
 
-## SECTION 6 — View Your Tables (3 Ways)
+### Test 4 — Place an Order → Written to MySQL
 
-### Way 1: MySQL Workbench (Easiest — Visual)
-
+**API call:**
 ```
-1. Open MySQL Workbench
-2. On the home screen, click "Local instance MySQL80"
-3. A password prompt appears → type your root password → click OK
-4. The main editor opens
-5. On the LEFT side panel, look for "SCHEMAS"
-6. Click the arrow (▶) next to "sneakora_db" to expand it
-7. Click the arrow next to "Tables"
-8. You see: cart_items, order_items, orders, products, users
-9. Right-click any table name
-10. Click "Select Rows - Limit 1000"
-11. A grid appears showing all data in that table
+POST /api/orders
+Body: { user_id: 1, total: 160.00,
+        items: [{ product_id: 1, price: 75.00 },
+                { product_id: 2, price: 85.00 }] }
 ```
 
-To run your own SQL:
-```
-Click the SQL editor area (top section)
-Type your query
-Press Ctrl+Enter (runs just the line your cursor is on)
-OR press F5 (runs everything selected or all if nothing selected)
-```
-
----
-
-### Way 2: MySQL Command Line
-
-Open a terminal and type:
-
-```bash
-mysql -u root -p
-```
-
-When it asks for a password, type it and press Enter.
-The prompt changes to `mysql>` — you are now inside MySQL.
-
+**MySQL after checkout (3 tables joined):**
 ```sql
--- Switch to our database
-USE sneakora_db;
-
--- See what tables exist
-SHOW TABLES;
-
--- See columns of a table
-DESCRIBE products;
-
--- See all rows
-SELECT * FROM products;
-SELECT * FROM users;
-SELECT * FROM orders;
-SELECT * FROM order_items;
-SELECT * FROM cart_items;
-
--- Exit MySQL
-EXIT;
+SELECT o.id AS order_id, u.name AS customer, o.total,
+       o.status, p.name AS product, oi.price
+FROM orders o
+JOIN users u ON o.user_id = u.id
+JOIN order_items oi ON o.id = oi.order_id
+JOIN products p ON oi.product_id = p.id;
+```
+```
+order_id | customer  | total  | status  | product          | price
+─────────┼───────────┼────────┼─────────┼──────────────────┼──────
+1        | Test User | 160.00 | pending | Skechers Go Walk | 75.00
+1        | Test User | 160.00 | pending | Skechers D'Lites | 85.00
 ```
 
-Expected output of `SHOW TABLES`:
+**Result: PASS** — Order and 2 items written to MySQL across 2 tables.
+
+---
+
+### Summary — All Tests Passed
+
 ```
-+---------------------+
-| Tables_in_sneakora_db |
-+---------------------+
-| cart_items          |
-| order_items         |
-| orders              |
-| products            |
-| users               |
-+---------------------+
+✓  node server.js   → tables auto-created in MySQL
+✓  GET /api/products → 7 products served from MySQL
+✓  Register user     → row inserted into users table
+✓  Place order       → row in orders + 2 rows in order_items
+✓  Data persists     → still there after restarting server
 ```
 
 ---
 
-### Way 3: VS Code Extension
+## SECTION 9 — ALL Queries in This Project — Fully Explained
 
-```
-1. Open VS Code
-2. Press Ctrl+Shift+X (Extensions panel)
-3. Search: "Database Client JDBC" by cweijan
-4. Click Install
-5. A database icon appears in the left sidebar — click it
-6. Click the + button at the top
-7. Select "MySQL"
-8. Fill in: Host = localhost, Username = root, Password = yours
-9. Click Connect
-10. Expand sneakora_db → Tables → click any table
-11. Data shows up in a tab inside VS Code
-```
+Every SQL query that runs when you use the app. All live in `server.js`.
 
 ---
 
-## SECTION 7 — ALL Queries Used in This Project — Fully Explained
+### USERS
 
-Every database query in this project lives in `server.js`. Below is every
-single one, explained in plain English.
-
----
-
-### ── USERS ──────────────────────────────────────────────────────────────
-
-#### Query 1 — Register a New User
-**Location in code:** `server.js` line ~22
-**Triggered when:** User fills the Register form and clicks Register
-
+#### Query 1 — Register (INSERT)
+**Line ~22 | Triggered by: clicking Register**
 ```js
 db.query(
     `INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)`,
-    [name, email, hash, role],
+    [name, email, hash, 'user'],
     (err, result) => { ... }
 );
 ```
-
-**SQL plain English:**
-> "Add a new row to the users table with name, email, hashed password, and role."
-
-**What fills each `?`:**
-| `?` Position | Variable | Example Value                   |
-|--------------|----------|---------------------------------|
-| 1st          | `name`   | `'Hamza'`                       |
-| 2nd          | `email`  | `'hamza@email.com'`             |
-| 3rd          | `hash`   | `'$2b$10$xyz...'` (bcrypt hash) |
-| 4th          | `role`   | `'user'`                        |
-
-**What `hash` is:**
-The real password is never stored. `bcrypt.hashSync(password, 10)` converts
-`'mypassword'` into something like `'$2b$10$AbCdEfGhIj...'`.
-This cannot be reversed — even if someone steals the database, they cannot
-recover the original password.
-
-**What comes back:**
-`result.insertId` — the new user's auto-generated ID (e.g. `3`)
+> Adds a new user row. Password is pre-hashed by bcrypt before this runs.
+> `result.insertId` = the new user's ID (e.g. 3).
 
 ---
 
-#### Query 2 — Login (Find User by Email)
-**Location in code:** `server.js` line ~34
-**Triggered when:** User types email and password and clicks Login
-
+#### Query 2 — Login (SELECT)
+**Line ~34 | Triggered by: clicking Login**
 ```js
-db.query(
-    `SELECT * FROM users WHERE email = ?`,
-    [email],
-    (err, rows) => { ... }
-);
+db.query(`SELECT * FROM users WHERE email = ?`, [email], (err, rows) => { ... });
 ```
-
-**SQL plain English:**
-> "Find the user whose email matches. Return all their columns."
-
-**What comes back:**
-`rows` is an array. `rows[0]` is the matching user.
-If no user found: `rows[0]` is `undefined` → server returns 404.
-If found: `bcrypt.compareSync(password, user.password)` checks if the
-password the user typed matches the stored hash.
+> Finds the user by email. Returns all columns.
+> `rows[0]` = the user. If empty = no account with that email.
+> bcrypt then checks if the password matches the hash.
 
 ---
 
-### ── PRODUCTS ────────────────────────────────────────────────────────────
+### PRODUCTS
 
-#### Query 3 — Get ALL Products
-**Location in code:** `server.js` line ~50
-**Triggered when:** Category page loads
-
+#### Query 3 — Get All Products (SELECT)
+**Line ~50 | Triggered by: Category page loading**
 ```js
 db.query(`SELECT * FROM products`, (err, rows) => { ... });
 ```
-
-**SQL plain English:**
-> "Give me every row and every column from the products table."
-
-**What comes back:**
-```json
-[
-  { "id": 1, "name": "Skechers D-Lites", "price": 89.99, "category": "Men", ... },
-  { "id": 2, "name": "Skechers Go Walk 7", "price": 79.99, "category": "Women", ... }
-]
-```
+> Returns every product as an array. Frontend renders one card per item.
 
 ---
 
-#### Query 4 — Get ONE Product by ID
-**Location in code:** `server.js` line ~57
-**Triggered when:** User opens a product detail page
-
+#### Query 4 — Get One Product (SELECT)
+**Line ~57 | Triggered by: clicking on a product**
 ```js
-db.query(
-    `SELECT * FROM products WHERE id = ?`,
-    [req.params.id],
-    (err, rows) => { ... }
-);
+db.query(`SELECT * FROM products WHERE id = ?`, [req.params.id], (err, rows) => { ... });
 ```
-
-**SQL plain English:**
-> "Give me the one product whose ID matches the number in the URL."
-
-**Example:** URL `/api/products/3` → `req.params.id` = `'3'` → returns product with `id = 3`
+> Returns the single product matching the ID in the URL.
+> `/api/products/3` → `req.params.id = '3'`
 
 ---
 
-#### Query 5 — Add a New Product (Admin)
-**Location in code:** `server.js` line ~65
-**Triggered when:** Admin fills the Add Product form
-
+#### Query 5 — Add Product (INSERT) — Admin
+**Line ~65 | Triggered by: Admin clicking Save**
 ```js
 db.query(
     `INSERT INTO products (name, price, category, image, description) VALUES (?, ?, ?, ?, ?)`,
@@ -813,20 +1118,12 @@ db.query(
     (err, result) => { ... }
 );
 ```
-
-**SQL plain English:**
-> "Add a new product row with the given details."
-
-**What `description || ''` means:**
-If description is not provided (undefined), use an empty string instead
-so the query doesn't fail.
+> Adds a new product. `description || ''` means if no description given, use empty string.
 
 ---
 
-#### Query 6 — Update a Product (Admin)
-**Location in code:** `server.js` line ~78
-**Triggered when:** Admin edits a product and saves
-
+#### Query 6 — Update Product (UPDATE) — Admin
+**Line ~78 | Triggered by: Admin editing a product**
 ```js
 db.query(
     `UPDATE products SET name=?, price=?, category=?, image=?, description=? WHERE id=?`,
@@ -834,194 +1131,114 @@ db.query(
     (err) => { ... }
 );
 ```
-
-**SQL plain English:**
-> "Change the details of the product whose ID matches."
-
-**Why `WHERE id=?` is critical:**
-Without the `WHERE`, this would update EVERY product. The `WHERE` limits the
-change to exactly one row.
+> Changes one product's details. The `WHERE id=?` is critical — without it,
+> EVERY product would be updated.
 
 ---
 
-#### Query 7 — Delete a Product (Admin)
-**Location in code:** `server.js` line ~89
-**Triggered when:** Admin clicks Delete on a product
-
+#### Query 7 — Delete Product (DELETE) — Admin
+**Line ~89 | Triggered by: Admin clicking Delete**
 ```js
-db.query(
-    `DELETE FROM products WHERE id = ?`,
-    [req.params.id],
-    (err) => { ... }
-);
+db.query(`DELETE FROM products WHERE id = ?`, [req.params.id], (err) => { ... });
 ```
-
-**SQL plain English:**
-> "Remove the product whose ID matches."
-
-**Warning:** If this product exists in any `order_items` or `cart_items` rows,
-MySQL will reject the delete (foreign key constraint). Remove those rows first.
+> Removes the product row. Will fail if the product is in order_items or cart_items.
 
 ---
 
-### ── CART ────────────────────────────────────────────────────────────────
+### CART
 
-#### Query 8 — Get a User's Cart
-**Location in code:** `server.js` line ~98
-**Triggered when:** User opens the Cart page
-
+#### Query 8 — Get User's Cart (SELECT + JOIN)
+**Line ~98 | Triggered by: Cart page loading**
 ```js
 db.query(
     `SELECT c.id, p.id as product_id, p.name, p.price, p.category, p.image
      FROM cart_items c
      JOIN products p ON c.product_id = p.id
      WHERE c.user_id = ?`,
-    [req.params.userId],
-    (err, rows) => { ... }
+    [req.params.userId], (err, rows) => { ... }
 );
 ```
+> Gets cart items with product details. JOIN needed because cart_items only
+> stores IDs — product names and prices live in the products table.
 
-**SQL plain English:**
-> "Find this user's cart items, and for each item also bring in the product
->  name, price, category, and image from the products table."
-
-**Why JOIN is needed:**
-`cart_items` only stores `user_id` and `product_id` numbers. It doesn't store
-product names or prices — those live in the `products` table. The JOIN connects
-the two tables on the matching product ID.
-
-**Visualized:**
 ```
-cart_items                 products
-───────────────────        ─────────────────────────────────
-id | user_id | product_id  id | name               | price
-───┼─────────┼──────────── ───┼────────────────────┼───────
-7  |    2    |     3   ───→ 3 | Skechers Afterburn | 94.99
-8  |    2    |     1   ───→ 1 | Skechers D-Lites   | 89.99
+cart_items           products
+──────────────────   ────────────────────────────
+id | user | product  id | name              | price
+───┼──────┼───────── ───┼───────────────────┼──────
+7  |  2   |   3  ───→ 3 | Skechers Afterburn| 94.99
 ```
 
 ---
 
-#### Query 9 — Add Item to Cart
-**Location in code:** `server.js` line ~113
-**Triggered when:** User clicks "Add to Cart"
-
+#### Query 9 — Add to Cart (INSERT)
+**Line ~113 | Triggered by: clicking Add to Cart (server-side version)**
 ```js
-db.query(
-    `INSERT INTO cart_items (user_id, product_id) VALUES (?, ?)`,
-    [user_id, product_id],
-    (err, result) => { ... }
-);
+db.query(`INSERT INTO cart_items (user_id, product_id) VALUES (?, ?)`,
+         [user_id, product_id], (err, result) => { ... });
 ```
-
-**SQL plain English:**
-> "Record that this user added this product to their cart."
+> Saves a cart item to MySQL. In this app the homepage uses localStorage,
+> but this API exists for direct cart management.
 
 ---
 
-#### Query 10 — Remove ONE Item from Cart
-**Location in code:** `server.js` line ~123
-**Triggered when:** User clicks remove on a single cart item
-
+#### Query 10 — Remove One Cart Item (DELETE)
+**Line ~123 | Triggered by: removing one item from cart**
 ```js
-db.query(
-    `DELETE FROM cart_items WHERE id = ?`,
-    [req.params.id],
-    (err) => { ... }
-);
+db.query(`DELETE FROM cart_items WHERE id = ?`, [req.params.id], (err) => { ... });
 ```
-
-**SQL plain English:**
-> "Delete this specific cart entry by its own cart ID."
-
-Note: uses `cart_items.id` — not `product_id` or `user_id`.
+> Deletes one cart entry by its cart row ID (not the product ID).
 
 ---
 
-#### Query 11 — Clear Entire Cart
-**Location in code:** `server.js` line ~131
-**Triggered when:** User checks out (all cart items removed after order placed)
-
+#### Query 11 — Clear Entire Cart (DELETE)
+**Line ~131 | Triggered by: after checkout completes**
 ```js
-db.query(
-    `DELETE FROM cart_items WHERE user_id = ?`,
-    [req.params.userId],
-    (err) => { ... }
-);
+db.query(`DELETE FROM cart_items WHERE user_id = ?`, [req.params.userId], (err) => { ... });
 ```
-
-**SQL plain English:**
-> "Delete ALL cart rows belonging to this user."
+> Removes ALL cart items for a specific user at once.
 
 ---
 
-### ── ORDERS ──────────────────────────────────────────────────────────────
+### ORDERS
 
-#### Query 12 — Create an Order
-**Location in code:** `server.js` line ~141
-**Triggered when:** User clicks Checkout
-
+#### Query 12 — Create Order Header (INSERT)
+**Line ~141 | Triggered by: clicking Checkout — step 1 of 3**
 ```js
 db.query(
     `INSERT INTO orders (user_id, total, status) VALUES (?, ?, 'pending')`,
-    [user_id, total],
-    (err, result) => { ... }
+    [user_id, total], (err, result) => { ... }
 );
 ```
-
-**SQL plain English:**
-> "Create a new order record for this user with the total amount. Status = pending."
-
-`'pending'` is hardcoded (not a `?`) because it is always pending at creation.
-`result.insertId` gives the new order's ID, used in the next query.
+> Creates the order record. Status is hardcoded `'pending'`.
+> `result.insertId` = the new order ID — passed to step 2.
 
 ---
 
-#### Query 13 — Save Each Product in the Order
-**Location in code:** `server.js` line ~149
-**Triggered when:** Immediately after Query 12 succeeds
-
+#### Query 13 — Save Order Items (INSERT bulk)
+**Line ~149 | Triggered by: checkout — step 2 of 3**
 ```js
 const itemValues = items.map(item => [orderId, item.product_id, item.price]);
-db.query(
-    `INSERT INTO order_items (order_id, product_id, price) VALUES ?`,
-    [itemValues],
-    (err2) => { ... }
-);
+db.query(`INSERT INTO order_items (order_id, product_id, price) VALUES ?`,
+         [itemValues], (err2) => { ... });
 ```
-
-**SQL plain English:**
-> "Insert multiple rows into order_items at once — one per product in the order."
-
-**What `items.map(...)` produces:**
-If the cart had 3 products, `itemValues` becomes:
-```js
-[
-  [5, 2, 89.99],    // [orderId, product_id, price]
-  [5, 4, 109.99],
-  [5, 7, 74.99]
-]
-```
-MySQL inserts all 3 rows with one query using `VALUES ?`.
+> Inserts ALL products from the order in one query.
+> `items.map(...)` converts the cart array into `[[orderId, pid, price], ...]`.
+> If cart had 3 items → 3 rows inserted in one shot.
 
 ---
 
-#### Query 14 — Clear Cart After Order
-**Location in code:** `server.js` line ~154
-**Triggered when:** Immediately after Query 13 succeeds
-
+#### Query 14 — Clear Cart After Order (DELETE)
+**Line ~154 | Triggered by: checkout — step 3 of 3 (automatic)**
 ```js
 db.query(`DELETE FROM cart_items WHERE user_id = ?`, [user_id], () => { ... });
 ```
-
-Same as Query 11 — empties the cart automatically after checkout.
+> Automatically empties the cart after the order is saved.
 
 ---
 
-#### Query 15 — Get Order History
-**Location in code:** `server.js` line ~163
-**Triggered when:** User opens the Profile page
-
+#### Query 15 — Order History (SELECT + 2 JOINs)
+**Line ~163 | Triggered by: opening Profile page**
 ```js
 db.query(
     `SELECT o.id, o.total, o.status, o.created_at,
@@ -1031,113 +1248,134 @@ db.query(
      JOIN products    p  ON oi.product_id = p.id
      WHERE o.user_id = ?
      ORDER BY o.created_at DESC`,
-    [req.params.userId],
-    (err, rows) => { ... }
+    [req.params.userId], (err, rows) => { ... }
 );
 ```
+> 2 JOINs needed because the data is spread across 3 tables:
+> `orders` (date, total) + `order_items` (link) + `products` (name, image).
 
-**SQL plain English:**
-> "Get all orders for this user, with the name and image of each product
->  in each order. Sort newest first."
-
-**Why 2 JOINs?**
-Data is spread across 3 tables:
+**Why the same order ID repeats:**
 ```
-orders → has total, status, date
-order_items → links orders to products
-products → has name, image
+Result returned:
+order_id | total  | product_name      | price
+─────────┼────────┼───────────────────┼──────
+1        | 160.00 | Skechers Go Walk  | 75.00   ← same order
+1        | 160.00 | Skechers D'Lites  | 85.00   ← same order, 2 items
 ```
-Join all three to get everything in one query instead of 3 separate queries.
-
-**What comes back:**
-Same order ID repeats — once per product in that order:
-```json
-[
-  { "id": 5, "total": 274.97, "product_name": "Skechers Go Walk 7",  "price": 79.99  },
-  { "id": 5, "total": 274.97, "product_name": "Skechers Skech-Air",  "price": 109.99 },
-  { "id": 5, "total": 274.97, "product_name": "Skechers Relaxed Fit","price": 74.99  }
-]
-```
-The frontend groups them by `id` to display as one order with 3 items.
+The frontend groups rows by order_id to display them as one order with 2 items.
 
 ---
 
-## SECTION 8 — CRUD Operations at Specific Points (Scenarios)
+## SECTION 10 — CRUD Scenarios — Real Examples
 
-Run these in MySQL Workbench or terminal after connecting.
-Always start with: `USE sneakora_db;`
+Run these in MySQL Workbench or terminal. Start each block with `USE sneakora_db;`
 
 ---
 
-### Scenario A — Change the price of product ID 3
+### Change the Price of One Specific Product
 
 ```sql
 USE sneakora_db;
-SELECT id, name, price FROM products WHERE id = 3;   -- check before
+
+-- Check current price first
+SELECT id, name, price FROM products WHERE id = 3;
+
+-- Change it
 UPDATE products SET price = 129.99 WHERE id = 3;
-SELECT id, name, price FROM products WHERE id = 3;   -- verify after
+
+-- Verify the change happened
+SELECT id, name, price FROM products WHERE id = 3;
 ```
 
 ---
 
-### Scenario B — Increase ALL prices by 10%
+### Increase ALL Prices by 10%
 
 ```sql
 USE sneakora_db;
--- Preview first (no changes made):
+
+-- Preview the new prices BEFORE changing anything
 SELECT id, name, price, ROUND(price * 1.10, 2) AS new_price FROM products;
--- Apply:
+
+-- Apply the increase
 UPDATE products SET price = ROUND(price * 1.10, 2);
 ```
 
 ---
 
-### Scenario C — Safely delete product ID 7
+### Safely Delete a Product
 
 ```sql
 USE sneakora_db;
--- Check if referenced:
-SELECT * FROM cart_items  WHERE product_id = 7;
+
+-- Step 1: Check if product is in anyone's cart
+SELECT * FROM cart_items WHERE product_id = 7;
+
+-- Step 2: Check if product is in any order history
 SELECT * FROM order_items WHERE product_id = 7;
--- If both empty, safe to delete:
+
+-- Step 3a: If both are empty → safe to delete
 DELETE FROM products WHERE id = 7;
--- If cart_items has rows, clear those first:
+
+-- Step 3b: If cart has rows → clear those first, then delete
 DELETE FROM cart_items WHERE product_id = 7;
 DELETE FROM products WHERE id = 7;
+
+-- Step 3c: If order_items has rows → don't delete (it's in order history)
+-- Instead, mark it discontinued:
+UPDATE products SET name = '[Discontinued] Old Name' WHERE id = 7;
 ```
 
 ---
 
-### Scenario D — See all orders placed today
+### Update an Order Status
 
 ```sql
 USE sneakora_db;
-SELECT o.id, u.name AS customer, o.total, o.status, o.created_at
+
+-- Mark one order as delivered
+UPDATE orders SET status = 'delivered' WHERE id = 1;
+
+-- Mark ALL pending orders as processing
+UPDATE orders SET status = 'processing' WHERE status = 'pending';
+
+-- See all orders and their statuses
+SELECT id, user_id, total, status, created_at FROM orders ORDER BY created_at DESC;
+```
+
+---
+
+### See All Orders With Customer Names and Products
+
+```sql
+USE sneakora_db;
+
+SELECT
+    o.id          AS order_id,
+    u.name        AS customer,
+    u.email,
+    p.name        AS product,
+    oi.price,
+    o.total,
+    o.status,
+    o.created_at
 FROM orders o
-JOIN users u ON o.user_id = u.id
-WHERE DATE(o.created_at) = CURDATE()
+JOIN users       u  ON o.user_id     = u.id
+JOIN order_items oi ON o.id          = oi.order_id
+JOIN products    p  ON oi.product_id = p.id
 ORDER BY o.created_at DESC;
 ```
 
 ---
 
-### Scenario E — Mark all pending orders as processing
+### Delete a User and ALL Their Data (Correct Order)
 
-```sql
-USE sneakora_db;
-SELECT id, user_id, total, status FROM orders WHERE status = 'pending';  -- preview
-UPDATE orders SET status = 'processing' WHERE status = 'pending';
-```
-
----
-
-### Scenario F — Delete a user and ALL their data
-
-Run in this exact order (foreign keys require child records deleted first):
+Foreign keys require deleting child records before the parent.
 
 ```sql
 USE sneakora_db;
 -- Replace 3 with the actual user ID
+
 DELETE FROM cart_items  WHERE user_id = 3;
 DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE user_id = 3);
 DELETE FROM orders      WHERE user_id = 3;
@@ -1146,182 +1384,183 @@ DELETE FROM users       WHERE id = 3;
 
 ---
 
-### Scenario G — Reset products table and start fresh
+### Reset Products Table and Start Fresh
 
 ```sql
 USE sneakora_db;
--- WARNING: deletes all products and their cart/order references
+
+-- WARNING: permanent. Clears carts and order items too.
 DELETE FROM cart_items;
 DELETE FROM order_items;
 DELETE FROM products;
 ALTER TABLE products AUTO_INCREMENT = 1;
--- Now re-insert your products
+
+-- Re-insert fresh products
+INSERT INTO products (name, price, category, image, description) VALUES
+('Skechers Go Walk', 75.00, 'Men', 'images/shoe_cyan.png', 'Comfortable walking shoe');
 ```
 
 ---
 
-### Scenario H — Find which user has the most orders
+### Find the Most Active Users
 
 ```sql
 USE sneakora_db;
-SELECT u.id, u.name, u.email, COUNT(o.id) AS total_orders
+
+SELECT u.id, u.name, u.email, COUNT(o.id) AS total_orders,
+       COALESCE(SUM(o.total), 0) AS total_spent
 FROM users u
 LEFT JOIN orders o ON u.id = o.user_id
 GROUP BY u.id
 ORDER BY total_orders DESC
-LIMIT 5;
+LIMIT 10;
 ```
 
 ---
 
-## SECTION 9 — How to Change a Query and Re-Apply It
+## SECTION 11 — How to Change a Query and Re-Apply It
 
-### The Process Every Time
+### The Steps Every Time
 
 ```
-1. Open server.js in your editor
-2. Find the query using the map below
-3. Edit the SQL string inside the backticks ( ` )
-4. Save the file (Ctrl+S)
+1. Open server.js in your editor (VS Code)
+2. Find the route you want (use the map below)
+3. Edit the SQL string — it is inside backticks ( ` )
+4. Save the file: Ctrl+S
 5. In terminal: press Ctrl+C to stop the server
-6. Type: node server.js to restart
-7. Test the change in the browser
+6. Type: node server.js
+7. Test in the browser or with the API
 ```
 
-### Query Location Map in `server.js`
+### Route and Query Map
 
 ```
 server.js
 │
-├── Line 17  POST /api/register
-│            INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)
+├── Line 17   POST /api/register
+│             INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)
 │
-├── Line 32  POST /api/login
-│            SELECT * FROM users WHERE email = ?
+├── Line 32   POST /api/login
+│             SELECT * FROM users WHERE email = ?
 │
-├── Line 49  GET /api/products
-│            SELECT * FROM products
+├── Line 49   GET /api/products
+│             SELECT * FROM products
 │
-├── Line 56  GET /api/products/:id
-│            SELECT * FROM products WHERE id = ?
+├── Line 56   GET /api/products/:id
+│             SELECT * FROM products WHERE id = ?
 │
-├── Line 64  POST /api/products
-│            INSERT INTO products (...) VALUES (?, ?, ?, ?, ?)
+├── Line 64   POST /api/products         (admin: add)
+│             INSERT INTO products (...) VALUES (?, ?, ?, ?, ?)
 │
-├── Line 76  PUT /api/products/:id
-│            UPDATE products SET name=?, price=?, ... WHERE id=?
+├── Line 76   PUT /api/products/:id      (admin: edit)
+│             UPDATE products SET name=?, price=?, ... WHERE id=?
 │
-├── Line 88  DELETE /api/products/:id
-│            DELETE FROM products WHERE id = ?
+├── Line 88   DELETE /api/products/:id   (admin: delete)
+│             DELETE FROM products WHERE id = ?
 │
-├── Line 97  GET /api/cart/:userId
-│            SELECT ... FROM cart_items JOIN products WHERE user_id = ?
+├── Line 97   GET /api/cart/:userId
+│             SELECT ... FROM cart_items JOIN products WHERE user_id = ?
 │
-├── Line 111 POST /api/cart
-│            INSERT INTO cart_items (user_id, product_id) VALUES (?, ?)
+├── Line 111  POST /api/cart
+│             INSERT INTO cart_items (user_id, product_id) VALUES (?, ?)
 │
-├── Line 122 DELETE /api/cart/:id
-│            DELETE FROM cart_items WHERE id = ?
+├── Line 122  DELETE /api/cart/:id
+│             DELETE FROM cart_items WHERE id = ?
 │
-├── Line 130 DELETE /api/cart/user/:userId
-│            DELETE FROM cart_items WHERE user_id = ?
+├── Line 130  DELETE /api/cart/user/:userId
+│             DELETE FROM cart_items WHERE user_id = ?
 │
-├── Line 139 POST /api/orders
-│            INSERT INTO orders → INSERT INTO order_items → DELETE cart
+├── Line 139  POST /api/orders
+│             INSERT INTO orders → INSERT INTO order_items → DELETE cart
 │
-└── Line 163 GET /api/orders/:userId
-             SELECT ... JOIN order_items JOIN products WHERE user_id = ?
+└── Line 163  GET /api/orders/:userId
+              SELECT + JOIN order_items + JOIN products WHERE user_id = ?
 ```
 
 ---
 
-### Example Changes
+### Example — Add Product Search
 
-**Add search filter to GET /api/products:**
+Find line ~49 and replace the whole route:
+
 ```js
-// Find line ~49 and replace with:
 app.get('/api/products', (req, res) => {
-    const search = req.query.search;
+    const { search, category } = req.query;
+    let sql = 'SELECT * FROM products';
+    const params = [];
+
     if (search) {
-        db.query(`SELECT * FROM products WHERE name LIKE ?`, [`%${search}%`], (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json(rows);
-        });
-    } else {
-        db.query(`SELECT * FROM products`, (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json(rows);
-        });
+        sql += ' WHERE name LIKE ?';
+        params.push(`%${search}%`);
+    } else if (category) {
+        sql += ' WHERE category = ?';
+        params.push(category);
     }
+
+    db.query(sql, params, (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json(rows);
+    });
 });
-// Usage: GET /api/products?search=walk
 ```
 
-**Sort products by price:**
+Now these URLs work:
+```
+/api/products?search=walk       → products with "walk" in the name
+/api/products?category=Women    → only Women's products
+/api/products                   → all products
+```
+
+---
+
+### Example — Sort Products by Price
+
+Change line ~50 from:
 ```js
-// Change line ~50 from:
 db.query(`SELECT * FROM products`, ...
-// To:
+```
+To:
+```js
 db.query(`SELECT * FROM products ORDER BY price ASC`, ...
 ```
 
-**Filter products by category:**
-```js
-db.query(`SELECT * FROM products WHERE category = ?`, [req.query.category], ...
-// Usage: GET /api/products?category=Women
-```
+---
+
+## SECTION 12 — Troubleshooting — Every Error Explained
 
 ---
 
-## SECTION 10 — Troubleshooting — Every Error Explained
-
-### Error: `MySQL connection failed: Access denied for user 'root'`
+### `MySQL connection failed: Access denied for user 'root'`
 
 **Cause:** Wrong password in `backend/database.js`
 
 **Fix:**
 1. Open `backend/database.js`
-2. Find: `password: 'saram'`
-3. Change it to your actual MySQL root password
-4. Save → restart server
+2. Find `password: 'saram'`
+3. Change to your real MySQL root password
+4. Save → restart server (`Ctrl+C` → `node server.js`)
 
-**How to find your MySQL password:**
-If you forgot it, open MySQL Workbench → try connecting with different passwords.
-If completely forgotten, MySQL password reset requires stopping the service and
-using `--skip-grant-tables` mode (search "reset MySQL root password Windows").
+**To check your password:** Open MySQL Workbench → try connecting.
+If Workbench connects, that password is correct.
 
 ---
 
-### Error: `MySQL connection failed: connect ECONNREFUSED 127.0.0.1:3306`
+### `MySQL connection failed: connect ECONNREFUSED 127.0.0.1:3306`
 
-**Cause:** MySQL server is not running
+**Cause:** MySQL server is not running at all
 
 **Fix:**
-1. Press Win key → search "Services"
-2. Find `MySQL80`
+1. Press Windows key → search "Services"
+2. Find `MySQL80` in the list
 3. Right-click → Start
 4. Wait 10 seconds
-5. Try `node server.js` again
+5. Run `node server.js` again
 
 ---
 
-### Error: `MySQL connection failed: Unknown database 'sneakora_db'`
+### `Cannot find module 'mysql2'`
 
-**Cause:** This should not happen anymore — the code creates it automatically.
-But if it does, it means the `CREATE DATABASE` query failed silently.
-
-**Fix:**
-Open MySQL Workbench and run:
-```sql
-CREATE DATABASE sneakora_db;
-```
-Then restart the server.
-
----
-
-### Error: `Cannot find module 'mysql2'`
-
-**Cause:** `npm install` was not run
+**Cause:** You haven't run `npm install` yet
 
 **Fix:**
 ```bash
@@ -1330,9 +1569,9 @@ npm install
 
 ---
 
-### Error: `Port 3000 already in use`
+### `Port 3000 already in use`
 
-**Cause:** An old `node server.js` process is still running in the background
+**Cause:** An old `node server.js` is still running in the background
 
 **Fix:**
 ```bash
@@ -1342,60 +1581,69 @@ Then restart: `node server.js`
 
 ---
 
-### Error: `ER_NO_REFERENCED_ROW_2`
+### `ER_NO_REFERENCED_ROW_2` (Cannot add or update a child row)
 
-**Cause:** You tried to insert a row that references a non-existent parent.
-Example: adding a cart item for `user_id = 99` but user 99 doesn't exist.
+**Cause:** Foreign key violation. You tried to insert a row that references
+a record that doesn't exist.
+
+**Example:** Adding a cart item for `user_id = 99` but user 99 doesn't exist.
 
 **Fix:** Create the parent record first.
-- For cart: user must exist (register first)
-- For order_items: order must exist first
-- For orders: user must exist first
+- Cart item → user must exist first → register via app
+- Order item → order must exist first → place order first
+- Order → user must exist first → register first
 
 ---
 
-### Error: `ER_ROW_IS_REFERENCED_2`
+### `ER_ROW_IS_REFERENCED_2` (Cannot delete or update a parent row)
 
 **Cause:** You tried to delete a row that other rows are pointing to.
-Example: deleting a product that exists in `order_items`.
 
-**Fix:** Delete the child rows first (see Scenario F and C in Section 8).
+**Example:** Deleting a product that exists in `order_items`.
 
----
-
-### Problem: Products page is empty
-
-**Cause:** Products table has no rows
-
-**Fix:** Add products via Admin panel at `http://localhost:3000/admin.html`
-or run the INSERT SQL from Section 2.
+**Fix:** Delete the child rows first:
+```sql
+DELETE FROM cart_items  WHERE product_id = X;
+DELETE FROM order_items WHERE product_id = X;
+DELETE FROM products    WHERE id = X;
+```
 
 ---
 
-### Problem: Login fails with correct password
+### Products Page is Empty
 
-**Cause:** User was added manually via SQL with a plain-text password.
-The app expects bcrypt-hashed passwords.
+**Cause:** Products table has no rows.
 
-**Fix:** Always register users through the app's Register form, not raw SQL.
-The app hashes passwords before saving them.
+**Fix:** Go to `http://localhost:3000/admin.html` and add products,
+OR run the INSERT SQL from Section 2 in MySQL Workbench.
 
 ---
 
-### Problem: Server starts but only one line appears
+### Login Fails Even Though I Just Registered
+
+**Cause 1:** User was added manually via SQL with a plain-text password.
+bcrypt cannot match a plain-text password against a hashed one.
+
+**Fix:** Register through the app's Register form — not via raw SQL.
+
+**Cause 2:** Wrong email or password typed.
+
+---
+
+### Server Starts but No MySQL Lines Appear
 
 ```
 Server running on http://localhost:3000
-(nothing else)
+(nothing about MySQL)
 ```
 
-**Cause:** Database connection is failing silently or hasn't completed yet.
-Look for a line below it — there may be a delayed error message.
+**Cause:** The database connection is still failing silently or asynchronously.
 
-**Fix:** Check that:
-1. MySQL is running
-2. Password in `database.js` is correct
-3. Run `node server.js` again and watch closely for the "Connected to MySQL." line
+**Fix:**
+1. Wait 3 seconds — the MySQL messages sometimes appear after the server line
+2. Check the password in `database.js`
+3. Check MySQL80 is Running in Services
+4. Look for an error message right after the server line
 
 ---
 
@@ -1412,13 +1660,13 @@ Look for a line below it — there may be a delayed error message.
 │ role     │         │ created_at  │         └──────────────┘  │
 └──────────┘         └─────────────┘                           │
      │                                                          │
-     │  1:many        ┌─────────────┐         ┌───────────────┘
-     └───────────────>│ cart_items  │         │
-                      │             │    ┌────┘  ┌──────────────┐
-                      │ id          │    │       │   products   │
-                      │ user_id ────┘    └──────>│              │
-                      │ product_id ────────────> │ id           │
-                      │ added_at                 │ name         │
+     │  1:many        ┌─────────────┐                          │
+     └───────────────>│ cart_items  │         ┌────────────────┘
+                      │             │         │  ┌──────────────┐
+                      │ id          │         └─>│   products   │
+                      │ user_id     │            │              │
+                      │ product_id ─────────────>│ id           │
+                      │ added_at    │            │ name         │
                       └─────────────┘            │ price        │
                                                  │ category     │
                                                  │ image        │
@@ -1431,52 +1679,63 @@ Look for a line below it — there may be a delayed error message.
 ## Quick Reference Card
 
 ```
-═══════════════════════════════════════════════════
+═══════════════════════════════════════════════════════
   FIRST TIME SETUP
-═══════════════════════════════════════════════════
-  1. Install MySQL Server + Workbench
+═══════════════════════════════════════════════════════
+  1. Install MySQL + Node.js
   2. Open backend/database.js
-  3. Change password: 'saram' to your password
+  3. Change: password: 'saram'  →  password: 'YOUR PASSWORD'
   4. Run: npm install
   5. Run: node server.js
-  → Tables create automatically
+  → Tables create automatically, no SQL needed
 
-═══════════════════════════════════════════════════
+═══════════════════════════════════════════════════════
   EVERY TIME YOU START
-═══════════════════════════════════════════════════
-  1. Check MySQL80 is Running (Services)
+═══════════════════════════════════════════════════════
+  1. Services → MySQL80 must say "Running"
   2. node server.js
   3. Open http://localhost:3000
 
-═══════════════════════════════════════════════════
-  VIEW DATA
-═══════════════════════════════════════════════════
-  MySQL Workbench → sneakora_db → Tables
-  → Right-click any table → Select Rows
+═══════════════════════════════════════════════════════
+  WHERE ARE MY TABLES?
+═══════════════════════════════════════════════════════
+  MySQL Workbench
+    → Local instance MySQL80
+    → Left panel: SCHEMAS → sneakora_db → Tables
+    → Right-click any table → Select Rows
 
-═══════════════════════════════════════════════════
+═══════════════════════════════════════════════════════
   QUICK QUERIES
-═══════════════════════════════════════════════════
+═══════════════════════════════════════════════════════
   USE sneakora_db;
-  SELECT * FROM products;
-  SELECT * FROM users;
-  SELECT * FROM orders;
+  SELECT * FROM products;       ← all shoes
+  SELECT * FROM users;          ← all accounts
+  SELECT * FROM orders;         ← all purchases
+  SELECT * FROM order_items;    ← items per order
+  SELECT * FROM cart_items;     ← saved cart items
 
-═══════════════════════════════════════════════════
-  MODIFY A QUERY IN CODE
-═══════════════════════════════════════════════════
-  1. Open server.js → find the route (Section 9 map)
-  2. Edit the SQL in backticks
-  3. Save → Ctrl+C → node server.js
+═══════════════════════════════════════════════════════
+  WHAT WRITES TO MYSQL?
+═══════════════════════════════════════════════════════
+  Register        → INSERT users
+  Add to Cart     → localStorage only (no MySQL)
+  Checkout        → INSERT orders + INSERT order_items
+  Admin add prod  → INSERT products
 
-═══════════════════════════════════════════════════
-  SAFE DELETE ORDER
-═══════════════════════════════════════════════════
+═══════════════════════════════════════════════════════
+  CHANGE A QUERY
+═══════════════════════════════════════════════════════
+  server.js → find the route → edit SQL in backticks
+  Save → Ctrl+C → node server.js
+
+═══════════════════════════════════════════════════════
+  SAFE DELETE (correct order)
+═══════════════════════════════════════════════════════
   USE sneakora_db;
   DELETE FROM cart_items WHERE user_id = X;
   DELETE FROM order_items WHERE order_id IN
     (SELECT id FROM orders WHERE user_id = X);
   DELETE FROM orders WHERE user_id = X;
   DELETE FROM users WHERE id = X;
-═══════════════════════════════════════════════════
+═══════════════════════════════════════════════════════
 ```
