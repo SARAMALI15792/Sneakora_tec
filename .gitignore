@@ -29,3 +29,14 @@ logs/
 # Build outputs
 dist/
 build/
+.next/
+
+# Prisma
+prisma/migrations/
+
+# Generated
+generated/
+
+# Old reference files
+package.json.old
+package-lock.json.old
