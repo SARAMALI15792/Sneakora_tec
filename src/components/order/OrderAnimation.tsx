@@ -222,7 +222,7 @@ export function OrderAnimation({ order }: { order: Order }) {
               className="mt-8 flex justify-center gap-4"
             >
               <Link
-                href="/orders"
+                href="/profile/orders"
                 className="inline-flex h-11 items-center px-6 text-xs font-semibold uppercase tracking-widest border border-border hover:bg-muted transition-all duration-300 active:scale-[0.98]"
               >
                 View Orders

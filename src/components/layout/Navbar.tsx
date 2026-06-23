@@ -116,9 +116,13 @@ export function Navbar() {
                     <User className="size-4" />
                     Profile
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push("/orders")}>
+                  <DropdownMenuItem onClick={() => router.push("/profile/orders")}>
                     <Package className="size-4" />
                     Orders
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/wishlist")}>
+                    <Heart className="size-4" />
+                    Wishlist
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} variant="destructive">
@@ -185,7 +189,8 @@ export function Navbar() {
               ...(session?.user
                 ? [
                     { href: "/profile", label: "Profile" },
-                    { href: "/orders", label: "Orders" },
+                    { href: "/profile/orders", label: "Orders" },
+                    { href: "/wishlist", label: "Wishlist" },
                   ]
                 : [{ href: "/sign-in", label: "Sign In" }]),
             ].map((link, i) => (

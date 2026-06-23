@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { X, ChevronLeft, ChevronRight, Heart, ShoppingBag } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { WishlistButton } from "@/components/product/WishlistButton";
 
 type Product = {
   id: string;
@@ -247,12 +248,7 @@ export function ProductDetails({ product }: { product: Product }) {
               <ShoppingBag className="size-4" />
               {adding ? "Adding..." : "Add to Cart"}
             </button>
-            <button
-              className="inline-flex h-12 w-12 items-center justify-center border border-border transition-all duration-300 hover:bg-muted active:scale-[0.98]"
-              onClick={() => {}}
-            >
-              <Heart className="size-4" />
-            </button>
+            <WishlistButton productId={product.id} />
           </div>
         </div>
       </div>

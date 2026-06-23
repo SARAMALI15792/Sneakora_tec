@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import prisma from "@/lib/db";
 import { ProductDetails } from "@/components/product/ProductDetails";
+import { ReviewForm } from "@/components/product/ReviewForm";
 
 type Params = Promise<{ id: string }>;
 
@@ -58,16 +59,16 @@ export default async function ProductPage({ params }: { params: Params }) {
 
         <ProductDetails product={serialized} />
 
-        {product.reviews.length > 0 && (
-          <div className="mx-auto mt-20 max-w-2xl">
-            <div className="border-t border-border pt-10">
-              <p className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
-                Customer Reviews
-              </p>
-              <h2 className="font-heading mt-2 text-2xl font-bold">
-                {product.reviews.length} review{product.reviews.length !== 1 ? "s" : ""}
-              </h2>
+        <div className="mx-auto mt-20 max-w-2xl">
+          <div className="border-t border-border pt-10">
+            <p className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
+              Customer Reviews
+            </p>
+            <h2 className="font-heading mt-2 text-2xl font-bold">
+              {product.reviews.length} review{product.reviews.length !== 1 ? "s" : ""}
+            </h2>
 
+            {product.reviews.length > 0 && (
               <div className="mt-8 space-y-8">
                 {product.reviews.map((review) => (
                   <div key={review.id} className="border-b border-border pb-6">
@@ -93,9 +94,16 @@ export default async function ProductPage({ params }: { params: Params }) {
                   </div>
                 ))}
               </div>
+            )}
+
+            <div className="mt-10 border-t border-border pt-8">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-semibold mb-4">
+                Write a Review
+              </p>
+              <ReviewForm productId={product.id} />
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
