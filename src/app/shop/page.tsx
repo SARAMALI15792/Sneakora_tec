@@ -123,11 +123,18 @@ export default function ShopPage() {
       params.set("page", page.toString());
 
       const res = await fetch(`/api/products?${params.toString()}`);
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        console.error("Failed to fetch products:", res.status, text);
+        setProducts([]);
+        return;
+      }
       const data = await res.json();
-      setProducts(data.products);
-      setTotalPages(data.pagination.totalPages);
+      setProducts(data.products ?? []);
+      setTotalPages(data.pagination?.totalPages ?? 1);
     } catch (error) {
       console.error("Failed to fetch products:", error);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
