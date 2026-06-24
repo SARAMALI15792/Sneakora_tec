@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth, isAdmin } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { z } from "zod";
 

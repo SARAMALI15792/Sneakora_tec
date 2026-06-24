@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
-import { Eye, Trash2, AlertCircle, RotateCw } from "lucide-react";
+import { Trash2, AlertCircle, RotateCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProductCard } from "@/components/product/ProductCard";
 
@@ -52,6 +51,7 @@ export function RecentlyViewed() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- valid async init with abort controller
     fetchRecentlyViewed();
     return () => abortRef.current?.abort();
   }, []);

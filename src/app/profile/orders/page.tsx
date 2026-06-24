@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import Link from "next/link";
+import Image from "next/image";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { Package, ChevronRight } from "lucide-react";
@@ -14,8 +15,10 @@ const statusStyles: Record<string, string> = {
 
 export default async function OrdersPage() {
   const session = await auth.api.getSession({ headers: await headers() });
+  console.log("[ProfileOrders] Session:", session?.user?.id, session?.user?.email);
 
   if (!session) {
+    console.log("[ProfileOrders] No session - user needs to sign in");
     return (
       <div className="flex min-h-[60dvh] items-center justify-center pt-20">
         <p className="text-sm text-muted-foreground">Please sign in.</p>
@@ -34,6 +37,8 @@ export default async function OrdersPage() {
     },
     orderBy: { createdAt: "desc" },
   });
+
+  console.log(`[ProfileOrders] Found ${orders.length} orders for user ${session.user.id}`);
 
   return (
     <div className="pt-20">
@@ -80,13 +85,15 @@ export default async function OrdersPage() {
                     {order.items.slice(0, 3).map((item) => (
                       <div
                         key={item.id}
-                        className="size-12 overflow-hidden rounded-lg border-2 border-background bg-muted"
+                        className="relative size-12 overflow-hidden rounded-lg border-2 border-background bg-muted"
                       >
                         {item.product.images[0] ? (
-                          <img
+                          <Image
                             src={item.product.images[0]}
                             alt={item.product.name}
-                            className="h-full w-full object-cover"
+                            fill
+                            sizes="48px"
+                            className="object-cover"
                           />
                         ) : (
                           <div className="flex h-full items-center justify-center text-lg opacity-10">👟</div>

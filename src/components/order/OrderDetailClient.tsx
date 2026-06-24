@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
@@ -87,7 +87,6 @@ function formatDate(dateStr: string) {
 }
 
 export function OrderDetailClient({ order: initialOrder }: { order: ClientOrder }) {
-  const router = useRouter();
   const [order, setOrder] = useState(initialOrder);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
@@ -284,13 +283,15 @@ export function OrderDetailClient({ order: initialOrder }: { order: ClientOrder 
                 >
                   <Link
                     href={`/shop/${item.product.slug || item.productId}`}
-                    className="size-16 shrink-0 overflow-hidden rounded-xl bg-muted ring-1 ring-border/50"
+                    className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-muted ring-1 ring-border/50"
                   >
                     {item.product.images[0] ? (
-                      <img
+                      <Image
                         src={item.product.images[0]}
                         alt={item.product.name}
-                        className="h-full w-full object-cover"
+                        fill
+                        sizes="64px"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-2xl opacity-10">👟</div>

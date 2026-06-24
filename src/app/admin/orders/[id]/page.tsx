@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 interface OrderItem {
@@ -26,17 +27,9 @@ interface Order {
 }
 
 const statuses = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
-const statusColors: Record<string, string> = {
-  pending: "bg-amber-500/10 text-amber-500 border-amber-500/20",
-  confirmed: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-  shipped: "bg-purple-500/10 text-purple-500 border-purple-500/20",
-  delivered: "bg-green-500/10 text-green-500 border-green-500/20",
-  cancelled: "bg-red-500/10 text-red-500 border-red-500/20",
-};
 
 export default function AdminOrderDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -78,8 +71,6 @@ export default function AdminOrderDetailPage() {
     return <div className="text-center py-16 text-muted-foreground">Order not found.</div>;
   }
 
-  const nextStatuses = statuses.slice(0, statuses.indexOf(order.status) + 1);
-
   const itemVariants = {
     hidden: { y: 15, opacity: 0 },
     visible: { y: 0, opacity: 1, transition: { type: "spring" as const, damping: 20, stiffness: 100 } },
@@ -111,9 +102,9 @@ export default function AdminOrderDetailPage() {
             <div className="space-y-3">
               {order.items.map((item) => (
                 <div key={item.id} className="flex items-center gap-3 py-2 border-b border-border/30 last:border-0">
-                  <div className="size-12 rounded-lg bg-foreground/5 flex items-center justify-center overflow-hidden shrink-0">
+                  <div className="size-12 rounded-lg bg-foreground/5 flex items-center justify-center overflow-hidden shrink-0 relative">
                     {item.product.images[0] ? (
-                      <img src={item.product.images[0]} alt="" className="size-full object-cover" />
+                      <Image src={item.product.images[0]} alt="" fill sizes="48px" className="object-cover" />
                     ) : (
                       <span className="text-xs text-muted-foreground">—</span>
                     )}

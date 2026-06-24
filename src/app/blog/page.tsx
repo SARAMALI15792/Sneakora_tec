@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowRight, Calendar } from "lucide-react";
 
@@ -78,7 +79,7 @@ export default function BlogPage() {
           </div>
         ) : (
           <div className="grid gap-8">
-            {posts.map((post, i) => (
+            {posts.map((post) => (
               <motion.article
                 key={post.id}
                 variants={itemVariants}
@@ -86,8 +87,8 @@ export default function BlogPage() {
               >
                 <Link href={`/blog/${post.slug}`} className="flex flex-col sm:flex-row">
                   {post.image && (
-                    <div className="sm:w-48 h-48 sm:h-auto shrink-0">
-                      <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+                    <div className="relative sm:w-48 h-48 sm:h-auto shrink-0">
+                      <Image src={post.image} alt={post.title} fill sizes="192px" className="w-full h-full object-cover" />
                     </div>
                   )}
                   <div className="flex-1 p-6 flex flex-col justify-center">

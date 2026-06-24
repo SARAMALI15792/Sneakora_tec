@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 
 type OrderItem = {
   id: string;
@@ -301,18 +302,24 @@ function BackgroundDecorations() {
       />
 
       {/* Floating route dots */}
-      {[
-        { top: "15%", left: "5%", size: "size-2", delay: 0 },
-        { top: "35%", left: "3%", size: "size-1.5", delay: 2 },
-        { top: "55%", right: "4%", size: "size-2", delay: 1 },
-        { top: "75%", left: "7%", size: "size-1", delay: 3 },
-        { top: "20%", right: "6%", size: "size-1.5", delay: 1.5 },
-        { top: "60%", left: "2%", size: "size-1", delay: 2.5 },
-      ].map((dot, i) => (
+      {(
+        [
+          { top: "15%", left: "5%", size: "size-2", delay: 0 },
+          { top: "35%", left: "3%", size: "size-1.5", delay: 2 },
+          { top: "55%", right: "4%", size: "size-2", delay: 1 },
+          { top: "75%", left: "7%", size: "size-1", delay: 3 },
+          { top: "20%", right: "6%", size: "size-1.5", delay: 1.5 },
+          { top: "60%", left: "2%", size: "size-1", delay: 2.5 },
+        ] as Array<{ top: string; left?: string; right?: string; size: string; delay: number }>
+      ).map((dot) => (
         <motion.div
-          key={i}
+          key={`${dot.top}-${dot.left ?? dot.right}`}
           className={`absolute ${dot.size} rounded-full bg-accent/10`}
-          style={{ top: dot.top, left: dot.left, right: dot.right as any }}
+          style={{
+            top: dot.top,
+            left: dot.left,
+            right: dot.right,
+          }}
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: [0, 0.6, 0], scale: [0, 1, 0], y: [0, -20] }}
           transition={{ duration: 3, delay: dot.delay, repeat: Infinity, ease: "easeInOut" }}
@@ -493,9 +500,11 @@ export function OrderAnimation({ order }: { order: Order }) {
                     className="flex items-center gap-4 px-5 py-4"
                   >
                     {item.product.images[0] ? (
-                      <img
+                      <Image
                         src={item.product.images[0]}
                         alt={item.product.name}
+                        width={56}
+                        height={56}
                         className="size-14 rounded-lg object-cover bg-muted"
                       />
                     ) : (

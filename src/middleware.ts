@@ -31,6 +31,8 @@ export const config = {
   runtime: "nodejs",
   matcher: [
     "/profile/:path*",
+    "/profile/orders",
+    "/profile/orders/:path*",
     "/wishlist",
     "/orders/:path*",
     "/checkout",

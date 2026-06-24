@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, Calendar } from "lucide-react";
 import prisma from "@/lib/db";
 
@@ -48,7 +49,7 @@ export default async function BlogPostPage({ params }: { params: Params }) {
         )}
         {post.image && (
           <div className="mt-8 rounded-xl overflow-hidden">
-            <img src={post.image} alt={post.title} className="w-full aspect-video object-cover" />
+            <Image src={post.image} alt={post.title} width={1200} height={675} sizes="(max-width: 768px) 100vw, 672px" className="w-full aspect-video object-cover" />
           </div>
         )}
         <div className="mt-8 prose prose-sm dark:prose-invert max-w-none">

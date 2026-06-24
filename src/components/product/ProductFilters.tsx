@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 const categories = [
   { value: "", label: "All" },
   { value: "men", label: "Men" },
@@ -101,12 +103,12 @@ export function ProductFilters({
 
       {/* Clear */}
       {hasFilters && (
-        <a
+        <Link
           href="/shop"
           className="inline-block text-[10px] uppercase tracking-[0.3em] text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
         >
           Clear Filters
-        </a>
+        </Link>
       )}
     </div>
   );

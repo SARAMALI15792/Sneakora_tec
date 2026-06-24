@@ -438,6 +438,11 @@ The following skills are installed in `.agents/skills/` and available for use:
 | `improve-codebase-architecture` | skills.sh | Refactoring and improving project structure |
 | `next-best-practices` | skills.sh | Next.js specific patterns and optimizations |
 | `organization-best-practices` | skills.sh | Multi-tenant organization support |
+| `rag-implementation` | skills.sh | Building RAG systems — vector DBs, embeddings, retrieval, reranking, LangGraph |
+| `rag-eval` | skills.sh | Iterating and testing RAG pipelines with structured evals, gold-sets, cost tracking |
+| `react-email` | skills.sh | React Email rendering — JSON specs to HTML/text emails via @react-email/components |
+| `email-service-integration` | skills.sh | Email provider integration — SMTP, SendGrid, Mailgun, templates, validation |
+| `email-smtp-send` | skills.sh | SMTP sending with attachments, IMAP sent-sync, machine-readable JSON output |
 | `redesign-existing-projects` | skills.sh | Transforming existing codebases into modern stacks |
 | `shadcn` | skills.sh | Using shadcn/ui components, customization |
 | `supabase-postgres-best-practices` | skills.sh | PostgreSQL best practices (also applies to Neon) |

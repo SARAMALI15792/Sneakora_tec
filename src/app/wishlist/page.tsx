@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Heart, ShoppingBag, Trash2, ArrowLeft } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,6 +37,7 @@ export default function WishlistPage() {
 
   useEffect(() => {
     if (!session) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- conditional guard pattern
       setLoading(false);
       return;
     }
@@ -142,13 +144,15 @@ export default function WishlistPage() {
             <div key={item.id} className="group relative">
               <Link
                 href={`/shop/${item.product.slug || item.product.id}`}
-                className="block aspect-[4/5] overflow-hidden bg-muted"
+                className="relative block aspect-[4/5] overflow-hidden bg-muted"
               >
                 {item.product.images[0] ? (
-                  <img
+                  <Image
                     src={item.product.images[0]}
                     alt={item.product.name}
-                    className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-6xl opacity-10">👟</div>

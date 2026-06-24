@@ -1,15 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Filter, X, Search, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Filter, Search } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { RecentlyViewed } from "@/components/product/RecentlyViewed";
+
+type Product = {
+  id: string;
+  name: string;
+  slug: string;
+  price: number | { toString(): string };
+  compareAt: number | { toString(): string } | null;
+  images: string[];
+  category: string;
+  colors?: string[];
+  stock?: number;
+  featured?: boolean;
+};
 
 const categories = [
   { name: "Men", value: "men" },
@@ -93,7 +104,7 @@ const buttonVariants = {
 };
 
 export default function ShopPage() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -106,10 +117,15 @@ export default function ShopPage() {
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    fetchProducts();
-  }, [searchTerm, selectedCategories, selectedSizes, selectedColors, priceRange, sortBy, page]);
+    const params = new URLSearchParams(window.location.search);
+    const cat = params.get("category");
+    if (cat) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- URL param initialization
+      setSelectedCategories(cat.split(",").filter(Boolean));
+    }
+  }, []);
 
-  async function fetchProducts() {
+  const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -138,7 +154,12 @@ export default function ShopPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [searchTerm, selectedCategories, selectedSizes, selectedColors, priceRange, sortBy, page]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async data fetch pattern with useCallback
+    fetchProducts();
+  }, [fetchProducts]);
 
   function toggleCategory(category: string) {
     setSelectedCategories((prev) =>

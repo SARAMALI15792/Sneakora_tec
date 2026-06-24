@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { Plus, Search, Edit, Trash2, MoreHorizontal } from "lucide-react";
@@ -169,12 +170,14 @@ export default function AdminProductsPage() {
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="size-10 rounded-lg bg-foreground/5 flex items-center justify-center overflow-hidden shrink-0">
+                          <div className="size-10 rounded-lg bg-foreground/5 flex items-center justify-center overflow-hidden shrink-0 relative">
                             {product.images[0] ? (
-                              <img
+                              <Image
                                 src={product.images[0]}
                                 alt=""
-                                className="size-full object-cover"
+                                fill
+                                sizes="40px"
+                                className="object-cover"
                               />
                             ) : (
                               <span className="text-xs text-muted-foreground">—</span>

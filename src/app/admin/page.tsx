@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   XAxis,
@@ -81,8 +79,6 @@ const statusColors: Record<string, string> = {
   delivered: "#22c55e",
   cancelled: "#ef4444",
 };
-
-const CHART_COLORS = ["#8b5cf6", "#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#ec4899"];
 
 export default function AdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);

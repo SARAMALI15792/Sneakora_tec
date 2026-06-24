@@ -7,7 +7,7 @@ import { authClient, useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 import {
   Check, ChevronRight, Loader2, ArrowLeft, RefreshCw,
-  Sparkles, Shirt, Ruler, Bell, Zap, Heart, Truck,
+  Sparkles, Bell, Zap, Heart, Truck,
 } from "lucide-react";
 
 const styleCategories = [

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
@@ -25,7 +26,6 @@ type ProductCardProps = {
 export function ProductCard({
   product,
   variant = "default",
-  showWishlist = true,
   onClick,
 }: ProductCardProps) {
   const price =
@@ -36,13 +36,6 @@ export function ProductCard({
       : product.compareAt;
   const imageUrl = product.images?.[0];
   const onSale = compareAt && compareAt > price;
-
-  const priceValue = typeof product.price === "object" ? Number(product.price) : product.price;
-  const compareAtValue = product.compareAt && typeof product.compareAt === "object"
-    ? Number(product.compareAt)
-    : product.compareAt;
-  const imageUrlValue = product.images?.[0];
-  const onSaleValue = compareAtValue && compareAtValue > priceValue;
 
   const handleClick = async () => {
     if (onClick) {
@@ -81,10 +74,12 @@ export function ProductCard({
           whileHover={{ scale: 1.05, transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] } }}
         >
         {imageUrl ? (
-          <img
+          <Image
             src={imageUrl}
             alt={product.name}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center">

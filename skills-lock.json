@@ -7,6 +7,36 @@
       "skillPath": "skills/deploy-to-vercel/SKILL.md",
       "computedHash": "d2b5bcc7c09fdb649129ffc7dd7b647ec1b155736974b974292675afd588cb39"
     },
+    "email-service-integration": {
+      "source": "aj-geddes/useful-ai-prompts",
+      "sourceType": "github",
+      "skillPath": "skills/email-service-integration/SKILL.md",
+      "computedHash": "0ff0b47218fa8a0690300368835b8d4c4a307117932d3a499e322eab30ab0b4c"
+    },
+    "email-smtp-send": {
+      "source": "tiangong-ai/skills",
+      "sourceType": "github",
+      "skillPath": "email-smtp-send/SKILL.md",
+      "computedHash": "1b0c4f0c9801fd07afd8f59c579e1b2c62186b47c672210f526fa5b57baab77d"
+    },
+    "rag-eval": {
+      "source": "glebis/claude-skills",
+      "sourceType": "github",
+      "skillPath": "rag-eval/SKILL.md",
+      "computedHash": "f3bbcee109550e544f6a93798166b93461c214df893ad2ad5b40c324dd3d383d"
+    },
+    "rag-implementation": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "skillPath": "plugins/llm-application-dev/skills/rag-implementation/SKILL.md",
+      "computedHash": "b2c65d9929448481586adb195214a14b35e3d9b6a2ad6f42b0013224985b4e2c"
+    },
+    "react-email": {
+      "source": "vercel-labs/json-render",
+      "sourceType": "github",
+      "skillPath": "skills/react-email/SKILL.md",
+      "computedHash": "fcdc6735efd9d8f4cfd8bd702608a77a6a312be0b5a4e8de58e47eba145045c3"
+    },
     "vercel-cli-with-tokens": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",

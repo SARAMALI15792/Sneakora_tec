@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import {
   Trash2,
   Minus,
   Plus,
-  ShoppingBag,
   ArrowLeft,
   ArrowRight,
   Lock,
@@ -19,7 +19,7 @@ import {
   AlertCircle,
   RotateCw,
 } from "lucide-react";
-import { authClient, useSession } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-client";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type CartItem = {
@@ -89,6 +89,7 @@ export default function CartPage() {
 
   useEffect(() => {
     if (authPending || !session) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async init pattern with guard
     fetchCart();
   }, [session, authPending, fetchCart]);
 
@@ -365,13 +366,15 @@ export default function CartPage() {
                               {/* Image */}
                               <Link
                                 href={`/shop/${item.product.id}`}
-                                className="size-28 shrink-0 overflow-hidden rounded-xl bg-muted ring-1 ring-border/30"
+                                className="relative size-28 shrink-0 overflow-hidden rounded-xl bg-muted ring-1 ring-border/30"
                               >
                                 {item.product.images[0] ? (
-                                  <img
+                                  <Image
                                     src={item.product.images[0]}
                                     alt={item.product.name}
-                                    className="h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-105"
+                                    fill
+                                    sizes="112px"
+                                    className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] hover:scale-105"
                                   />
                                 ) : (
                                   <div className="flex h-full items-center justify-center text-3xl opacity-10">👟</div>

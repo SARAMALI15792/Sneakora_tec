@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    console.log(`[Checkout] Creating order for user ${session.user.id}, cart has ${cartItems.length} items`);
     const order = await prisma.order.create({
       data: {
         userId: session.user.id,
@@ -90,6 +91,7 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+    console.log(`[Checkout] Order ${order.id} created for user ${session.user.id}, status: ${order.status}`);
 
     const stripe = getStripe();
 

@@ -1,13 +1,17 @@
 "use client";
 
+import Image from "next/image";
+
 export function CanvasScene() {
   return (
     <div className="h-full w-full overflow-hidden relative bg-[#1a1714] flex items-center justify-center">
       {/* Editorial photo */}
-      <img
+      <Image
         src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800&q=85&auto=format"
         alt=""
-        className="absolute inset-0 h-full w-full object-cover object-center"
+        fill
+        sizes="100vw"
+        className="object-cover object-center"
       />
 
       {/* Warm editorial overlays */}

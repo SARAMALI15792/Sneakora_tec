@@ -57,11 +57,9 @@ interface InputFieldProps {
   hasError: boolean;
   onChange: (value: string) => void;
   onBlur: () => void;
-  showPassword?: boolean;
-  onShowPasswordToggle?: () => void;
 }
 
-function InputField({ field, type, label, placeholder, value, error, isTouched, hasError, onChange, onBlur, showPassword, onShowPasswordToggle }: InputFieldProps) {
+function InputField({ field, type, label, placeholder, value, error, isTouched, hasError, onChange, onBlur }: InputFieldProps) {
   const [pwdVisible, setPwdVisible] = useState(false);
 
   return (

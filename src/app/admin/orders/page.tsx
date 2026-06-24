@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search, Eye } from "lucide-react";
 import Link from "next/link";
@@ -25,7 +24,6 @@ const statusColors: Record<string, string> = {
 };
 
 export default function AdminOrdersPage() {
-  const router = useRouter();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");

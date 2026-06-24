@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCart, Menu, X, User, LogOut, Package, Heart, Shirt } from "lucide-react";
+import { ShoppingCart, Menu, X, User, LogOut, Package, Heart } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
 import {
   DropdownMenu,
@@ -114,7 +114,11 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (!session?.user) { setCartCount(0); return; }
+    if (!session?.user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- conditional guard pattern
+      setCartCount(0);
+      return;
+    }
     function refetch() {
       fetch("/api/cart")
         .then((r) => r.json())
@@ -170,27 +174,18 @@ export function Navbar() {
           </motion.div>
 
           {/* Desktop nav */}
-          <motion.nav
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="hidden md:flex items-center gap-8"
-          >
-            {navLinks.map((link, index) => (
-              <motion.div
+          <nav className="hidden md:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <a
                 key={link.href}
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.95 }}
+                href={link.href}
+                onClick={(e) => { e.preventDefault(); window.location.assign(link.href); }}
+                className="nav-link text-sm tracking-wide"
               >
-                <Link
-                  href={link.href}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 tracking-wide"
-                >
-                  {link.label}
-                </Link>
-              </motion.div>
+                {link.label}
+              </a>
             ))}
-          </motion.nav>
+          </nav>
 
           {/* Actions */}
           <motion.div
@@ -252,7 +247,8 @@ export function Navbar() {
               </motion.div>
             )}
 
-            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>n              <Link
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+              <Link
                 href="/cart"
                 className="text-muted-foreground hover:text-foreground transition-colors duration-200 relative"
               >

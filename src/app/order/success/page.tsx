@@ -10,9 +10,11 @@ export default async function OrderSuccessPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const sessionId = sp.session_id;
   const orderId = sp.order_id;
+  console.log(`[OrderSuccess] session_id: ${sessionId}, order_id: ${orderId}`);
 
   let order = null;
   if (sessionId) {
+    console.log(`[OrderSuccess] Looking up order by stripeSessionId: ${sessionId}`);
     order = await prisma.order.findUnique({
       where: { stripeSessionId: sessionId },
       include: {
@@ -22,6 +24,7 @@ export default async function OrderSuccessPage({ searchParams }: PageProps) {
       },
     });
   } else if (orderId) {
+    console.log(`[OrderSuccess] Looking up order by id: ${orderId}`);
     order = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
@@ -31,6 +34,7 @@ export default async function OrderSuccessPage({ searchParams }: PageProps) {
       },
     });
   }
+  console.log(`[OrderSuccess] Found order:`, order ? `id=${order.id}, status=${order.status}, userId=${order.userId}` : "null");
 
   if (!order) {
     return (

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { X, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
+import Image from "next/image";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { WishlistButton } from "@/components/product/WishlistButton";
@@ -76,10 +77,12 @@ export function ProductDetails({ product }: { product: Product }) {
             className="group relative aspect-[4/5] w-full overflow-hidden bg-muted text-left"
           >
             {images[selectedImage] ? (
-              <img
+              <Image
                 src={images[selectedImage]}
                 alt={product.name}
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"
+                fill
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-105"
               />
             ) : (
               <div className="flex h-full items-center justify-center">
@@ -100,7 +103,13 @@ export function ProductDetails({ product }: { product: Product }) {
                       : "opacity-50 hover:opacity-100"
                   }`}
                 >
-                  <img src={img} alt={`${product.name} ${i + 1}`} className="absolute inset-0 h-full w-full object-cover" />
+                  <Image
+                    src={img}
+                    alt={`${product.name} ${i + 1}`}
+                    fill
+                    sizes="64px"
+                    className="object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -284,9 +293,11 @@ export function ProductDetails({ product }: { product: Product }) {
           )}
 
           <div className="relative max-h-[85vh] max-w-[85vw]">
-            <img
+            <Image
               src={images[selectedImage]}
               alt={product.name}
+              width={1200}
+              height={1200}
               className="max-h-[85vh] max-w-[85vw] object-contain"
             />
           </div>
