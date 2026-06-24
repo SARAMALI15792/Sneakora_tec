@@ -40,3 +40,7 @@ generated/
 # Old reference files
 package.json.old
 package-lock.json.old
+
+# API keys and sensitive files
+opencode.json
+claude.md
