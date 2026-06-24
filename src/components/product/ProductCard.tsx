@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
 type Product = {
@@ -9,12 +10,24 @@ type Product = {
   compareAt: number | { toString(): string } | null;
   images: string[];
   category: string;
-  colors: string[];
-  stock: number;
-  featured: boolean;
+  colors?: string[];
+  stock?: number;
+  featured?: boolean;
 };
 
-export function ProductCard({ product }: { product: Product }) {
+type ProductCardProps = {
+  product: Product;
+  variant?: "default" | "compact";
+  showWishlist?: boolean;
+  onClick?: () => void;
+};
+
+export function ProductCard({
+  product,
+  variant = "default",
+  showWishlist = true,
+  onClick,
+}: ProductCardProps) {
   const price =
     typeof product.price === "object" ? Number(product.price) : product.price;
   const compareAt =
@@ -24,10 +37,49 @@ export function ProductCard({ product }: { product: Product }) {
   const imageUrl = product.images?.[0];
   const onSale = compareAt && compareAt > price;
 
+  const priceValue = typeof product.price === "object" ? Number(product.price) : product.price;
+  const compareAtValue = product.compareAt && typeof product.compareAt === "object"
+    ? Number(product.compareAt)
+    : product.compareAt;
+  const imageUrlValue = product.images?.[0];
+  const onSaleValue = compareAtValue && compareAtValue > priceValue;
+
+  const handleClick = async () => {
+    if (onClick) {
+      onClick();
+    }
+
+    // Track recently viewed
+    try {
+      await fetch("/api/recently-viewed", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId: product.id }),
+      });
+    } catch (error) {
+      console.error("Failed to track recently viewed:", error);
+    }
+  };
+
   return (
-    <Link href={`/shop/${product.id}`} className="group block">
-      {/* Image */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-muted">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+      whileHover={{ scale: 1.02, transition: { duration: 0.3 } }}
+    >
+      <Link
+        href={`/shop/${product.id}`}
+        className="group block"
+        onClick={handleClick}
+      >
+        {/* Image */}
+        <motion.div
+          className={`relative overflow-hidden bg-muted ${
+            variant === "compact" ? "aspect-square" : "aspect-[4/5]"
+          }`}
+          whileHover={{ scale: 1.05, transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] } }}
+        >
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -58,42 +110,53 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="absolute bottom-3 right-3 flex size-9 items-center justify-center bg-background text-foreground opacity-0 translate-y-2 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:opacity-100 group-hover:translate-y-0">
           <ArrowUpRight className="size-4" />
         </div>
-      </div>
+      </motion.div>
 
       {/* Info */}
-      <div className="mt-3.5">
-        <p className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground">
-          {product.category}
-        </p>
-        <h3 className="font-heading mt-1 text-[15px] font-bold leading-snug transition-colors duration-200 group-hover:text-accent">
+      <div className={variant === "compact" ? "mt-2" : "mt-3.5"}>
+        {variant !== "compact" && (
+          <p className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground">
+            {product.category}
+          </p>
+        )}
+        <h3
+          className={`font-heading mt-1 font-bold leading-snug transition-colors duration-200 group-hover:text-accent ${variant === "compact" ? "text-sm" : "text-[15px]"}`}
+        >
           {product.name}
         </h3>
         <div className="mt-1.5 flex items-baseline gap-2">
-          <span className="text-sm font-bold">${price.toFixed(2)}</span>
+          <span
+            className={`font-bold ${variant === "compact" ? "text-base" : "text-sm"}`}
+          >
+            ${Number(price).toFixed(2)}
+          </span>
           {onSale && (
             <span className="text-xs text-muted-foreground line-through">
-              ${compareAt.toFixed(2)}
+              ${Number(compareAt).toFixed(2)}
             </span>
           )}
         </div>
 
-        {/* Colors */}
-        <div className="mt-2 flex items-center gap-1.5">
-          {product.colors.slice(0, 4).map((color) => (
-            <span
-              key={color}
-              className="size-2.5 rounded-full ring-1 ring-border"
-              style={{ backgroundColor: colorToHex(color) }}
-            />
-          ))}
-          {product.colors.length > 4 && (
-            <span className="text-[10px] text-muted-foreground">
-              +{product.colors.length - 4}
-            </span>
-          )}
-        </div>
+        {/* Colors - only for default variant */}
+        {variant !== "compact" && product.colors && (
+          <div className="mt-2 flex items-center gap-1.5">
+            {product.colors.slice(0, 4).map((color) => (
+              <span
+                key={color}
+                className="size-2.5 rounded-full ring-1 ring-border"
+                style={{ backgroundColor: colorToHex(color) }}
+              />
+            ))}
+            {product.colors.length > 4 && (
+              <span className="text-[10px] text-muted-foreground">
+                +{product.colors.length - 4}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </Link>
+    </motion.div>
   );
 }
 

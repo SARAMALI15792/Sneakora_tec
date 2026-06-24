@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, Menu, X, User, LogOut, Package, Heart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ShoppingCart, Menu, X, User, LogOut, Package, Heart, Shirt } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
 import {
   DropdownMenu,
@@ -22,6 +23,82 @@ const navLinks = [
   { href: "/shop?category=women", label: "Women" },
   { href: "/shop?category=running", label: "Running" },
 ];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: -20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: "spring" as const,
+      damping: 15,
+      stiffness: 100,
+    },
+  },
+};
+
+const buttonVariants = {
+  hover: {
+    scale: 1.05,
+    transition: {
+      type: "spring" as const,
+      stiffness: 400,
+      damping: 10,
+    },
+  },
+  tap: {
+    scale: 0.95,
+    transition: {
+      type: "spring" as const,
+      stiffness: 500,
+      damping: 20,
+    },
+  },
+};
+
+const mobileMenuVariants = {
+  hidden: { opacity: 0, y: "-100%" },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      damping: 20,
+      stiffness: 100,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: "-100%",
+    transition: {
+      duration: 0.3,
+    },
+  },
+};
+
+const mobileLinkVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: (i: number) => ({
+    opacity: 1,
+    x: 0,
+    transition: {
+      delay: i * 0.05,
+      type: "spring" as const,
+      damping: 15,
+      stiffness: 100,
+    },
+  }),
+};
 
 export function Navbar() {
   const router = useRouter();
@@ -57,52 +134,85 @@ export function Navbar() {
 
   return (
     <>
-      <header
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
         style={{ viewTransitionName: "site-header" }}
-        className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 ${
-          scrolled
-            ? "bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-sm"
-            : "bg-transparent"
+        className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 ${scrolled
+          ? "bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-sm"
+          : "bg-transparent"
         }`}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <span className="flex h-7 w-7 items-center justify-center bg-foreground text-background text-xs font-bold">
-              S
-            </span>
-            <span className="font-heading text-base font-bold tracking-wide">
-              Sneakora
-            </span>
-          </Link>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link href="/" className="flex items-center gap-2.5 shrink-0">
+              <motion.span
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="flex h-7 w-7 items-center justify-center bg-foreground text-background text-xs font-bold"
+              >
+                S
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="font-heading text-base font-bold tracking-wide"
+              >
+                Sneakora
+              </motion.span>
+            </Link>
+          </motion.div>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <Link
+          <motion.nav
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="hidden md:flex items-center gap-8"
+          >
+            {navLinks.map((link, index) => (
+              <motion.div
                 key={link.href}
-                href={link.href}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 tracking-wide"
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {link.label}
-              </Link>
+                <Link
+                  href={link.href}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-200 tracking-wide"
+                >
+                  {link.label}
+                </Link>
+              </motion.div>
             ))}
-          </nav>
+          </motion.nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-4">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="flex items-center gap-4"
+          >
             {session?.user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger className="hidden md:flex outline-none">
-                  <Avatar className="size-8 cursor-pointer">
-                    <AvatarFallback className="bg-muted text-xs font-medium">
-                      {session.user.name
-                        ?.split(" ")
-                        .map((n) => n[0])
-                        .join("")
-                        .toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
+                  <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                    <Avatar className="size-8 cursor-pointer">
+                      <AvatarFallback className="bg-muted text-xs font-medium">
+                        {session.user.name
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </motion.div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-44">
                   <DropdownMenuGroup>
@@ -132,96 +242,133 @@ export function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link
-                href="/sign-in"
-                className="hidden md:inline-flex h-8 items-center px-3 text-xs font-semibold uppercase tracking-widest bg-foreground text-background hover:opacity-90 transition-all"
-              >
-                Sign In
-              </Link>
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="/sign-in"
+                  className="hidden md:inline-flex h-8 items-center px-3 text-xs font-semibold uppercase tracking-widest bg-foreground text-background hover:opacity-90 transition-all"
+                >
+                  Sign In
+                </Link>
+              </motion.div>
             )}
-            <Link
-              href="/cart"
-              className="text-muted-foreground hover:text-foreground transition-colors duration-200 relative"
-            >
-              <ShoppingCart className="size-[18px]" />
-              {cartCount > 0 && (
-                <span className="absolute -right-1.5 -top-1.5 flex size-3.5 items-center justify-center rounded-full bg-accent text-[8px] font-bold text-accent-foreground">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-            <button
+
+            <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>n              <Link
+                href="/cart"
+                className="text-muted-foreground hover:text-foreground transition-colors duration-200 relative"
+              >
+                <ShoppingCart className="size-[18px]" />
+                {cartCount > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                    className="absolute -right-1.5 -top-1.5 flex size-3.5 items-center justify-center rounded-full bg-accent text-[8px] font-bold text-accent-foreground"
+                  >
+                    {cartCount}
+                  </motion.span>
+                )}
+              </Link>
+            </motion.div>
+
+            <motion.button
+              whileHover={{ scale: 1.1, rotate: 90 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => setMobileOpen(true)}
               className="md:hidden text-muted-foreground hover:text-foreground transition-colors duration-200"
               aria-label="Open menu"
             >
               <Menu className="size-[18px]" />
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-50 bg-background/98 backdrop-blur-2xl flex flex-col px-6 py-6"
-          style={{ transition: "opacity 300ms" }}
-        >
-          <div className="flex items-center justify-between">
-            <Link
-              href="/"
-              className="font-heading text-base font-bold tracking-wide"
-              onClick={() => setMobileOpen(false)}
-            >
-              Sneakora
-            </Link>
-            <button
-              onClick={() => setMobileOpen(false)}
-              className="text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <X className="size-5" />
-            </button>
-          </div>
-
-          <nav className="mt-16 flex flex-col gap-1">
-            {[
-              ...navLinks,
-              ...(session?.user
-                ? [
-                    { href: "/profile", label: "Profile" },
-                    { href: "/profile/orders", label: "Orders" },
-                    { href: "/wishlist", label: "Wishlist" },
-                  ]
-                : [{ href: "/sign-in", label: "Sign In" }]),
-            ].map((link, i) => (
-              <Link
-                key={link.href}
-                href={link.href}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            key="mobile-menu"
+            variants={mobileMenuVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="fixed inset-0 z-50 bg-background/98 backdrop-blur-2xl flex flex-col px-6 py-6"
+          >
+            <div className="flex items-center justify-between">
+              <motion.div variants={itemVariants}>
+                <Link
+                  href="/"
+                  className="font-heading text-base font-bold tracking-wide"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Sneakora
+                </Link>
+              </motion.div>
+              <motion.button
+                variants={buttonVariants}
+                whileHover="hover"
+                whileTap="tap"
                 onClick={() => setMobileOpen(false)}
-                className="font-heading text-4xl font-bold py-3 border-b border-border/40 hover:text-accent transition-colors duration-200"
-                style={{ transitionDelay: `${i * 40}ms` }}
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
-                {link.label}
-              </Link>
-            ))}
-            {session?.user && (
-              <button
-                onClick={() => {
-                  setMobileOpen(false);
-                  handleSignOut();
-                }}
-                className="flex items-center gap-2 font-heading text-4xl font-bold py-3 text-destructive text-left hover:text-accent transition-colors duration-200"
-              >
-                Sign Out
-              </button>
-            )}
-          </nav>
+                <X className="size-5" />
+              </motion.button>
+            </div>
 
-          <div className="mt-auto text-xs text-muted-foreground tracking-widest uppercase">
-            Premium Footwear Since 2024
-          </div>
-        </div>
-      )}
+            <motion.nav
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="mt-16 flex flex-col gap-1"
+            >
+              {[
+                ...navLinks,
+                ...(session?.user
+                  ? [
+                      { href: "/profile", label: "Profile" },
+                      { href: "/profile/orders", label: "Orders" },
+                      { href: "/wishlist", label: "Wishlist" },
+                    ]
+                  : [{ href: "/sign-in", label: "Sign In" }]),
+              ].map((link, i) => (
+                <motion.div
+                  key={link.href}
+                  variants={mobileLinkVariants}
+                  custom={i}
+                >
+                  <Link
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="font-heading text-4xl font-bold py-3 border-b border-border/40 hover:text-accent transition-colors duration-200"
+                  >
+                    {link.label}
+                  </Link>
+                </motion.div>
+              ))}
+              {session?.user && (
+                <motion.div variants={mobileLinkVariants} custom={navLinks.length + 3}>
+                  <button
+                    onClick={() => {
+                      setMobileOpen(false);
+                      handleSignOut();
+                    }}
+                    className="flex items-center gap-2 font-heading text-4xl font-bold py-3 text-destructive text-left hover:text-accent transition-colors duration-200"
+                  >
+                    Sign Out
+                  </button>
+                </motion.div>
+              )}
+            </motion.nav>
+
+            <motion.div
+              variants={itemVariants}
+              className="mt-auto text-xs text-muted-foreground tracking-widest uppercase"
+            >
+              Premium Footwear Since 2024
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

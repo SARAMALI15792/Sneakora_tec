@@ -1,4 +1,9 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
+import { Loader2, Check } from "lucide-react";
 
 const footerLinks = {
   Shop: [
@@ -20,19 +25,88 @@ const footerLinks = {
 };
 
 export function Footer() {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+
+  async function handleSubscribe(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        if (res.status === 409) {
+          toast.error("You're already subscribed!");
+        } else {
+          throw new Error(data.error);
+        }
+      } else {
+        setSubscribed(true);
+        toast.success("Subscribed!", { description: "Welcome to the Sneakora community." });
+      }
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <footer className="border-t border-border bg-background">
       <div className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid gap-12 lg:grid-cols-[1.5fr_1fr_1fr_1fr]">
-          {/* Brand */}
-          <div className="space-y-4">
-            <Link href="/" className="font-heading text-xl font-bold tracking-wide">
-              Sneakora
-            </Link>
-            <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
-              Premium sneakers for every step. Heritage craft meets modern performance.
-            </p>
-            <p className="pt-2 text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+          {/* Brand + Newsletter */}
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <Link href="/" className="font-heading text-xl font-bold tracking-wide">
+                Sneakora
+              </Link>
+              <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
+                Premium sneakers for every step. Heritage craft meets modern performance.
+              </p>
+            </div>
+
+            {/* Newsletter */}
+            <div className="space-y-3">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground font-semibold">
+                Newsletter
+              </p>
+              {subscribed ? (
+                <div className="flex items-center gap-2 text-sm text-green-500">
+                  <Check className="size-4" />
+                  Subscribed!
+                </div>
+              ) : (
+                <form onSubmit={handleSubscribe} className="flex gap-2">
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="flex-1 h-10 px-3 text-xs bg-transparent border border-border rounded-lg outline-none focus:border-foreground transition-colors"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="h-10 px-4 rounded-lg bg-foreground text-background text-[10px] font-semibold uppercase tracking-widest hover:opacity-90 transition-all disabled:opacity-50 flex items-center"
+                  >
+                    {loading ? <Loader2 className="size-3 animate-spin" /> : "Join"}
+                  </button>
+                </form>
+              )}
+              <p className="text-[10px] text-muted-foreground/60">
+                Get 10% off your first order. No spam, just drops.
+              </p>
+            </div>
+
+            <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
               Est. 2024
             </p>
           </div>

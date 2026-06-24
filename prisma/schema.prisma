@@ -13,15 +13,17 @@ model User {
   emailVerified Boolean  @default(false)
   image         String?
   role          String    @default("user")
+  banned        Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts  Account[]
-  sessions  Session[]
-  orders    Order[]
-  cartItems CartItem[]
-  reviews   Review[]
-  wishlist  WishlistItem[]
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  cartItems     CartItem[]
+  reviews       Review[]
+  wishlist      WishlistItem[]
+  recentlyViewed RecentlyViewed[]
 }
 
 model Account {
@@ -80,10 +82,11 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  orderItems  OrderItem[]
-  cartItems   CartItem[]
-  reviews     Review[]
-  wishlist    WishlistItem[]
+  orderItems      OrderItem[]
+  cartItems      CartItem[]
+  reviews        Review[]
+  wishlist       WishlistItem[]
+  recentlyViewed RecentlyViewed[]
 }
 
 model Order {
@@ -142,6 +145,18 @@ model Review {
 }
 
 model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+}
+
+model RecentlyViewed {
   id        String   @id @default(cuid())
   userId    String
   productId String

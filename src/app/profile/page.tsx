@@ -65,7 +65,17 @@ export default async function ProfilePage() {
               >
                 <span className="flex items-center gap-3">
                   <Settings className="size-4" />
-                  Profile
+                  Account Overview
+                </span>
+                <ChevronRight className="size-3 text-muted-foreground" />
+              </Link>
+              <Link
+                href="/profile/settings"
+                className="flex items-center justify-between rounded-lg px-4 py-3 text-sm text-muted-foreground transition-colors hover:bg-muted"
+              >
+                <span className="flex items-center gap-3">
+                  <Settings className="size-4" />
+                  Profile Settings
                 </span>
                 <ChevronRight className="size-3 text-muted-foreground" />
               </Link>
@@ -122,18 +132,18 @@ export default async function ProfilePage() {
 
             <div className="flex gap-4">
               <Link
-                href="/profile/orders"
+                href="/profile/settings"
                 className="inline-flex h-11 items-center gap-2 px-5 text-xs font-semibold uppercase tracking-widest bg-foreground text-background hover:opacity-90 transition-all"
+              >
+                <Settings className="size-4" />
+                Edit Profile
+              </Link>
+              <Link
+                href="/profile/orders"
+                className="inline-flex h-11 items-center gap-2 px-5 text-xs font-semibold uppercase tracking-widest border border-border hover:bg-muted transition-all"
               >
                 <Package className="size-4" />
                 View Orders
-              </Link>
-              <Link
-                href="/wishlist"
-                className="inline-flex h-11 items-center gap-2 px-5 text-xs font-semibold uppercase tracking-widest border border-border hover:bg-muted transition-all"
-              >
-                <Heart className="size-4" />
-                Wishlist
               </Link>
             </div>
           </div>

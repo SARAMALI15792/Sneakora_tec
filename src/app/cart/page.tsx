@@ -68,6 +68,12 @@ export default function CartPage() {
   const [fetchError, setFetchError] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
   const [removing, setRemoving] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponState, setCouponState] = useState<{
+    loading: boolean;
+    applied: { code: string; discount: number; type: string } | null;
+    error: string | null;
+  }>({ loading: false, applied: null, error: null });
 
   const fetchCart = useCallback(async () => {
     setFetchError(false);
@@ -115,21 +121,66 @@ export default function CartPage() {
     setRemoving(null);
   }
 
-  async function handleCheckout() {
-    setCheckingOut(true);
-    const res = await fetch("/api/checkout", { method: "POST" });
-    if (res.ok) {
+  async function applyCoupon() {
+    if (!couponCode.trim()) return;
+    setCouponState((p) => ({ ...p, loading: true, error: null }));
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode, cartTotal: subtotal }),
+      });
       const data = await res.json();
-      window.location.href = data.url;
-    } else {
-      const err = await res.json();
-      alert(err.error || "Checkout failed");
+      if (data.valid) {
+        setCouponState({ loading: false, applied: data.coupon, error: null });
+        setCouponState((p) => ({ ...p, error: null }));
+      } else {
+        setCouponState((p) => ({ ...p, loading: false, error: data.error || "Invalid coupon" }));
+      }
+    } catch {
+      setCouponState((p) => ({ ...p, loading: false, error: "Failed to validate coupon" }));
     }
-    setCheckingOut(false);
   }
 
   const subtotal = items.reduce((s, i) => s + i.product.price * i.quantity, 0);
   const itemCount = items.reduce((s, i) => s + i.quantity, 0);
+
+  function removeCoupon() {
+    setCouponCode("");
+    setCouponState({ loading: false, applied: null, error: null });
+  }
+
+  const discount = couponState.applied
+    ? couponState.applied.type === "percentage"
+      ? (subtotal * couponState.applied.discount) / 100
+      : Math.min(couponState.applied.discount, subtotal)
+    : 0;
+  const total = Math.max(0, subtotal - discount);
+
+  async function handleCheckout() {
+    setCheckingOut(true);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ couponCode: couponState.applied?.code || undefined }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        if (data.url) {
+          window.location.href = data.url;
+        } else if (data.clientSecret) {
+          window.location.href = `/checkout?session_id=${data.sessionId}`;
+        }
+      } else {
+        alert(data.error || "Checkout failed");
+      }
+    } catch (error) {
+      alert("Checkout failed. Please try again.");
+      console.error("Checkout error:", error);
+    }
+    setCheckingOut(false);
+  }
 
   /* ────────── Unauthenticated ────────── */
   if (!session) {
@@ -455,7 +506,51 @@ export default function CartPage() {
                     Order Summary
                   </p>
 
-                  <div className="mt-6 space-y-3.5 text-sm">
+                  {/* Coupon */}
+                  <div className="mt-6 space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Coupon code"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        disabled={!!couponState.applied}
+                        className="flex-1 h-10 px-3 text-xs bg-transparent border border-border rounded-lg outline-none focus:border-foreground transition-colors uppercase tracking-wider disabled:opacity-50"
+                      />
+                      {couponState.applied ? (
+                        <button
+                          onClick={removeCoupon}
+                          className="h-10 px-4 rounded-lg border border-border text-xs font-medium hover:bg-muted transition-all"
+                        >
+                          Remove
+                        </button>
+                      ) : (
+                        <button
+                          onClick={applyCoupon}
+                          disabled={couponState.loading || !couponCode.trim()}
+                          className="h-10 px-4 rounded-lg bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-1"
+                        >
+                          {couponState.loading ? (
+                            <span className="size-3 animate-spin rounded-full border-2 border-background/30 border-t-background" />
+                          ) : (
+                            "Apply"
+                          )}
+                        </button>
+                      )}
+                    </div>
+                    {couponState.error && (
+                      <p className="text-[10px] text-destructive">{couponState.error}</p>
+                    )}
+                    {couponState.applied && (
+                      <p className="text-[10px] text-green-500">
+                        {couponState.applied.type === "percentage"
+                          ? `${couponState.applied.discount}% discount applied`
+                          : `$${couponState.applied.discount} discount applied`}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="mt-5 space-y-3.5 text-sm">
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Subtotal</span>
                       <motion.span
@@ -468,6 +563,12 @@ export default function CartPage() {
                         {formatPrice(subtotal)}
                       </motion.span>
                     </div>
+                    {discount > 0 && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-green-500">Discount</span>
+                        <span className="font-medium text-green-500">-{formatPrice(discount)}</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
                       <span className="text-muted-foreground">Shipping</span>
                       <span className="flex items-center gap-1.5 font-medium text-green-500">
@@ -484,13 +585,13 @@ export default function CartPage() {
                       <div className="flex items-center justify-between">
                         <span className="text-base font-semibold">Total</span>
                         <motion.span
-                          key={`tot-${subtotal}`}
+                          key={`tot-${total}`}
                           initial={{ scale: 1.08, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
                           transition={{ type: "spring", stiffness: 350, damping: 18, mass: 0.8 }}
                           className="font-heading text-2xl font-bold tabular-nums"
                         >
-                          {formatPrice(subtotal)}
+                          {formatPrice(total)}
                         </motion.span>
                       </div>
                     </div>

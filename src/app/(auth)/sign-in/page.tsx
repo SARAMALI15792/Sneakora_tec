@@ -36,7 +36,6 @@ export default function SignInPage() {
           toast.success("Welcome back", {
             description: "You've been signed in successfully.",
           });
-          setTimeout(() => router.push("/"), 600);
         },
         onError: (ctx) => {
           const msg = ctx.error.message ?? "Something went wrong";
@@ -110,6 +109,11 @@ export default function SignInPage() {
                 setEmail(e.target.value);
                 if (errors.email) setErrors((prev) => ({ ...prev, email: "" }));
               }}
+              onBlur={() => {
+                // Validate on blur
+                if (!email.trim()) setErrors((prev) => ({ ...prev, email: "Email is required" }));
+                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) setErrors((prev) => ({ ...prev, email: "Enter a valid email address" }));
+              }}
               className={`w-full h-11 px-4 text-sm bg-transparent border outline-none transition-all duration-200 ${
                 errors.email
                   ? "border-destructive focus:border-destructive"
@@ -140,6 +144,9 @@ export default function SignInPage() {
                 onChange={(e) => {
                   setPassword(e.target.value);
                   if (errors.password) setErrors((prev) => ({ ...prev, password: "" }));
+                }}
+                onBlur={() => {
+                  if (!password) setErrors((prev) => ({ ...prev, password: "Password is required" }));
                 }}
                 className={`w-full h-11 px-4 text-sm bg-transparent border outline-none transition-all duration-200 ${
                   errors.password

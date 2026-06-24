@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Hero3D } from "@/components/hero/Hero3D";
+import { RecentlyViewed } from "@/components/product/RecentlyViewed";
 
 const categories = [
   { name: "Men", sub: "New arrivals", href: "/shop?category=men" },
@@ -155,6 +156,13 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── RECENTLY VIEWED ──────────────────────────────────── */}
+      <section className="py-24 lg:py-32">
+        <div className="mx-auto max-w-7xl px-6">
+          <RecentlyViewed />
         </div>
       </section>
 

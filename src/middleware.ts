@@ -6,9 +6,10 @@ export async function middleware(request: NextRequest) {
     headers: request.headers,
   });
 
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
+  const { pathname } = request.nextUrl;
 
-  if (isAdminRoute) {
+  // Admin routes require admin role
+  if (pathname.startsWith("/admin")) {
     if (!session) {
       return NextResponse.redirect(new URL("/sign-in", request.url));
     }
@@ -18,6 +19,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Protected routes require any authenticated user
   if (!session) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
@@ -27,5 +29,11 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   runtime: "nodejs",
-  matcher: ["/profile/:path*", "/wishlist", "/orders/:path*", "/admin/:path*", "/checkout"],
+  matcher: [
+    "/profile/:path*",
+    "/wishlist",
+    "/orders/:path*",
+    "/checkout",
+    "/admin/:path*",
+  ],
 };

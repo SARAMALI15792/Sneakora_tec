@@ -391,18 +391,300 @@ const products = [
     stock: 47,
     featured: false,
   },
+  // ---- NEW PRODUCTS ----
+  {
+    name: "Zenith Air",
+    slug: "zenith-air",
+    description: "Light as air, bold as ever. The Zenith Air features a knitted flyweave upper and ultra-responsive Air cushioning for all-day comfort.",
+    price: 199.99,
+    compareAt: 249.99,
+    category: "men",
+    images: [
+      "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800",
+      "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800",
+    ],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12", "US 13"],
+    colors: ["Black", "White", "Navy"],
+    stock: 52,
+    featured: true,
+  },
+  {
+    name: "Fusion Stride",
+    slug: "fusion-stride",
+    description: "Where fashion meets function. Hybrid sneaker-boot with weather-resistant upper and a rugged lug outsole.",
+    price: 184.99,
+    compareAt: 219.99,
+    category: "men",
+    images: [
+      "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=800",
+      "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=800",
+    ],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12"],
+    colors: ["Olive", "Black", "Tan"],
+    stock: 37,
+    featured: true,
+  },
+  {
+    name: "Aura Knit",
+    slug: "aura-knit",
+    description: "Designed for her. Sleek knit upper with a sculpted foam midsole that moves with your every step.",
+    price: 124.99,
+    compareAt: 149.99,
+    category: "women",
+    images: [
+      "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=800",
+      "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=800",
+    ],
+    sizes: ["US 5", "US 6", "US 7", "US 8", "US 9", "US 10"],
+    colors: ["White", "Blush", "Lavender", "Black"],
+    stock: 64,
+    featured: true,
+  },
+  {
+    name: "Lunar Glide",
+    slug: "lunar-glide",
+    description: "Moonlight-inspired design with reflective details and a plush cushioned sole. Perfect for evening runs.",
+    price: 154.99,
+    compareAt: null,
+    category: "running",
+    images: [
+      "https://images.unsplash.com/photo-1579338559194-a162d19bf842?w=800",
+      "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=800",
+    ],
+    sizes: ["US 6", "US 7", "US 8", "US 9", "US 10", "US 11", "US 12"],
+    colors: ["Silver/Neon", "Black/Reflective", "Blue/White"],
+    stock: 42,
+    featured: false,
+  },
+  {
+    name: "Hype Beast",
+    slug: "hype-beast",
+    description: "The ultimate streetwear statement. Oversized silhouette with bold branding and a chunky EVA sole.",
+    price: 159.99,
+    compareAt: 199.99,
+    category: "casual",
+    images: [
+      "https://images.unsplash.com/photo-1613310023042-ad79320c00ff?w=800",
+      "https://images.unsplash.com/photo-1605733160314-4fc7dac4bb16?w=800",
+    ],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12"],
+    colors: ["Black/White", "Red/Black", "Green/White"],
+    stock: 28,
+    featured: true,
+  },
+  {
+    name: "Little Racer",
+    slug: "little-racer",
+    description: "Speed-inspired design for kids. Lightweight construction with easy lace-up closure and a flexible sole.",
+    price: 59.99,
+    compareAt: 74.99,
+    category: "kids",
+    images: [
+      "https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=800",
+      "https://images.unsplash.com/photo-1524532787116-e70228437bbe?w=800",
+    ],
+    sizes: ["US 10", "US 11", "US 12", "US 13", "US 1", "US 2", "US 3"],
+    colors: ["Blue/Green", "Red/Black", "Pink/White"],
+    stock: 88,
+    featured: true,
+  },
+  {
+    name: "Terra Grip",
+    slug: "terra-grip",
+    description: "Conquer any trail with aggressive lugs and a waterproof membrane. Built for the serious hiker.",
+    price: 194.99,
+    compareAt: 229.99,
+    category: "sports",
+    images: [
+      "https://images.unsplash.com/photo-1534778101976-62847782c213?w=800",
+      "https://images.unsplash.com/photo-1562183241-b937e95585b6?w=800",
+    ],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12", "US 13"],
+    colors: ["Olive", "Brown", "Black"],
+    stock: 33,
+    featured: false,
+  },
+  {
+    name: "Hoops Classic",
+    slug: "hoops-classic",
+    description: "Old-school basketball style with modern comfort. Full-grain leather upper with padded ankle collar.",
+    price: 139.99,
+    compareAt: null,
+    category: "basketball",
+    images: [
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+      "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800",
+    ],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12", "US 13", "US 14"],
+    colors: ["White/Red", "Black/Gold", "Navy/White"],
+    stock: 59,
+    featured: true,
+  },
+  {
+    name: "Velocity Pro",
+    slug: "velocity-pro",
+    description: "Carbon-fiber plate meets Pebax foam. The ultimate marathon racer for chasing personal records.",
+    price: 279.99,
+    compareAt: 329.99,
+    category: "running",
+    images: [
+      "https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=800",
+      "https://images.unsplash.com/photo-1579338559194-a162d19bf842?w=800",
+    ],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12"],
+    colors: ["Neon/Black", "White/Gold", "Blue/Orange"],
+    stock: 14,
+    featured: true,
+  },
+  {
+    name: "Casual Canvas Low",
+    slug: "casual-canvas-low",
+    description: "Everyday canvas sneaker with a vulcanized sole. Simple, timeless, and built to last.",
+    price: 69.99,
+    compareAt: null,
+    category: "casual",
+    images: [
+      "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=800",
+      "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800",
+    ],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11"],
+    colors: ["White", "Black", "Navy", "Red"],
+    stock: 120,
+    featured: false,
+  },
+  {
+    name: "Power Lift TR",
+    slug: "power-lift-tr",
+    description: "Built for the weight room. Flat, wide heel base with reinforced stitching and breathable mesh upper.",
+    price: 144.99,
+    compareAt: 169.99,
+    category: "training",
+    images: [
+      "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800",
+      "https://images.unsplash.com/photo-1562183241-b937e95585b6?w=800",
+    ],
+    sizes: ["US 7", "US 8", "US 9", "US 10", "US 11", "US 12", "US 13"],
+    colors: ["Black", "White", "Grey"],
+    stock: 48,
+    featured: false,
+  },
+  {
+    name: "Sunset Walker",
+    slug: "sunset-walker",
+    description: "Vibrant sunset-inspired gradient upper with a memory foam insole. Style meets comfort for evening strolls.",
+    price: 99.99,
+    compareAt: 124.99,
+    category: "lifestyle",
+    images: [
+      "https://images.unsplash.com/photo-1607522370275-f14206abe5d3?w=800",
+      "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=800",
+    ],
+    sizes: ["US 6", "US 7", "US 8", "US 9", "US 10", "US 11"],
+    colors: ["Orange/Pink", "Yellow/Red", "Purple/Blue"],
+    stock: 71,
+    featured: false,
+  },
 ];
 
 async function main() {
   console.log("Seeding database...");
 
   await prisma.product.deleteMany();
+  await prisma.blogPost.deleteMany();
+  await prisma.coupon.deleteMany();
 
   for (const product of products) {
     await prisma.product.create({ data: product });
   }
 
   console.log(`Seeded ${products.length} products`);
+
+  const blogPosts = [
+    {
+      title: "The Ultimate Guide to Choosing the Right Running Shoe",
+      slug: "guide-to-choosing-running-shoes",
+      content: `Finding the perfect running shoe can feel overwhelming with so many options on the market. But don't worry — we're here to help you find your ideal match.\n\nFirst, consider your foot type. Do you have flat feet, high arches, or neutral pronation? This determines whether you need stability shoes, motion control, or neutral cushioning.\n\nNext, think about where you run. Road runners need different shoes than trail runners. Road shoes prioritize cushioning and responsiveness, while trail shoes need aggressive tread and protection.\n\nFinally, consider your mileage. If you're logging 30+ miles per week, invest in a premium shoe with better foam technology and durability.\n\nAt Sneakora, we carry options for every runner. Visit our shop to find your perfect pair.`,
+      excerpt: "Everything you need to know before buying your next pair of running sneakers.",
+      image: "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=800",
+      published: true,
+    },
+    {
+      title: "Sneaker Care 101: How to Make Your Kicks Last Longer",
+      slug: "sneaker-care-101",
+      content: `Your sneakers take you everywhere — literally. Here's how to keep them looking fresh.\n\n**Daily Care**\nAfter each wear, wipe down your sneakers with a dry cloth to remove dust and dirt. For leather shoes, use a conditioner every few weeks.\n\n**Deep Cleaning**\nRemove the laces and insoles before cleaning. Use a soft brush with mild soap and water for the uppers. Stuff with newspaper to help them keep shape while drying.\n\n**Storage**\nKeep your sneakers in a cool, dry place away from direct sunlight. Use shoe trees to maintain shape. Rotate between pairs to extend their lifespan.\n\n**Pro Tip**\nApply a protective spray before first wear to repel water and stains.`,
+      excerpt: "Keep your sneakers looking fresh with these simple maintenance tips.",
+      image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800",
+      published: true,
+    },
+    {
+      title: "Top 10 Sneaker Trends for This Season",
+      slug: "top-10-sneaker-trends",
+      content: `The sneaker world moves fast. Here are the biggest trends shaping footwear right now.\n\n**1. Retro Runners**\nChunky, bulky silhouettes from the 90s and 2000s continue to dominate. Think thick midsoles and mesh uppers.\n\n**2. Sustainable Materials**\nEco-friendly sneakers using recycled materials, organic cotton, and natural rubber are on the rise.\n\n**3. Bold Colors**\nNeon accents, color blocking, and gradient effects are everywhere this season.\n\n**4. Slip-On Convenience**\nEasy-entry designs with elastic panels and pull tabs are increasingly popular for everyday wear.\n\n**5. Tech-Infused Designs**\nSmart sneakers with fitness tracking, self-lacing systems, and responsive cushioning technology.\n\n**6. Minimalist Leather**\nClean, simple leather sneakers in neutral tones remain a wardrobe staple.\n\n**7. Platform Soles**\nElevated soles add height while maintaining comfort — a favorite in women's sneakers.\n\n**8. Collaboration Culture**\nLimited-edition collaborations between brands and artists drive hype and collectibility.\n\n**9. Trail-to-Street**\nRugged trail-inspired designs are crossing over into everyday streetwear.\n\n**10. Customization**\nPersonalized sneakers with custom colors, materials, and monogramming are more accessible than ever.`,
+      excerpt: "Stay ahead of the curve with the hottest sneaker trends dominating fashion right now.",
+      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+      published: true,
+    },
+    {
+      title: "The History of Sneaker Culture: From Court to Street",
+      slug: "history-of-sneaker-culture",
+      content: `The sneaker has evolved from a simple athletic shoe to a global cultural icon.\n\n**The Early Days**\nIn the late 1800s, rubber-soled shoes called "plimsolls" were the first mass-market athletic footwear. The Converse All-Star debuted in 1917 and became the dominant basketball shoe.\n\n**The Golden Era**\nThe 1980s marked a turning point. Nike signed Michael Jordan in 1984, launching the Air Jordan brand. This partnership revolutionized athlete endorsements and created the modern sneaker resale market.\n\n**Hip-Hop and Streetwear**\nIn the 90s and 2000s, sneakers became central to hip-hop culture. Run-DMC's "My Adidas" anthem and the rise of limited releases transformed sneakers into status symbols.\n\n**Today**\nSneaker culture is a multi-billion dollar industry. Limited drops, resale markets, and celebrity collaborations drive global demand. What started as athletic equipment has become wearable art.`,
+      excerpt: "From basketball courts to fashion runways — how sneakers became a cultural phenomenon.",
+      image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800",
+      published: true,
+    },
+    {
+      title: "How to Style White Sneakers with Any Outfit",
+      slug: "how-to-style-white-sneakers",
+      content: `White sneakers are the most versatile piece in your wardrobe. Here's how to wear them with anything.\n\n**With Jeans**\nThe classic combo. Slim or straight-leg jeans with clean white sneakers works for casual to smart-casual occasions.\n\n**With Suits**\nModern suiting looks fresh with minimalist white leather sneakers. Keep the suit tailored and the sneakers clean.\n\n**With Dresses**\nDresses and white sneakers create an effortless, casual look. Try it with midi dresses, slip dresses, or shirt dresses.\n\n**With Shorts**\nPerfect for summer. Cuffed shorts and low-top white sneakers are a go-to warm weather outfit.\n\n**Keeping Them Clean**\nThe key to styling white sneakers is keeping them clean. Use a magic eraser for scuffs and a whitening toothpaste for stubborn stains.`,
+      excerpt: "The ultimate style guide for the most versatile shoe in your closet.",
+      image: "https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=800",
+      published: true,
+    },
+    {
+      title: "Best Sneakers for Flat Feet: Our Top Picks",
+      slug: "best-sneakers-for-flat-feet",
+      content: `If you have flat feet, finding the right sneaker is crucial for comfort and injury prevention.\n\n**What to Look For**\nFlat feet need stability shoes with motion control features. Look for medial posts, firm midsoles, and structured heel counters.\n\n**Our Top Picks**\n1. Stability-focused running shoes with dense foam on the inner side\n2. Cross-training shoes with flat, wide bases\n3. Walking shoes with arch support and rocker bottoms\n\n**Features That Matter**\n- Arch support: Look for shoes with built-in arch support or room for orthotics\n- Heel stability: A firm heel counter keeps your foot aligned\n- Wide toe box: Allows toes to splay naturally for better balance\n\nVisit our shop and use the filter feature to find stability shoes perfect for flat feet.`,
+      excerpt: "Find the perfect sneakers for flat feet with our expert recommendations.",
+      image: "https://images.unsplash.com/photo-1579338559194-a162d19bf842?w=800",
+      published: true,
+    },
+    {
+      title: "Sustainable Sneakers: Eco-Friendly Footwear Guide",
+      slug: "sustainable-sneakers-eco-guide",
+      content: `The fashion industry is going green, and sneakers are leading the charge.\n\n**Why Sustainable Sneakers Matter**\nThe footwear industry produces over 20 billion pairs of shoes annually, with most ending up in landfills. Sustainable sneakers use recycled materials, reduce waste, and often have lower carbon footprints.\n\n**Materials to Look For**\n- Recycled polyester from plastic bottles\n- Natural rubber instead of synthetic\n- Organic cotton and hemp uppers\n- Cork and algae-based foams\n- Biodegradable midsoles\n\n**Brands Leading the Way**\nMany major brands now have sustainability lines. Look for shoes made with at least 50% recycled materials and those with take-back programs.\n\n**What You Can Do**\nExtend your sneakers' life with proper care. When you're done, recycle them through brand programs or donate if they're still wearable.`,
+      excerpt: "Discover how sustainable materials and ethical practices are transforming the sneaker industry.",
+      image: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800",
+      published: true,
+    },
+    {
+      title: "Breaking In New Sneakers: Tips for a Comfortable Fit",
+      slug: "breaking-in-new-sneakers",
+      content: `New sneakers should feel comfortable from day one, but sometimes they need a little breaking in.\n\n**The Right Fit First**\nStart with properly fitted shoes. You should have a thumb's width of space between your longest toe and the shoe's end.\n\n**Gradual Wear**\nWear your new sneakers for short periods — 1-2 hours at a time — increasing duration gradually.\n\n**Lacing Techniques**\n- For heel slip: Use the heel lock lacing technique\n- For tight toes: Try wide lacing to relieve pressure\n- For general comfort: Skip the first eyelet for more room\n\n**Quick Break-In Methods**\n- Wear thick socks and use a hairdryer on medium heat for 2-3 minutes\n- Stuff shoes with damp newspaper overnight\n- Use a shoe stretcher for specific pressure points\n\n**When to Return**\nIf sneakers cause pain after a week of gradual wear, they may not be the right fit. Most stores have a 30-day return policy.`,
+      excerpt: "Expert advice on how to break in new sneakers without the pain.",
+      image: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=800",
+      published: true,
+    },
+  ];
+
+  for (const post of blogPosts) {
+    await prisma.blogPost.create({ data: post });
+  }
+
+  console.log(`Seeded ${blogPosts.length} blog posts`);
+
+  const coupons = [
+    { code: "WELCOME10", discount: 10, type: "percentage", maxUses: 100, usedCount: 0 },
+    { code: "SNEAK20", discount: 20, type: "percentage", maxUses: 50, usedCount: 0 },
+    { code: "FLAT500", discount: 500, type: "flat", maxUses: 30, usedCount: 0 },
+    { code: "FREESHIP", discount: 100, type: "flat", maxUses: 200, usedCount: 0 },
+    { code: "SUMMER25", discount: 25, type: "percentage", maxUses: 75, usedCount: 0 },
+  ];
+
+  for (const coupon of coupons) {
+    await prisma.coupon.create({ data: coupon });
+  }
+
+  console.log(`Seeded ${coupons.length} coupons`);
 }
 
 main()

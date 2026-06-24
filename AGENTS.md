@@ -16,7 +16,7 @@ This document establishes the rules, principles, and procedures by which any age
 
 Every agent, before writing any code, shall adhere to the following sequence:
 
-1. **Check Skills First.** Before writing any code, the agent shall load the matching skill via the `skill` tool. Skills reside in `.agents/skills/` (project-local). If a skill covers the task at hand, its instructions shall be followed. Skill names and paths shall not be hardcoded — they shall be referenced dynamically by name. A complete catalog of installed skills is maintained in Article VIII.
+1. **Check Skills First.** Before writing any code, the agent shall load the matching skill via the `skill` tool. Skills reside in `.claude/skills/` (project-local). If a skill covers the task at hand, its instructions shall be followed. Skill names and paths shall not be hardcoded — they shall be referenced dynamically by name. A complete catalog of installed skills is maintained in Article VIII.
 
 2. **Research via Context7 MCP.** For any question concerning a framework, library, or language — including but not limited to Next.js, React, BetterAuth, Prisma, PostgreSQL, Tailwind CSS, and shadcn/ui — the agent shall call `context7_resolve-library-id` followed by `context7_query-docs` to obtain authoritative documentation and code examples. The MCP server is pre-configured in `opencode.json` with an active API key.
 

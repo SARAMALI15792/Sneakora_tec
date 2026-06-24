@@ -119,11 +119,11 @@ export function ProductDetails({ product }: { product: Product }) {
           </div>
 
           <div className="flex items-baseline gap-3">
-            <span className="text-2xl font-bold">${price.toFixed(2)}</span>
+            <span className="text-2xl font-bold">${Number(price).toFixed(2)}</span>
             {onSale && (
               <>
                 <span className="text-base text-muted-foreground line-through">
-                  ${compareAt.toFixed(2)}
+                  ${Number(compareAt).toFixed(2)}
                 </span>
                 <span className="bg-accent px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-accent-foreground">
                   -{Math.round((1 - price / compareAt) * 100)}%
