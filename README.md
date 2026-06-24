@@ -1,316 +1,63 @@
-# Sneakora_tec
+Sneakora_tec
 
 A modern, full-stack e-commerce platform rebuilt from the ground up using Next.js 14+, TypeScript, and cutting-edge web technologies. This premium online shoe store features a complete redesign with sophisticated UI/UX, robust authentication, seamless shopping experience, and comprehensive admin capabilities.
 
-![Sneakora_tec Preview](public/images/shoe_cyan.png)
+Overview
 
-> **Note**: Replace the above image with actual screenshots of your application
+Sneakora_tec represents a complete evolution from traditional e-commerce platforms to a modern, scalable solution built for performance and user experience. The application leverages the latest web technologies to deliver a fast, secure, and engaging shopping experience while providing administrators with powerful tools for store management.
 
-## ✨ Features
+Core E-commerce Functionality
 
-### 🛒 Core E-commerce Functionality
-- **Product Catalog**: Browse shoes by category (Men, Women, Kids, Sports, Casual) with filtering and sorting
-- **Product Details**: Rich product pages with multiple images, size/color selection, pricing, and descriptions
-- **Shopping Cart**: Add/remove items, update quantities, persistent cart with localStorage
-- **Checkout Flow**: Multi-step checkout with shipping, payment, and order confirmation
-- **Order Management**: Order history, status tracking, and detailed order views
+The platform provides a complete online shopping experience including product browsing, detailed product views, cart management, and streamlined checkout processes. Users can explore products by category, apply filters and sorting options, view detailed product information with multiple images and specifications, and manage their shopping cart with ease. The checkout process guides users through shipping and payment steps to order completion with confirmation.
 
-### 🔐 Authentication & Security
-- **Multi-factor Authentication**: Email/password + Google & GitHub OAuth via BetterAuth
-- **Session Management**: Secure server-side sessions with automatic refresh
-- **Role-based Access**: Admin vs. user role protection for sensitive routes
-- **Protected Routes**: Middleware guarding /profile, /orders, /admin, and /checkout
+Authentication and Security
 
-### 👤 User Experience
-- **Profile Management**: Personal information, order history, and wishlist management
-- **Wishlist System**: Save favorite items for later purchase
-- **Product Reviews**: Rate and review purchased products with star ratings
-- **Recently Viewed**: Track browsing history for personalized recommendations
-- **Responsive Design**: Fully responsive across mobile, tablet, and desktop devices
+Security is implemented through multi-factor authentication supporting email/password credentials as well as Google and GitHub OAuth providers via BetterAuth. Session management utilizes secure server-side storage with automatic token refresh mechanisms. Role-based access control distinguishes between standard users and administrators, protecting sensitive routes through middleware protection. All authentication flows implement industry-standard security practices including secure password handling and session validation.
 
-### ⚙️ Admin Panel
-- **Product Management**: Complete CRUD operations for products with image upload
-- **Order Management**: View, filter, and update order statuses
-- **User Administration**: Manage user accounts and roles
-- **Coupon System**: Create and manage discount codes with usage limits
-- **Analytics Dashboard**: Sales metrics, top products, and customer insights
+User Experience Features
 
-### 📝 Content & Engagement
-- **Blog System**: Full-featured blog with categories, tags, and SEO optimization
-- **Newsletter Subscription**: Email capture for marketing campaigns
-- **Contact Form**: Spam-protected contact mechanism with admin notifications
-- **About Us Page**: Company story and brand information
+Registered users benefit from personalized profile management capabilities including order history review and wishlist functionality. The wishlist system allows users to save products of interest for future consideration. Product reviews enable verified purchasers to share feedback through star ratings and written comments. Recently viewed tracking enhances the shopping experience by maintaining browsing history for personalized recommendations. The responsive design ensures consistent functionality and appearance across mobile, tablet, and desktop devices.
 
-### 🛠️ Technical Excellence
-- **Modern Stack**: Next.js 14 App Router, TypeScript, Tailwind CSS v4, shadcn/ui
-- **Performance Optimized**: Image optimization, lazy loading, and code splitting
-- **Accessibility**: WCAG 2.1 compliant components and keyboard navigation
-- **SEO Friendly**: Metadata management, sitemap generation, and clean URLs
-- **Type Safety**: End-to-end TypeScript with strict mode enabled
-- **Error Handling**: Custom error pages (404, 500) and graceful degradation
-- **Testing Ready**: Structured for unit and integration testing
+Administrative Capabilities
 
-## 🚀 Tech Stack
+Administrators access a comprehensive dashboard for store management operations. Product management includes full create, read, update, and delete functionality with image upload support. Order management provides viewing, filtering, and status update capabilities. User administration enables account oversight and role assignment. The coupon system facilitates creation and management of promotional codes with configurable usage limits and expiration dates. Analytics deliver insights into sales performance, popular products, and customer behavior patterns.
 
-### Frontend
-- **[Next.js 14](https://nextjs.org/)** - React framework with App Router
-- **[TypeScript](https://www.typescriptlang.org/)** - Static typing for JavaScript
-- **[Tailwind CSS v4](https://tailwindcss.com/)** - Utility-first CSS framework
-- **[shadcn/ui](https://ui.shadcn.com/)** - Beautiful, accessible components
-- **[Framer Motion](https://www.framer.com/motion/)** - Production-ready animations
-- **[Sonner](https://sonner.emilkowal.ski/)** - Toast notification system
-- **[Lucide Icons](https://lucide.dev/)** - Beautifully crafted SVG icons
+Content and Engagement Features
 
-### Backend & Infrastructure
-- **[Next.js API Routes](https://nextjs.org/docs/api-routes/introduction)** - Serverless functions
-- **[BetterAuth](https://better-auth.com/)** - Full-stack authentication framework
-- **[Prisma ORM](https://www.prisma.io/)** - Type-safe database ORM
-- **[Neon PostgreSQL](https://neon.tech/)** - Serverless PostgreSQL database
-- **[Zod](https://zod.dev/)** - TypeScript-first schema validation
+The platform incorporates content management through an integrated blog system supporting categories, tagging, and search engine optimization. Newsletter functionality enables email capture for marketing communications. A contact form provides visitors with a secure method to submit inquiries while protecting against spam submissions. An About Us page communicates brand story and values to visitors.
 
-### Development & Deployment
-- **[Vercel](https://vercel.com/)** - Optimized hosting for Next.js
-- **[ESLint](https://eslint.org/)** - Code quality and consistency
-- **[Prettier](https://prettier.io/)** - Code formatting
-- **[Husky](https://typicode.github.io/husky/)** - Git hooks for linting
-- **[Lint-Staged](https://github.com/okonet/lint-staged)** - Run linters on staged files
+Technical Implementation
 
-## 📁 Project Structure
+Built on Next.js 14 with the App Router architecture, the application utilizes TypeScript for type safety throughout the codebase. Styling employs Tailwind CSS v4 with shadcn/ui components for consistent, accessible user interfaces. Animation capabilities are provided through Framer Motion while Sonner handles notification display. Iconography relies on the Lucide icon set for visual consistency.
 
-```
-sneakora_tec/
-├── .app/                     # Next.js App Router pages
-│   ├── (auth)/               # Authentication routes (login, signup)
-│   ├── admin/                # Admin dashboard and management
-│   ├── api/                  # API routes (REST endpoints)
-│   ├── blog/                 # Blog listing and individual posts
-│   ├── cart/                 # Shopping cart functionality
-│   ├── checkout/             # Checkout flow and order confirmation
-│   ├── contact/              # Contact form and information
-│   ├── onboarding/           # User onboarding flow
-│   ├── order/                # Order history and details
-│   ├── profile/              # User profile and settings
-│   ├── shop/                 # Product catalog and listings
-│   ├── studio/               # Sanity CMS studio integration
-│   └── wishlist/             # Wishlist management
-├── components/               # Reusable UI components
-│   ├── admin/                # Admin-specific components
-│   ├── layout/               # Navigation, footer, sidebar
-│   ├── product/              # Product cards, details, filters
-│   ├── cart/                 # Cart items and summary
-│   ├── order/                # Order status and history components
-│   ├── profile/              # Profile settings and forms
-│   ├── shared/               # Cross-component utilities
-│   └── ui/                   # shadcn/ui wrapper components
-├── lib/                      # Utility functions and configurations
-│   ├── auth.ts               # BetterAuth configuration
-│   ├── db.ts                 # Prisma client instance
-│   ├── navigate.ts           # Navigation utilities
-│   ├── product-images.ts     # Product image constants
-│   └── utils.ts              # Helper functions
-├── prisma/                   # Database schema and migrations
-│   ├── schema.prisma         # Database models and relationships
-│   └── seed.ts               # Database seeding script
-├── public/                   # Static assets
-│   └── images/               # Product images, logos, icons
-├── .env.example              # Environment variables template
-├── components.json           # shadcn/ui configuration
-├── next.config.ts            # Next.js configuration
-├── tailwind.config.ts        # Tailwind CSS configuration
-├── tsconfig.json             # TypeScript configuration
-└── package.json              # Dependencies and scripts
-```
+Server-side functionality leverages Next.js API Routes for backend services, integrated with BetterAuth for comprehensive authentication management. Data persistence utilizes Prisma ORM connected to a Neon PostgreSQL database instance. Schema validation employs Zod for type-safe data handling. The application follows modern web development practices including code splitting, lazy loading, and performance optimization techniques.
 
-## 🛠️ Setup & Installation
+Development and Deployment
 
-### Prerequisites
-- Node.js 18+ (LTS recommended)
-- npm or yarn
-- Git
-- Neon PostgreSQL account (free tier available)
-- GitHub and Google Developer accounts (for OAuth)
+The development environment incorporates ESLint for code quality maintenance and Prettier for consistent code formatting. Husky manages git hooks to enforce pre-commit checks while lint-staged runs linters on staged files. Deployment is optimized for Vercel hosting with seamless integration for Next.js applications. Environment variable management follows security best practices with separate configuration for development and production environments.
 
-### Installation Steps
+Getting Started
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-username/sneakora_tec.git
-   cd sneakora_tec
-   ```
+Initialization requires Node.js 18 or later, npm or yarn package manager, and a Git client. A Neon PostgreSQL account provides database hosting while Google and GitHub developer accounts enable OAuth functionality (optional but recommended).
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+The setup process begins with repository cloning followed by dependency installation. Environment configuration involves copying the example environment file and populating required values including database connection strings, authentication secrets, and optional service credentials. Database initialization executes through Prisma commands to deploy the schema and populate initial data. Development server startup enables local testing at the default localhost port.
 
-3. **Configure environment variables**
-   ```bash
-   cp .env.example .env.local
-   ```
-   Edit `.env.local` with your actual values:
-   ```env
-   # Database
-   DATABASE_URL="postgresql://user:password@host:port/dbname?sslmode=require"
+Production deployment follows standard Next.js build procedures with Vercel offering optimized hosting configuration. Environment variables must be properly configured in the hosting environment prior to deployment.
 
-   # BetterAuth
-   BETTER_AUTH_SECRET="your-32-character-random-string"
-   NEXT_PUBLIC_BETTER_AUTH_URL="http://localhost:3000"
+Technical Specifications
 
-   # OAuth Providers (optional but recommended)
-   AUTH_GOOGLE_ID="your-google-client-id"
-   AUTH_GOOGLE_SECRET="your-google-client-secret"
-   AUTH_GITHUB_ID="your-github-client-id"
-   AUTH_GITHUB_SECRET="your-github-client-secret"
+The application implements RESTful API design principles for all backend endpoints organized under logical resource groupings. Authentication endpoints manage user registration, login, session handling, and logout procedures. Product endpoints support catalog browsing, individual product retrieval, and administrative product management operations. Cart functionality enables item addition, quantity modification, and removal. Order processing encompasses history retrieval, detailed order viewing, and creation through checkout completion.
 
-   # Stripe (for payments)
-   STRIPE_SECRET_KEY="sk_test_..."
-   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
-   STRIPE_WEBHOOK_SECRET="whsec_..."
+User profile endpoints facilitate information retrieval and updates. Administrative endpoints provide access to product inventory management, order oversight, user administration, coupon management, and system analytics reporting. All protected endpoints enforce appropriate authentication and authorization requirements.
 
-   # Email (Resend or SMTP)
-   RESEND_API_KEY="re_..."  # or SMTP credentials
+Database schema design incorporates normalized tables for users, accounts, sessions, and verification tokens alongside e-commerce specific entities for products, orders, order items, cart items, reviews, wishlist items, coupons, blog posts, and newsletter subscriptions. Relationships maintain data integrity while supporting efficient query patterns.
 
-   # File Upload (UploadThing or Vercel Blob)
-   BLOB_READ_WRITE_TOKEN="your_vercel_blob_token"  # or UploadThing tokens
-   ```
+The frontend architecture follows React best practices with functional components, custom hooks for reusable logic, and proper state management strategies. Component organization separates concerns between layout structures, page-specific elements, and reusable user interface elements. Styling approaches utility-first classes with custom extensions for brand-specific design elements.
 
-4. **Initialize the database**
-   ```bash
-   # Push schema to Neon
-   npx prisma db push
-   
-   # Seed with sample data
-   npx prisma db seed
-   ```
+Project Organization
 
-5. **Start the development server**
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+File organization separates concerns into logical groupings including application pages within the app directory, reusable components in components, utility functions and configurations in lib, database schema and migration files in prisma, and static assets in public. Configuration files reside in the project root with documentation and metadata files providing project context.
 
-6. **Open your browser**
-   Visit `http://localhost:3000` to see the application running
+Development workflow emphasizes clean commit messages, comprehensive testing coverage, and documentation updates accompanying feature implementations. Code review processes maintain quality standards while continuous integration practices validate changes prior to integration.
 
-## 🌐 Deployment
-
-### Vercel (Recommended)
-1. Push your code to GitHub
-2. Import the project in [Vercel](https://vercel.com/new)
-3. Configure environment variables in Vercel dashboard
-4. Vercel will automatically build and deploy your application
-
-### Manual Deployment
-```bash
-# Build for production
-npm run build
-
-# Start production server
-npm start
-```
-
-## 🧪 Testing
-
-### Running Tests
-```bash
-# Run unit tests
-npm test
-
-# Run tests with coverage
-npm test -- --coverage
-
-# Run end-to-end tests (if configured)
-npm run test:e2e
-```
-
-### Linting & Formatting
-```bash
-# Check for linting errors
-npm run lint
-
-# Automatically fix formatting issues
-npm run format
-```
-
-## 📚 API Documentation
-
-### Authentication Endpoints
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/session` - Get current session
-
-### Product Endpoints
-- `GET /api/products` - Get all products (with filtering/pagination)
-- `GET /api/products/[id]` - Get single product by ID
-- `POST /api/products` - Create product (admin only)
-- `PUT /api/products/[id]` - Update product (admin only)
-- `DELETE /api/products/[id]` - Delete product (admin only)
-
-### Cart Endpoints
-- `GET /api/cart` - Get user's cart
-- `POST /api/cart` - Add item to cart
-- `PATCH /api/cart/[id]` - Update cart item quantity
-- `DELETE /api/cart/[id]` - Remove item from cart
-
-### Order Endpoints
-- `GET /api/orders` - Get user's order history
-- `GET /api/orders/[id]` - Get specific order details
-- `POST /api/orders` - Create new order (checkout)
-
-### User Endpoints
-- `GET /api/profile` - Get user profile
-- `PUT /api/profile` - Update user profile
-
-### Admin Endpoints (Require admin role)
-- `GET /api/admin/products` - List all products
-- `GET /api/admin/orders` - List all orders
-- `POST /api/admin/coupons` - Create coupon
-- `GET /api/admin/stats` - Get dashboard statistics
-
-## 🤝 Contributing
-
-We welcome contributions to make Sneakora_tec better! Please follow these guidelines:
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-Please ensure your code follows our coding standards:
-- TypeScript strict mode
-- ESLint and Prettier configurations
-- Meaningful commit messages
-- Comprehensive testing for new features
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👥 Acknowledgments
-
-- **Next.js Team** - For the incredible React framework
-- **Vercel** - For hosting and deployment excellence
-- **Tailwind Labs** - For the utility-first CSS approach
-- **[shadcn/ui](https://ui.shadcn.com/)** - For beautiful, accessible components
-- **BetterAuth Team** - For the authentication solution
-- **Prisma Team** - For the type-safe ORM
-- **Neon Tech** - For serverless PostgreSQL
-- **Open Source Community** - For countless tools and libraries
-
-## 📞 Support
-
-For support, questions, or feedback:
-- **Issues**: [GitHub Issues](https://github.com/your-username/sneakora_tec/issues)
-- **Email**: support@sneakora_tec.com
-- **Documentation**: [Docs Site](https://docs.sneakora_tec.com)
-
----
-
-Built with ❤️ by the Sneakora_tec Team
-
-*Transforming the sneaker shopping experience, one step at a time.*
+This implementation delivers production-ready e-commerce functionality suitable for immediate deployment while maintaining extensibility for future feature enhancements and business requirement adaptations. The modular architecture supports independent module development and testing facilitating team-based development approaches.
