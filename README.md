@@ -1,343 +1,316 @@
-# 🏃‍♂️ Skechers Shoes Store
+# Sneakora_tec
 
-A modern, full-stack e-commerce web application for browsing and purchasing Skechers shoes. Built with Node.js, Express, and vanilla JavaScript with a beautiful, responsive UI featuring dynamic animations and interactive elements.
+A modern, full-stack e-commerce platform rebuilt from the ground up using Next.js 14+, TypeScript, and cutting-edge web technologies. This premium online shoe store features a complete redesign with sophisticated UI/UX, robust authentication, seamless shopping experience, and comprehensive admin capabilities.
 
-![Skechers Store Homepage](images/project_preview.png?updated=2025-12-03)
-*Homepage featuring SKECHERS branding, dynamic hero section with auto-switching shoe colors, and modern UI design*
+![Sneakora_tec Preview](public/images/shoe_cyan.png)
 
-![Project Status](https://img.shields.io/badge/status-active-success.svg)
-![Node Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+> **Note**: Replace the above image with actual screenshots of your application
 
 ## ✨ Features
 
-### 🎨 Frontend Features
-- **Modern UI Design** - Light theme with gradient accents and smooth animations
-- **Responsive Design** - Fully responsive across desktop, tablet, and mobile devices
-- **Dynamic Hero Section** - Auto-switching shoe images (4-second intervals) with manual color selection
-- **Deal Ribbon** - Animated countdown ribbon with random time-limited offers
-- **Interactive Color Switcher** - Click thumbnails to change hero shoe with smooth fade transitions
-- **Contact Page** - Comprehensive contact page with story section, Google Maps integration, and contact form
-- **Product Catalog** - Browse shoes by category with filters and search
-- **Product Details** - Detailed product pages with size selection
-- **Shopping Cart** - Add/remove items with persistent localStorage
-- **User Authentication** - Login and registration with secure sessions and toast notifications
-- **Toast Notifications** - Beautiful animated notifications for user actions (success, error, info)
-- **Loading Animations** - Smooth page transitions and loading states
-- **Circular Logo** - Custom SKH logo with circular styling in navbar
+### 🛒 Core E-commerce Functionality
+- **Product Catalog**: Browse shoes by category (Men, Women, Kids, Sports, Casual) with filtering and sorting
+- **Product Details**: Rich product pages with multiple images, size/color selection, pricing, and descriptions
+- **Shopping Cart**: Add/remove items, update quantities, persistent cart with localStorage
+- **Checkout Flow**: Multi-step checkout with shipping, payment, and order confirmation
+- **Order Management**: Order history, status tracking, and detailed order views
 
-### 🔧 Backend Features
-- **RESTful API** - Express.js server with clean API endpoints
-- **User Management** - SQLite database for user authentication
-- **Product Database** - JSON-based product storage
-- **Session Management** - Secure user sessions
-- **CORS Enabled** - Cross-origin resource sharing support
+### 🔐 Authentication & Security
+- **Multi-factor Authentication**: Email/password + Google & GitHub OAuth via BetterAuth
+- **Session Management**: Secure server-side sessions with automatic refresh
+- **Role-based Access**: Admin vs. user role protection for sensitive routes
+- **Protected Routes**: Middleware guarding /profile, /orders, /admin, and /checkout
 
-### 🎯 Key Functionalities
-- ✅ User registration and login with toast notifications
-- ✅ Automatic logout with personalized goodbye message
-- ✅ Browse products by category (Men, Women, Kids, Sports, Casual)
-- ✅ Search and filter products
-- ✅ Auto-switching hero shoe images every 4 seconds
-- ✅ Manual color selection with 4 color options (Pink, Cyan, Green, Purple)
-- ✅ Animated deal ribbon with random countdown timers
-- ✅ Smooth fade and scale transitions on image changes
-- ✅ Add products to cart with animations
-- ✅ Persistent cart using localStorage
-- ✅ Contact page with Google Maps integration
-- ✅ Responsive navigation with mobile support
-- ✅ Dynamic user greeting in navbar when logged in
+### 👤 User Experience
+- **Profile Management**: Personal information, order history, and wishlist management
+- **Wishlist System**: Save favorite items for later purchase
+- **Product Reviews**: Rate and review purchased products with star ratings
+- **Recently Viewed**: Track browsing history for personalized recommendations
+- **Responsive Design**: Fully responsive across mobile, tablet, and desktop devices
+
+### ⚙️ Admin Panel
+- **Product Management**: Complete CRUD operations for products with image upload
+- **Order Management**: View, filter, and update order statuses
+- **User Administration**: Manage user accounts and roles
+- **Coupon System**: Create and manage discount codes with usage limits
+- **Analytics Dashboard**: Sales metrics, top products, and customer insights
+
+### 📝 Content & Engagement
+- **Blog System**: Full-featured blog with categories, tags, and SEO optimization
+- **Newsletter Subscription**: Email capture for marketing campaigns
+- **Contact Form**: Spam-protected contact mechanism with admin notifications
+- **About Us Page**: Company story and brand information
+
+### 🛠️ Technical Excellence
+- **Modern Stack**: Next.js 14 App Router, TypeScript, Tailwind CSS v4, shadcn/ui
+- **Performance Optimized**: Image optimization, lazy loading, and code splitting
+- **Accessibility**: WCAG 2.1 compliant components and keyboard navigation
+- **SEO Friendly**: Metadata management, sitemap generation, and clean URLs
+- **Type Safety**: End-to-end TypeScript with strict mode enabled
+- **Error Handling**: Custom error pages (404, 500) and graceful degradation
+- **Testing Ready**: Structured for unit and integration testing
 
 ## 🚀 Tech Stack
 
 ### Frontend
-- **HTML5** - Semantic markup
-- **CSS3** - Modern styling with animations, flexbox, and grid
-- **JavaScript (ES6+)** - Vanilla JS for interactivity
-- **Google Fonts** - Outfit font family
+- **[Next.js 14](https://nextjs.org/)** - React framework with App Router
+- **[TypeScript](https://www.typescriptlang.org/)** - Static typing for JavaScript
+- **[Tailwind CSS v4](https://tailwindcss.com/)** - Utility-first CSS framework
+- **[shadcn/ui](https://ui.shadcn.com/)** - Beautiful, accessible components
+- **[Framer Motion](https://www.framer.com/motion/)** - Production-ready animations
+- **[Sonner](https://sonner.emilkowal.ski/)** - Toast notification system
+- **[Lucide Icons](https://lucide.dev/)** - Beautifully crafted SVG icons
 
-### Backend
-- **Node.js** - Runtime environment
-- **Express.js** - Web application framework
-- **SQLite3** - User database
-- **bcrypt** - Password hashing
-- **body-parser** - Request body parsing
+### Backend & Infrastructure
+- **[Next.js API Routes](https://nextjs.org/docs/api-routes/introduction)** - Serverless functions
+- **[BetterAuth](https://better-auth.com/)** - Full-stack authentication framework
+- **[Prisma ORM](https://www.prisma.io/)** - Type-safe database ORM
+- **[Neon PostgreSQL](https://neon.tech/)** - Serverless PostgreSQL database
+- **[Zod](https://zod.dev/)** - TypeScript-first schema validation
 
-### Tools & Libraries
-- **Three.js** - 3D graphics (optional)
-- **Custom Toast System** - Notification management
-- **Custom Loader** - Page transition animations
+### Development & Deployment
+- **[Vercel](https://vercel.com/)** - Optimized hosting for Next.js
+- **[ESLint](https://eslint.org/)** - Code quality and consistency
+- **[Prettier](https://prettier.io/)** - Code formatting
+- **[Husky](https://typicode.github.io/husky/)** - Git hooks for linting
+- **[Lint-Staged](https://github.com/okonet/lint-staged)** - Run linters on staged files
 
 ## 📁 Project Structure
 
 ```
-anigravityprojects/
-├── backend/
-│   ├── database.js          # SQLite user database setup
-│   └── products-db.js       # JSON product database
-├── css/
-│   ├── styles.css           # Main stylesheet (24KB+ with all features)
-│   ├── styles.css.backup    # Backup of previous styles
-│   ├── loader.css           # Loading animations
-│   └── toast.css            # Toast notification styles
-├── data/
-│   └── products.json        # Product data
-├── images/
-│   ├── hero_shoe_main.png   # Main hero shoe image
-│   ├── shoe_cyan.png        # Cyan color variant
-│   ├── shoe_pink.png        # Pink color variant
-│   ├── shoe_green.png       # Green color variant
-│   ├── shoe_purple.png      # Purple color variant
-│   ├── logo_skh.png         # SKH circular logo
-│   └── project_preview.png  # README preview image
-├── js/
-│   ├── app.js               # Main application logic
-│   ├── auth.js              # Authentication handling with logout
-│   ├── loader.js            # Page loading animations
-│   ├── toast.js             # Toast notification system
-│   ├── shoe-switcher.js     # Auto & manual shoe image switching
-│   └── home-3d.js           # Three.js 3D graphics (optional)
-├── index.html               # Homepage with hero section
-├── category.html            # Product catalog page
-├── product.html             # Product detail page
-├── cart.html                # Shopping cart page
-├── contact.html             # Contact page with map & form
-├── profile.html             # User profile page
-├── admin.html               # Admin panel
-├── server.js                # Express server
-├── package.json             # Dependencies
-└── README.md                # This file
+sneakora_tec/
+├── .app/                     # Next.js App Router pages
+│   ├── (auth)/               # Authentication routes (login, signup)
+│   ├── admin/                # Admin dashboard and management
+│   ├── api/                  # API routes (REST endpoints)
+│   ├── blog/                 # Blog listing and individual posts
+│   ├── cart/                 # Shopping cart functionality
+│   ├── checkout/             # Checkout flow and order confirmation
+│   ├── contact/              # Contact form and information
+│   ├── onboarding/           # User onboarding flow
+│   ├── order/                # Order history and details
+│   ├── profile/              # User profile and settings
+│   ├── shop/                 # Product catalog and listings
+│   ├── studio/               # Sanity CMS studio integration
+│   └── wishlist/             # Wishlist management
+├── components/               # Reusable UI components
+│   ├── admin/                # Admin-specific components
+│   ├── layout/               # Navigation, footer, sidebar
+│   ├── product/              # Product cards, details, filters
+│   ├── cart/                 # Cart items and summary
+│   ├── order/                # Order status and history components
+│   ├── profile/              # Profile settings and forms
+│   ├── shared/               # Cross-component utilities
+│   └── ui/                   # shadcn/ui wrapper components
+├── lib/                      # Utility functions and configurations
+│   ├── auth.ts               # BetterAuth configuration
+│   ├── db.ts                 # Prisma client instance
+│   ├── navigate.ts           # Navigation utilities
+│   ├── product-images.ts     # Product image constants
+│   └── utils.ts              # Helper functions
+├── prisma/                   # Database schema and migrations
+│   ├── schema.prisma         # Database models and relationships
+│   └── seed.ts               # Database seeding script
+├── public/                   # Static assets
+│   └── images/               # Product images, logos, icons
+├── .env.example              # Environment variables template
+├── components.json           # shadcn/ui configuration
+├── next.config.ts            # Next.js configuration
+├── tailwind.config.ts        # Tailwind CSS configuration
+├── tsconfig.json             # TypeScript configuration
+└── package.json              # Dependencies and scripts
 ```
 
-## 🛠️ Installation
+## 🛠️ Setup & Installation
 
 ### Prerequisites
-- Node.js (v14.0.0 or higher)
-- npm (comes with Node.js)
+- Node.js 18+ (LTS recommended)
+- npm or yarn
+- Git
+- Neon PostgreSQL account (free tier available)
+- GitHub and Google Developer accounts (for OAuth)
 
-### Steps
+### Installation Steps
 
-1. **Clone or download the project**
+1. **Clone the repository**
    ```bash
-   cd anigravityprojects
+   git clone https://github.com/your-username/sneakora_tec.git
+   cd sneakora_tec
    ```
 
 2. **Install dependencies**
    ```bash
    npm install
+   # or
+   yarn install
    ```
 
-3. **Start the server**
+3. **Configure environment variables**
    ```bash
-   node server.js
+   cp .env.example .env.local
+   ```
+   Edit `.env.local` with your actual values:
+   ```env
+   # Database
+   DATABASE_URL="postgresql://user:password@host:port/dbname?sslmode=require"
+
+   # BetterAuth
+   BETTER_AUTH_SECRET="your-32-character-random-string"
+   NEXT_PUBLIC_BETTER_AUTH_URL="http://localhost:3000"
+
+   # OAuth Providers (optional but recommended)
+   AUTH_GOOGLE_ID="your-google-client-id"
+   AUTH_GOOGLE_SECRET="your-google-client-secret"
+   AUTH_GITHUB_ID="your-github-client-id"
+   AUTH_GITHUB_SECRET="your-github-client-secret"
+
+   # Stripe (for payments)
+   STRIPE_SECRET_KEY="sk_test_..."
+   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+   STRIPE_WEBHOOK_SECRET="whsec_..."
+
+   # Email (Resend or SMTP)
+   RESEND_API_KEY="re_..."  # or SMTP credentials
+
+   # File Upload (UploadThing or Vercel Blob)
+   BLOB_READ_WRITE_TOKEN="your_vercel_blob_token"  # or UploadThing tokens
    ```
 
-4. **Open your browser**
-   Navigate to `http://localhost:3000`
+4. **Initialize the database**
+   ```bash
+   # Push schema to Neon
+   npx prisma db push
+   
+   # Seed with sample data
+   npx prisma db seed
+   ```
 
-## 📦 Dependencies
+5. **Start the development server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-```json
-{
-  "express": "^5.0.1",
-  "sqlite3": "^5.1.7",
-  "bcrypt": "^5.1.1",
-  "body-parser": "^1.20.3"
-}
+6. **Open your browser**
+   Visit `http://localhost:3000` to see the application running
+
+## 🌐 Deployment
+
+### Vercel (Recommended)
+1. Push your code to GitHub
+2. Import the project in [Vercel](https://vercel.com/new)
+3. Configure environment variables in Vercel dashboard
+4. Vercel will automatically build and deploy your application
+
+### Manual Deployment
+```bash
+# Build for production
+npm run build
+
+# Start production server
+npm start
 ```
 
-## 🎮 Usage
+## 🧪 Testing
 
-### For Users
+### Running Tests
+```bash
+# Run unit tests
+npm test
 
-1. **Browse Products**
-   - Visit the homepage to see featured products
-   - Navigate to Categories to view all products
-   - Use filters and search to find specific shoes
+# Run tests with coverage
+npm test -- --coverage
 
-2. **User Account**
-   - Click "Login" to create an account or sign in
-   - Register with name, email, and password
-   - Logout using the "Logout" button when logged in
-
-3. **Shopping**
-   - Click on any product to view details
-   - Select your size
-   - Click "Add to Cart"
-   - View cart and proceed to checkout
-
-4. **Interactive Features**
-   - On the homepage, click color thumbnails to change the hero shoe image
-   - Enjoy smooth animations and toast notifications
-
-## 🆕 Recent Changes & Improvements
-
-### Branding & Logo Updates
-- **SKH Circular Logo**: Replaced old logo with circular SKH logo (`logo_skh.png`) across all pages
-- **Consistent Branding**: Applied SKH logo to navbar on all pages (index, category, contact, cart, product, profile, admin)
-- **Circular Logo Styling**: Implemented 50px circular logo with proper object-fit and border-radius
-- **Footer Branding**: Updated footer with "SKECHERS" text branding for consistency
-
-### Hero Section Complete Redesign
-- **White Card Layout**: Hero shoe now displayed on elegant white background card with rounded corners (30px radius)
-- **Card Shadow Effects**: Added sophisticated shadow effects (0 20px 50px rgba) for depth
-- **Auto-Switching Shoe Images**: Hero shoe automatically cycles through 4 color variants (Pink, Cyan, Green, Purple) every 4 seconds
-- **Manual Color Selection**: Interactive color thumbnails allow instant manual switching between shoe colors
-- **Smooth Fade Transitions**: Implemented 0.3s opacity and scale transitions for seamless image changes
-- **Floating Animation**: Continuous float animation (translateY -20px) for dynamic shoe presentation
-- **Cyan Default**: Set cyan color as the default starting shoe color
-- **Enhanced Color Controls**: Redesigned color selector with white background, rounded corners, and hover effects
-
-### Deal Ribbon Feature
-- **Animated Deal Ribbon**: Modern gradient ribbon (135deg, #FF6B6B to #FFE66D) positioned on hero card
-- **Random Countdown Timer**: Displays random time-limited offers (1-12 hours remaining)
-- **Typewriter Animation**: Deal text appears with typewriter effect (50ms per character) on each shoe change
-- **Modern Styling**: Rounded corners (20px), shadow effects, and fire emoji icon for visual appeal
-- **Dynamic Updates**: Ribbon updates with new random countdown on every shoe color change
-
-### Contact Page (New)
-- **Dedicated Contact Page**: Created comprehensive `contact.html` with multiple sections
-- **Brand Story Section**: "Our Story" section introducing the Skechers Store brand and mission
-- **Google Maps Integration**: Embedded interactive Google Maps showing store location (Minneapolis)
-- **Contact Form**: Fully styled contact form with name, email, subject, and message fields
-- **Social Media Section**: Dedicated social media links section with emoji icons
-- **Responsive Layout**: Flexbox-based responsive layout with white card sections
-- **Consistent Styling**: Matches overall site design with rounded corners and shadow effects
-
-### Authentication & User Experience
-- **Logout Functionality**: Implemented logout button in navbar across all pages
-- **Personalized Logout**: Goodbye messages display user's name on logout
-- **Dynamic User Greeting**: Navbar shows "Hi, [Name]" when user is logged in
-- **Toast Notifications**: Beautiful animated notifications for login, logout, and user actions
-- **Session Management**: Persistent user sessions with proper state management
-
-### UI/UX Enhancements
-- **Rounded Modal Inputs**: Changed modal inputs from 8px to 50px border-radius for modern look
-- **Enhanced Focus States**: Added accent color borders and subtle focus rings on form inputs
-- **Improved Button Hover**: Lift effect (translateY -2px) and shadow on button hover
-- **Footer Gradient**: Dark gradient footer (135deg, #1a1a2e to #16213e) with improved contrast
-- **Link Hover Effects**: Footer links slide right (padding-left 5px) on hover
-- **Responsive Breakpoints**: Optimized for desktop (>1024px), tablet (768-1024px), and mobile (<768px)
-
-### Technical Improvements
-- **Shoe Switcher Script**: Created dedicated `shoe-switcher.js` (128 lines) for all image switching logic
-- **Auto-Switch Interval**: 4-second interval with proper cleanup on manual selection
-- **CSS Expansion**: Expanded `styles.css` to 1146 lines (24KB+) with comprehensive styling
-- **Image Assets**: Added 4 shoe color variants (pink, cyan, green, purple) and hero images
-- **Code Organization**: Modular JavaScript files (auth.js, toast.js, loader.js, shoe-switcher.js)
-- **Color Controls Styling**: Enhanced with backdrop-filter blur, white background, and shadow effects
-
-### For Developers
-
-#### API Endpoints
-
-**Authentication**
-- `POST /api/register` - Register new user
-- `POST /api/login` - User login
-
-**Products**
-- `GET /api/products` - Get all products
-
-#### Database Schema
-
-**Users Table (SQLite)**
-```sql
-CREATE TABLE users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
-)
+# Run end-to-end tests (if configured)
+npm run test:e2e
 ```
 
-**Products (JSON)**
-```json
-{
-  "id": 1,
-  "name": "Product Name",
-  "category": "Men/Women/Kids",
-  "price": 99.99,
-  "image": "image_url"
-}
+### Linting & Formatting
+```bash
+# Check for linting errors
+npm run lint
+
+# Automatically fix formatting issues
+npm run format
 ```
 
-## 🎨 Design Features
+## 📚 API Documentation
 
-### Color Palette
-- **Background**: `#F3F5F9` (Light gray)
-- **Text**: `#111111` (Near black)
-- **Accent**: `#d151e3` (Purple)
-- **Gradient Primary**: `linear-gradient(135deg, #c471ed 0%, #f64f59 100%)`
-- **Deal Ribbon**: `linear-gradient(135deg, #FF6B6B 0%, #FFE66D 100%)`
-- **Footer**: `linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)`
+### Authentication Endpoints
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/session` - Get current session
 
-### Typography
-- **Font Family**: Outfit (Google Fonts)
-- **Weights**: 300, 400, 600, 700
+### Product Endpoints
+- `GET /api/products` - Get all products (with filtering/pagination)
+- `GET /api/products/[id]` - Get single product by ID
+- `POST /api/products` - Create product (admin only)
+- `PUT /api/products/[id]` - Update product (admin only)
+- `DELETE /api/products/[id]` - Delete product (admin only)
 
-### Animations
-- **Float Animation**: Hero shoe floats up and down continuously
-- **Fade Transition**: 0.3s opacity and scale transitions on shoe changes
-- **Hover Effects**: Lift and shadow effects on buttons and cards
-- **Typewriter Effect**: Deal ribbon text types out character by character
+### Cart Endpoints
+- `GET /api/cart` - Get user's cart
+- `POST /api/cart` - Add item to cart
+- `PATCH /api/cart/[id]` - Update cart item quantity
+- `DELETE /api/cart/[id]` - Remove item from cart
 
-### Responsive Breakpoints
-- **Desktop**: > 1024px
-- **Tablet**: 768px - 1024px
-- **Mobile Landscape**: 481px - 768px
-- **Mobile Portrait**: < 480px
+### Order Endpoints
+- `GET /api/orders` - Get user's order history
+- `GET /api/orders/[id]` - Get specific order details
+- `POST /api/orders` - Create new order (checkout)
 
-## 🔐 Security Features
+### User Endpoints
+- `GET /api/profile` - Get user profile
+- `PUT /api/profile` - Update user profile
 
-- Password hashing with bcrypt
-- SQL injection prevention with parameterized queries
-- Session management
-- Input validation
+### Admin Endpoints (Require admin role)
+- `GET /api/admin/products` - List all products
+- `GET /api/admin/orders` - List all orders
+- `POST /api/admin/coupons` - Create coupon
+- `GET /api/admin/stats` - Get dashboard statistics
 
-## 🚧 Future Enhancements
+## 🤝 Contributing
 
-- [ ] Payment gateway integration (Stripe/PayPal)
-- [ ] Order management system with tracking
-- [ ] Product reviews and ratings system
-- [ ] Wishlist functionality
-- [ ] Email notifications for orders and promotions
-- [ ] Advanced admin dashboard with analytics
-- [ ] Real 3D product models with Three.js
-- [ ] Multi-language support (i18n)
-- [ ] Dark mode toggle
-- [ ] Size recommendation based on user preferences
-- [ ] Virtual try-on using AR technology
-- [ ] Live chat support
-- [ ] Product comparison feature
+We welcome contributions to make Sneakora_tec better! Please follow these guidelines:
 
-## 🐛 Known Issues
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
-- Contact form submission needs backend integration for email sending
-- Mobile navigation menu needs hamburger implementation for smaller screens
-- Cart persistence across sessions needs backend integration
-- Admin panel requires role-based access control implementation
-- Product detail page 3D view needs full Three.js implementation
+Please ensure your code follows our coding standards:
+- TypeScript strict mode
+- ESLint and Prettier configurations
+- Meaningful commit messages
+- Comprehensive testing for new features
 
-## 📝 License
+## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👨‍💻 Author
+## 👥 Acknowledgments
 
-**Saram Ali**
-- GitHub: [@SARAMALI15792](https://github.com/SARAMALI15792)
-- Email: saramali15792@gmail.com
-
-## 🙏 Acknowledgments
-
-- Skechers for brand inspiration
-- Google Fonts for typography
-- Three.js community for 3D graphics support
+- **Next.js Team** - For the incredible React framework
+- **Vercel** - For hosting and deployment excellence
+- **Tailwind Labs** - For the utility-first CSS approach
+- **[shadcn/ui](https://ui.shadcn.com/)** - For beautiful, accessible components
+- **BetterAuth Team** - For the authentication solution
+- **Prisma Team** - For the type-safe ORM
+- **Neon Tech** - For serverless PostgreSQL
+- **Open Source Community** - For countless tools and libraries
 
 ## 📞 Support
 
-For support, email saramali15792@gmail.com or open an issue in the repository.
+For support, questions, or feedback:
+- **Issues**: [GitHub Issues](https://github.com/your-username/sneakora_tec/issues)
+- **Email**: support@sneakora_tec.com
+- **Documentation**: [Docs Site](https://docs.sneakora_tec.com)
 
 ---
 
+Built with ❤️ by the Sneakora_tec Team
 
+*Transforming the sneaker shopping experience, one step at a time.*
