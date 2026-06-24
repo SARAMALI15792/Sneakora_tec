@@ -12,7 +12,7 @@
 |------|------|----------|-------|
 | 0.1 | Context7 MCP configured | ✅ | — |
 | 0.2 | Branch `feat/nextjs-rebuild` created | ✅ | — |
-| 0.3 | 24 skills installed in `.opencode/skills/` | ✅ | — |
+| 0.3 | 29 skills installed in `.opencode/skills/` | ✅ | — |
 | 0.4 | AGENTS.md / Constitution loaded | ✅ | — |
 
 ---
@@ -669,43 +669,43 @@ Uses `stripe.webhooks.constructEvent()` to verify signature against `STRIPE_WEBH
 
 | Step | Task | Context7 | Skill |
 |------|------|----------|-------|
-| 10.1 | Research Gemini AI SDK for Next.js + RAG | ✅ | — |
-| 10.2 | Research Gemini File Search / embeddings | ✅ | — |
-| 10.3 | Install `@google/generative-ai` + `ai` packages | | — |
-| 10.4 | Create `src/lib/gemini.ts` (Gemini client config) | | — |
-| 10.5 | Create `prisma/schema.prisma` (add VectorStore model) | | — |
-| 10.6 | Run migration for pgvector setup on Neon | | — |
-| 10.7 | Create `app/api/rag/embed/product/route.ts` | | — |
-| 10.8 | Create `app/api/rag/embed/order/route.ts` | | — |
-| 10.9 | Create `app/api/rag/embed/blog/route.ts` | | — |
-| 10.10 | Create `app/api/rag/embed/batch/route.ts` (bulk seed) | | — |
-| 10.11 | Create `app/api/rag/query/route.ts` (streaming RAG) | | — |
-| 10.12 | Create `components/rag/RAGProvider.tsx` | | — |
+| 10.1 | Research Gemini AI SDK for Next.js + RAG | ✅ | `rag-implementation` |
+| 10.2 | Research Gemini File Search / embeddings | ✅ | `rag-implementation` |
+| 10.3 | Install `@google/generative-ai` + `ai` packages | | `rag-implementation` |
+| 10.4 | Create `src/lib/gemini.ts` (Gemini client config) | | `rag-implementation` |
+| 10.5 | Create `prisma/schema.prisma` (add VectorStore model + pgvector) | | `supabase-postgres-best-practices` |
+| 10.6 | Run migration for pgvector setup on Neon | | `supabase-postgres-best-practices` |
+| 10.7 | Create `app/api/rag/embed/product/route.ts` | | `rag-implementation` |
+| 10.8 | Create `app/api/rag/embed/order/route.ts` | | `rag-implementation` |
+| 10.9 | Create `app/api/rag/embed/blog/route.ts` | | `rag-implementation` |
+| 10.10 | Create `app/api/rag/embed/batch/route.ts` (bulk seed) | | `rag-implementation` |
+| 10.11 | Create `app/api/rag/query/route.ts` (streaming RAG) | | `rag-implementation` |
+| 10.12 | Create `components/rag/RAGProvider.tsx` | | `vercel-react-best-practices` |
 | 10.13 | Create `components/rag/RAGWidget.tsx` (floating chat) | | `high-end-visual-design` |
-| 10.14 | Create `components/rag/RAGMessage.tsx` | | — |
-| 10.15 | Create `components/rag/RAGTypingIndicator.tsx` | | — |
+| 10.14 | Create `components/rag/RAGMessage.tsx` | | `vercel-react-best-practices` |
+| 10.15 | Create `components/rag/RAGTypingIndicator.tsx` | | `high-end-visual-design` |
 | 10.16 | Create `components/rag/QuickActions.tsx` | | — |
-| 10.17 | Integrate RAGWidget into `src/app/layout.tsx` | | — |
-| 10.18 | Install `react-email` + `@react-email/components` | | — |
-| 10.19 | Create `src/emails/VerificationEmail.tsx` | | — |
-| 10.20 | Create `src/emails/WelcomeEmail.tsx` | | — |
-| 10.21 | Create `src/emails/PasswordResetEmail.tsx` | | — |
-| 10.22 | Create `src/emails/OrderConfirmation.tsx` | | — |
-| 10.23 | Create `src/emails/OrderShipped.tsx` | | — |
-| 10.24 | Create `src/emails/OrderDelivered.tsx` | | — |
-| 10.25 | Create `src/emails/OrderCancelled.tsx` | | — |
+| 10.17 | Integrate RAGWidget into `src/app/layout.tsx` | | `vercel-react-best-practices` |
+| 10.18 | Install `react-email` + `@react-email/components` | | `react-email` |
+| 10.19 | Create `src/emails/VerificationEmail.tsx` | | `react-email` |
+| 10.20 | Create `src/emails/WelcomeEmail.tsx` | | `react-email` |
+| 10.21 | Create `src/emails/PasswordResetEmail.tsx` | | `react-email` |
+| 10.22 | Create `src/emails/OrderConfirmation.tsx` | | `react-email` |
+| 10.23 | Create `src/emails/OrderShipped.tsx` | | `react-email` |
+| 10.24 | Create `src/emails/OrderDelivered.tsx` | | `react-email` |
+| 10.25 | Create `src/emails/OrderCancelled.tsx` | | `react-email` |
 | 10.26 | Update `src/lib/auth.ts` with Better Auth email config | ✅ | `email-and-password-best-practices` |
-| 10.27 | Create `app/api/verify-email/route.ts` (AI validation) | | — |
-| 10.28 | Update webhook handler to send order emails on state changes | | — |
+| 10.27 | Create `app/api/verify-email/route.ts` (AI validation) | | `email-service-integration` |
+| 10.28 | Update webhook handler to send order emails on state changes | | `email-service-integration` |
 | 10.29 | Create `components/shared/PremiumLoader.tsx` | | `high-end-visual-design` |
-| 10.30 | Create `components/shared/StatusLoader.tsx` | | — |
-| 10.31 | Create `components/shared/ProgressBar.tsx` | | — |
-| 10.32 | Create `components/shared/SkeletonCard.tsx` | | — |
-| 10.33 | Create `components/shared/SpinnerOverlay.tsx` | | — |
-| 10.34 | Integrate StatusLoader into checkout flow | | — |
-| 10.35 | Integrate loaders into auth forms | | — |
+| 10.30 | Create `components/shared/StatusLoader.tsx` | | `high-end-visual-design` |
+| 10.31 | Create `components/shared/ProgressBar.tsx` | | `high-end-visual-design` |
+| 10.32 | Create `components/shared/SkeletonCard.tsx` | | `high-end-visual-design` |
+| 10.33 | Create `components/shared/SpinnerOverlay.tsx` | | `high-end-visual-design` |
+| 10.34 | Integrate StatusLoader into checkout flow | | `vercel-react-best-practices` |
+| 10.35 | Integrate loaders into auth forms | | `vercel-react-best-practices` |
 | 10.36 | Document Stripe key setup in `.env.example` | ✅ | — |
-| 10.37 | Create `app/api/webhooks/stripe/route.ts` | | — |
+| 10.37 | Create `app/api/webhooks/stripe/route.ts` | | `email-service-integration` |
 
 **Files to produce (Phase 10):**
 - `src/lib/gemini.ts`
