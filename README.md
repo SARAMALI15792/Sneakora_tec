@@ -1,63 +1,126 @@
-Sneakora_tec
+# Sneakora_tec 👟
 
-A modern, full-stack e-commerce platform rebuilt from the ground up using Next.js 14+, TypeScript, and cutting-edge web technologies. This premium online shoe store features a complete redesign with sophisticated UI/UX, robust authentication, seamless shopping experience, and comprehensive admin capabilities.
+### Premium Full-Stack E-Commerce Platform for Modern Retail
 
-Overview
+![Next.js](https://img.shields.io/badge/Next.js-14+-black?style=for-the-badge\&logo=nextdotjs)
+![TypeScript](https://img.shields.io/badge/TypeScript-Blue?style=for-the-badge\&logo=typescript)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC?style=for-the-badge\&logo=tailwindcss)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?style=for-the-badge\&logo=postgresql)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge\&logo=prisma)
+![BetterAuth](https://img.shields.io/badge/Auth-BetterAuth-green?style=for-the-badge)
+![Vercel](https://img.shields.io/badge/Deploy-Vercel-black?style=for-the-badge\&logo=vercel)
 
-Sneakora_tec represents a complete evolution from traditional e-commerce platforms to a modern, scalable solution built for performance and user experience. The application leverages the latest web technologies to deliver a fast, secure, and engaging shopping experience while providing administrators with powerful tools for store management.
+**Sneakora_tec** is a modern full-stack e-commerce platform built with **Next.js 14+, TypeScript, and cutting-edge web technologies**. Designed as a premium online shoe store, it delivers a fast, secure, and seamless shopping experience with powerful admin controls and a refined user interface.
 
-Core E-commerce Functionality
+## Overview
 
-The platform provides a complete online shopping experience including product browsing, detailed product views, cart management, and streamlined checkout processes. Users can explore products by category, apply filters and sorting options, view detailed product information with multiple images and specifications, and manage their shopping cart with ease. The checkout process guides users through shipping and payment steps to order completion with confirmation.
+Sneakora_tec reimagines traditional e-commerce by focusing on **performance, scalability, and user experience**. The platform supports complete online shopping workflows while giving administrators robust tools to manage products, orders, users, and analytics efficiently.
 
-Authentication and Security
+## Core Features
 
-Security is implemented through multi-factor authentication supporting email/password credentials as well as Google and GitHub OAuth providers via BetterAuth. Session management utilizes secure server-side storage with automatic token refresh mechanisms. Role-based access control distinguishes between standard users and administrators, protecting sensitive routes through middleware protection. All authentication flows implement industry-standard security practices including secure password handling and session validation.
+### Customer Experience
 
-User Experience Features
+* Product browsing with categories, filters, and sorting
+* Detailed product pages with images and specifications
+* Shopping cart and smooth checkout flow
+* Wishlist and recently viewed products
+* Product reviews and ratings
+* Order history and profile management
+* Fully responsive across desktop, tablet, and mobile
 
-Registered users benefit from personalized profile management capabilities including order history review and wishlist functionality. The wishlist system allows users to save products of interest for future consideration. Product reviews enable verified purchasers to share feedback through star ratings and written comments. Recently viewed tracking enhances the shopping experience by maintaining browsing history for personalized recommendations. The responsive design ensures consistent functionality and appearance across mobile, tablet, and desktop devices.
+### Authentication & Security
 
-Administrative Capabilities
+* Secure email/password authentication
+* Google & GitHub OAuth via BetterAuth
+* Session management with token refresh
+* Role-based access control (User/Admin)
+* Protected routes using middleware security
 
-Administrators access a comprehensive dashboard for store management operations. Product management includes full create, read, update, and delete functionality with image upload support. Order management provides viewing, filtering, and status update capabilities. User administration enables account oversight and role assignment. The coupon system facilitates creation and management of promotional codes with configurable usage limits and expiration dates. Analytics deliver insights into sales performance, popular products, and customer behavior patterns.
+### Admin Dashboard
 
-Content and Engagement Features
+* Product CRUD management with image uploads
+* Order tracking and status updates
+* User management and role assignment
+* Coupon creation with expiry and usage limits
+* Sales analytics and business insights
 
-The platform incorporates content management through an integrated blog system supporting categories, tagging, and search engine optimization. Newsletter functionality enables email capture for marketing communications. A contact form provides visitors with a secure method to submit inquiries while protecting against spam submissions. An About Us page communicates brand story and values to visitors.
+### Content & Engagement
 
-Technical Implementation
+* SEO-friendly blog system
+* Newsletter subscription system
+* Contact form with spam protection
+* About page for brand identity
 
-Built on Next.js 14 with the App Router architecture, the application utilizes TypeScript for type safety throughout the codebase. Styling employs Tailwind CSS v4 with shadcn/ui components for consistent, accessible user interfaces. Animation capabilities are provided through Framer Motion while Sonner handles notification display. Iconography relies on the Lucide icon set for visual consistency.
+## Tech Stack
 
-Server-side functionality leverages Next.js API Routes for backend services, integrated with BetterAuth for comprehensive authentication management. Data persistence utilizes Prisma ORM connected to a Neon PostgreSQL database instance. Schema validation employs Zod for type-safe data handling. The application follows modern web development practices including code splitting, lazy loading, and performance optimization techniques.
+### Frontend
 
-Development and Deployment
+* **Next.js 14 (App Router)**
+* **React + TypeScript**
+* **Tailwind CSS v4**
+* **shadcn/ui**
+* **Framer Motion**
+* **Lucide Icons**
+* **Sonner Notifications**
 
-The development environment incorporates ESLint for code quality maintenance and Prettier for consistent code formatting. Husky manages git hooks to enforce pre-commit checks while lint-staged runs linters on staged files. Deployment is optimized for Vercel hosting with seamless integration for Next.js applications. Environment variable management follows security best practices with separate configuration for development and production environments.
+### Backend
 
-Getting Started
+* **Next.js API Routes**
+* **BetterAuth**
+* **Prisma ORM**
+* **Neon PostgreSQL**
+* **Zod Validation**
 
-Initialization requires Node.js 18 or later, npm or yarn package manager, and a Git client. A Neon PostgreSQL account provides database hosting while Google and GitHub developer accounts enable OAuth functionality (optional but recommended).
+## Development & Deployment
 
-The setup process begins with repository cloning followed by dependency installation. Environment configuration involves copying the example environment file and populating required values including database connection strings, authentication secrets, and optional service credentials. Database initialization executes through Prisma commands to deploy the schema and populate initial data. Development server startup enables local testing at the default localhost port.
+The project follows modern engineering standards with:
 
-Production deployment follows standard Next.js build procedures with Vercel offering optimized hosting configuration. Environment variables must be properly configured in the hosting environment prior to deployment.
+* ESLint + Prettier for code quality
+* Husky + lint-staged for pre-commit checks
+* Optimized deployment on **Vercel**
+* Secure environment variable management
 
-Technical Specifications
+## API & Database Architecture
 
-The application implements RESTful API design principles for all backend endpoints organized under logical resource groupings. Authentication endpoints manage user registration, login, session handling, and logout procedures. Product endpoints support catalog browsing, individual product retrieval, and administrative product management operations. Cart functionality enables item addition, quantity modification, and removal. Order processing encompasses history retrieval, detailed order viewing, and creation through checkout completion.
+The backend follows **RESTful API principles** with organized endpoints for:
 
-User profile endpoints facilitate information retrieval and updates. Administrative endpoints provide access to product inventory management, order oversight, user administration, coupon management, and system analytics reporting. All protected endpoints enforce appropriate authentication and authorization requirements.
+* Authentication
+* Products
+* Cart
+* Orders
+* User Profiles
+* Admin Operations
+* Analytics
 
-Database schema design incorporates normalized tables for users, accounts, sessions, and verification tokens alongside e-commerce specific entities for products, orders, order items, cart items, reviews, wishlist items, coupons, blog posts, and newsletter subscriptions. Relationships maintain data integrity while supporting efficient query patterns.
+The database schema is fully normalized and includes models for:
 
-The frontend architecture follows React best practices with functional components, custom hooks for reusable logic, and proper state management strategies. Component organization separates concerns between layout structures, page-specific elements, and reusable user interface elements. Styling approaches utility-first classes with custom extensions for brand-specific design elements.
+* Users & Sessions
+* Products
+* Orders & Order Items
+* Cart Items
+* Reviews
+* Wishlist
+* Coupons
+* Blog Posts
+* Newsletter Subscribers
 
-Project Organization
+## Project Structure
 
-File organization separates concerns into logical groupings including application pages within the app directory, reusable components in components, utility functions and configurations in lib, database schema and migration files in prisma, and static assets in public. Configuration files reside in the project root with documentation and metadata files providing project context.
+```bash
+app/          # Application routes & pages
+components/   # Reusable UI components
+lib/          # Utilities & configs
+prisma/       # Database schema & migrations
+public/       # Static assets
+```
 
-Development workflow emphasizes clean commit messages, comprehensive testing coverage, and documentation updates accompanying feature implementations. Code review processes maintain quality standards while continuous integration practices validate changes prior to integration.
+## Highlights
 
-This implementation delivers production-ready e-commerce functionality suitable for immediate deployment while maintaining extensibility for future feature enhancements and business requirement adaptations. The modular architecture supports independent module development and testing facilitating team-based development approaches.
+✔ Production-ready architecture
+✔ Scalable modular design
+✔ Modern UI/UX
+✔ Secure authentication
+✔ High-performance rendering
+✔ Easy future extensibility
+
+Sneakora_tec is built for real-world deployment, offering a complete production-grade e-commerce solution with clean architecture and excellent developer experience.
