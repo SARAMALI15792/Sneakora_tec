@@ -132,6 +132,7 @@ export function Navbar() {
   }, [session]);
 
   async function handleSignOut() {
+    document.cookie = "sneakora_recently_viewed=; path=/; max-age=0";
     await authClient.signOut({
       fetchOptions: { onSuccess: () => router.push("/") },
     });

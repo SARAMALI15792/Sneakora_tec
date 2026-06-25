@@ -16,7 +16,7 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {
-      await sendEmail({
+      const result = await sendEmail({
         to: user.email,
         subject: "Reset Your Password - Sneakora",
         react: PasswordResetEmail({
@@ -24,11 +24,14 @@ export const auth = betterAuth({
           resetUrl: url,
         }),
       });
+      if (result && "error" in result) {
+        console.warn("[Auth] Password reset email not sent:", result.error);
+      }
     },
   },
   emailVerification: {
     sendVerificationEmail: async ({ user, url }) => {
-      await sendEmail({
+      const result = await sendEmail({
         to: user.email,
         subject: "Verify Your Email - Sneakora",
         react: VerificationEmail({
@@ -36,6 +39,9 @@ export const auth = betterAuth({
           verificationUrl: url,
         }),
       });
+      if (result && "error" in result) {
+        console.warn("[Auth] Verification email not sent:", result.error);
+      }
     },
     sendOnSignUp: true,
     expiresIn: 3600,
@@ -85,14 +91,13 @@ export const auth = betterAuth({
           },
           after: async (user) => {
             if (user.email) {
-              try {
-                await sendEmail({
-                  to: user.email,
-                  subject: "Welcome to Sneakora!",
-                  react: WelcomeEmail({ name: user.name || "Sneakora Fan" }),
-                });
-              } catch (err) {
-                console.error("[Auth] Failed to send welcome email:", err);
+              const result = await sendEmail({
+                to: user.email,
+                subject: "Welcome to Sneakora!",
+                react: WelcomeEmail({ name: user.name || "Sneakora Fan" }),
+              });
+              if (result && "error" in result) {
+                console.warn("[Auth] Welcome email not sent:", result.error);
               }
             }
             return {};

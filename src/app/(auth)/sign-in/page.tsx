@@ -32,6 +32,7 @@ export default function SignInPage() {
       { email, password, callbackURL: "/" },
       {
         onSuccess: () => {
+          document.cookie = "sneakora_recently_viewed=; path=/; max-age=0";
           toast.success("Welcome back", {
             description: "You've been signed in successfully.",
           });

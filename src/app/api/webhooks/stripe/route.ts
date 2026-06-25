@@ -60,7 +60,7 @@ async function sendOrderConfirmation(order: OrderWithUser) {
   const estimatedDelivery = new Date(order.createdAt);
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 5);
 
-  await sendEmail({
+  const result = await sendEmail({
     to: order.user.email,
     subject: `Order Confirmed - #${order.id} - Sneakora`,
     react: OrderConfirmationEmail({
@@ -79,6 +79,10 @@ async function sendOrderConfirmation(order: OrderWithUser) {
       }),
     }),
   });
+
+  if (result && "error" in result) {
+    console.warn(`[Webhook] Order confirmation email failed for ${order.id}:`, result.error);
+  }
 }
 
 async function sendOrderShipped(order: OrderWithUser, trackingNumber: string, carrier: string) {
@@ -87,7 +91,7 @@ async function sendOrderShipped(order: OrderWithUser, trackingNumber: string, ca
   const estimatedDelivery = new Date();
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 3);
 
-  await sendEmail({
+  const result = await sendEmail({
     to: order.user.email,
     subject: `Your Order Has Shipped! - #${order.id} - Sneakora`,
     react: OrderShippedEmail({
@@ -103,12 +107,16 @@ async function sendOrderShipped(order: OrderWithUser, trackingNumber: string, ca
       }),
     }),
   });
+
+  if (result && "error" in result) {
+    console.warn(`[Webhook] Order shipped email failed for ${order.id}:`, result.error);
+  }
 }
 
 async function sendOrderDelivered(order: OrderWithUser) {
   if (!order.user) return;
 
-  await sendEmail({
+  const result = await sendEmail({
     to: order.user.email,
     subject: `Your Order Has Been Delivered! - #${order.id} - Sneakora`,
     react: OrderDeliveredEmail({
@@ -121,6 +129,10 @@ async function sendOrderDelivered(order: OrderWithUser) {
       }),
     }),
   });
+
+  if (result && "error" in result) {
+    console.warn(`[Webhook] Order delivered email failed for ${order.id}:`, result.error);
+  }
 }
 
 async function sendOrderCancelled(order: OrderWithUser, reason?: string) {
@@ -129,7 +141,7 @@ async function sendOrderCancelled(order: OrderWithUser, reason?: string) {
   const refundDate = new Date();
   refundDate.setDate(refundDate.getDate() + 7);
 
-  await sendEmail({
+  const result = await sendEmail({
     to: order.user.email,
     subject: `Order Cancelled - #${order.id} - Sneakora`,
     react: OrderCancelledEmail({
@@ -144,6 +156,10 @@ async function sendOrderCancelled(order: OrderWithUser, reason?: string) {
       reason,
     }),
   });
+
+  if (result && "error" in result) {
+    console.warn(`[Webhook] Order cancelled email failed for ${order.id}:`, result.error);
+  }
 }
 
 export async function POST(request: NextRequest) {

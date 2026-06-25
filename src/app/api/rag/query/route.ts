@@ -45,6 +45,7 @@ Guidelines:
 - Focus on helping users make informed purchasing decisions
 - Never make up product information or prices
 - Be concise but thorough in your responses
+- Format prices with $ and use bullet points for lists
 
 Context from the store will be provided below. Use it to answer user questions accurately.`;
 }
@@ -56,7 +57,6 @@ function buildContextPrompt(chunks: Array<{ chunkText: string; metadata: Record<
 
   const contextSections = chunks.map((chunk, index) => {
     const sourceType = chunk.metadata?.sourceType as string;
-
     return `[Context ${index + 1}] (${sourceType}): ${chunk.chunkText}`;
   });
 
@@ -64,6 +64,21 @@ function buildContextPrompt(chunks: Array<{ chunkText: string; metadata: Record<
     "Relevant information from the store:\n\n" +
     contextSections.join("\n\n")
   );
+}
+
+function sendStatus(controller: ReadableStreamDefaultController, encoder: TextEncoder, text: string) {
+  controller.enqueue(
+    encoder.encode(`data: ${JSON.stringify({ type: "status", text })}\n\n`)
+  );
+}
+
+function sendError(controller: ReadableStreamDefaultController, encoder: TextEncoder, message: string) {
+  controller.enqueue(
+    encoder.encode(
+      `data: ${JSON.stringify({ type: "error", text: message, done: true })}\n\n`
+    )
+  );
+  controller.close();
 }
 
 export async function POST(request: NextRequest) {
@@ -80,64 +95,96 @@ export async function POST(request: NextRequest) {
 
     const { query, userId, conversationHistory = [] } = parsed.data;
 
-    const queryEmbedding = await embedText(query, "RETRIEVAL_QUERY");
-
-    const allVectors = await prisma.vectorStore.findMany({
-      where: userId ? { userId } : undefined,
-    });
-
-    const scoredChunks = allVectors
-      .map((v) => ({
-        ...v,
-        score: cosineSimilarity(queryEmbedding, v.embedding),
-      }))
-      .filter((v) => v.score > 0.3)
-      .sort((a, b) => b.score - a.score)
-      .slice(0, 10);
-
-    const contextPrompt = buildContextPrompt(
-      scoredChunks.map((v) => ({
-        chunkText: v.chunkText,
-        metadata: v.metadata as Record<string, unknown>,
-      }))
-    );
-
-    const systemPrompt = buildSystemPrompt();
-
-    let fullPrompt = `${systemPrompt}\n\n${contextPrompt}\n\n`;
-
-    for (const message of conversationHistory) {
-      fullPrompt += `${message.role === "user" ? "User" : "Assistant"}: ${message.content}\n`;
-    }
-
-    fullPrompt += `User: ${query}\nAssistant:`;
-
     const encoder = new TextEncoder();
 
     const stream = new ReadableStream({
       async start(controller) {
         try {
+          sendStatus(controller, encoder, "Analyzing your query...");
+
+          const queryEmbedding = await embedText(query, "RETRIEVAL_QUERY");
+
+          sendStatus(controller, encoder, "Searching products and content...");
+
+          const allVectors = await prisma.vectorStore.findMany({
+            where: userId
+              ? {
+                  OR: [
+                    { sourceType: { in: ["product", "blog"] } },
+                    { sourceType: "order", userId },
+                  ],
+                }
+              : {
+                  sourceType: { in: ["product", "blog"] },
+                },
+            take: 500,
+          });
+
+          sendStatus(controller, encoder, "Finding the best matches...");
+
+          const scoredChunks = allVectors
+            .map((v) => ({
+              ...v,
+              score: cosineSimilarity(queryEmbedding, v.embedding),
+            }))
+            .filter((v) => v.score > 0.25)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 8);
+
+          const contextPrompt = buildContextPrompt(
+            scoredChunks.map((v) => ({
+              chunkText: v.chunkText,
+              metadata: v.metadata as Record<string, unknown>,
+            }))
+          );
+
+          const systemPrompt = buildSystemPrompt();
+
+          let fullPrompt = `${systemPrompt}\n\n${contextPrompt}\n\n`;
+
+          for (const message of conversationHistory) {
+            fullPrompt += `${message.role === "user" ? "User" : "Assistant"}: ${message.content}\n`;
+          }
+
+          fullPrompt += `User: ${query}\nAssistant:`;
+
+          sendStatus(controller, encoder, "Generating response...");
+
           let assistantMessage = "";
 
-          for await (const chunk of generateStream(fullPrompt)) {
-            assistantMessage += chunk;
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ text: chunk, done: false })}\n\n`)
-            );
+          try {
+            for await (const chunk of generateStream(fullPrompt)) {
+              assistantMessage += chunk;
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify({ text: chunk, done: false })}\n\n`)
+              );
+            }
+          } catch (genError: unknown) {
+            const err = genError as { status?: number; message?: string };
+            if (err.status === 429 || err.message?.includes("quota")) {
+              sendError(
+                controller,
+                encoder,
+                "The AI service is temporarily overloaded. Please try again in a moment."
+              );
+              return;
+            }
+            throw genError;
           }
 
           controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify({ text: "", done: true, fullResponse: assistantMessage })}\n\n`)
+            encoder.encode(
+              `data: ${JSON.stringify({ text: "", done: true, fullResponse: assistantMessage })}\n\n`
+            )
           );
           controller.close();
         } catch (error) {
           console.error("Stream error:", error);
-          controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({ error: "Failed to generate response", done: true })}\n\n`
-            )
+          sendError(
+            controller,
+            encoder,
+            "I encountered an error while processing your request. Please try again."
           );
-          controller.close();
         }
       },
     });

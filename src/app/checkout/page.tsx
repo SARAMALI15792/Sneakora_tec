@@ -2,7 +2,6 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import Image from "next/image";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   Elements,
@@ -11,16 +10,18 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import {
-  Shield,
   Lock,
   Truck,
   RefreshCw,
   ShoppingBag,
+  ChevronLeft,
+  Shield,
+  CreditCard,
 } from "lucide-react";
 import { ProgressBar } from "@/components/shared/ProgressBar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Logo } from "@/components/brand/Logo";
-import { LogoIcon } from "@/components/brand/LogoIcon";
+import { SneakerSlideshow } from "@/components/shared/SneakerSlideshow";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
@@ -33,10 +34,8 @@ const TRUST_BADGES = [
 ];
 
 function PaymentForm({
-  clientSecret,
   onBack,
 }: {
-  clientSecret: string;
   onBack: () => void;
 }) {
   const stripe = useStripe();
@@ -81,14 +80,14 @@ function PaymentForm({
         </div>
       )}
 
-      <div className="flex items-center gap-3 pt-2">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:pt-2">
         <button
           type="button"
           onClick={onBack}
           disabled={loading}
-          className="flex h-12 items-center gap-2 rounded-xl border border-border/50 px-5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 disabled:opacity-50"
+          className="flex h-12 items-center justify-center gap-2 rounded-xl border border-border/50 px-5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted/50 disabled:opacity-50"
         >
-          <ShoppingBag className="size-4" />
+          <ChevronLeft className="size-4" />
           Back to cart
         </button>
         <button
@@ -98,8 +97,10 @@ function PaymentForm({
         >
           {loading ? (
             <div className="size-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-          ) : null}
-          {loading ? "Processing..." : `Pay now`}
+          ) : (
+            <Lock className="size-4" />
+          )}
+          {loading ? "Processing..." : "Pay now"}
         </button>
       </div>
 
@@ -164,7 +165,7 @@ function CheckoutContent() {
     return (
       <div className="grid min-h-dvh md:grid-cols-2">
         <div className="hidden md:block bg-muted/30" />
-        <div className="flex items-center justify-center p-8">
+        <div className="flex items-center justify-center p-6 md:p-10">
           <div className="w-full max-w-md space-y-6">
             <Skeleton className="h-8 w-48" />
             <Skeleton className="h-4 w-64" />
@@ -179,17 +180,15 @@ function CheckoutContent() {
 
   if (error) {
     return (
-      <div className="grid min-h-dvh md:grid-cols-2">
-        <div className="hidden md:relative md:block overflow-hidden bg-zinc-950">
-          <Image
-            src="https://images.unsplash.com/photo-1552346154-21d32810aba3?w=1200&q=85&auto=format"
-            alt="Sneakers"
-            fill
-            className="object-cover opacity-40"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-transparent" />
-          <div className="absolute bottom-10 left-10 right-10">
+      <div className="flex min-h-dvh flex-col md:grid md:grid-cols-2">
+        {/* Mobile: compact slideshow */}
+        <div className="relative h-48 w-full overflow-hidden bg-zinc-950 md:hidden">
+          <SneakerSlideshow />
+        </div>
+        <div className="relative hidden overflow-hidden bg-zinc-950 md:block">
+          <SneakerSlideshow />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/50 to-transparent z-10" />
+          <div className="absolute bottom-10 left-10 right-10 z-10">
             <div className="text-white">
               <Logo size="lg" />
             </div>
@@ -198,7 +197,7 @@ function CheckoutContent() {
             </p>
           </div>
         </div>
-        <div className="flex items-center justify-center p-8">
+        <div className="flex items-center justify-center p-6 md:p-10">
           <div className="w-full max-w-md text-center">
             <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-red-500/10">
               <ShoppingBag className="size-8 text-red-500" />
@@ -218,19 +217,12 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="grid min-h-dvh md:grid-cols-2">
-      {/* Left Side — Brand Banner */}
+    <div className="flex min-h-dvh flex-col md:grid md:grid-cols-2">
+      {/* Left Side — Brand Banner with rotating sneakers (desktop) */}
       <div className="relative hidden overflow-hidden bg-zinc-950 md:block">
-        <Image
-          src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=1200&q=85&auto=format"
-          alt="Premium sneakers"
-          fill
-          className="object-cover opacity-50"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/30 via-zinc-950/60 to-zinc-950" />
+        <SneakerSlideshow />
 
-        <div className="absolute inset-0 flex flex-col justify-between p-10">
+        <div className="absolute inset-0 flex flex-col justify-between p-10 z-10">
           <div>
             <div className="text-white/90">
               <Logo size="sm" />
@@ -266,14 +258,15 @@ function CheckoutContent() {
       </div>
 
       {/* Right Side — Payment Form */}
-      <div className="flex items-start justify-center overflow-y-auto p-6 pt-16 md:p-10 md:pt-20">
+      <div className="flex items-start justify-center overflow-y-auto p-5 pt-6 md:p-12 md:pt-24">
         <div className="w-full max-w-md">
-          <div className="md:hidden mb-6">
-            <Logo size="sm" />
+          {/* Mobile: compact slideshow */}
+          <div className="relative mb-6 h-32 w-full overflow-hidden rounded-xl bg-zinc-950 md:hidden">
+            <SneakerSlideshow />
           </div>
 
-          <div className="mb-8">
-            <p className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
+          <div className="mb-6 md:mb-8">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
               Secure checkout
             </p>
             <h1 className="font-heading mt-2 text-2xl font-bold tracking-tight">
@@ -285,7 +278,7 @@ function CheckoutContent() {
           </div>
 
           {orderData && (
-            <div className="mb-8 space-y-3 rounded-xl border border-border/50 bg-card/50 p-5">
+            <div className="mb-6 space-y-3 rounded-xl border border-border/50 bg-card/50 p-4 md:p-5">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="font-medium">${orderData.subtotal.toFixed(2)}</span>
@@ -331,7 +324,6 @@ function CheckoutContent() {
                 }}
               >
                 <PaymentForm
-                  clientSecret={clientSecret}
                   onBack={() => router.push("/cart")}
                 />
               </Elements>

@@ -200,6 +200,7 @@ export default function SignUpPage() {
       {
         onRequest: () => { setLoading(true); },
         onSuccess: () => {
+          document.cookie = "sneakora_recently_viewed=; path=/; max-age=0";
           toast.success("Account created", {
             description: "Setting up your profile...",
           });

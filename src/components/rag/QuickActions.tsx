@@ -16,12 +16,12 @@ export function QuickActions({ onSelect, compact = false }: QuickActionsProps) {
   const actions = compact ? QUICK_ACTIONS.slice(0, 2) : QUICK_ACTIONS;
 
   return (
-    <div className="mt-4 flex flex-wrap gap-2 justify-center">
+    <div className={`flex flex-wrap gap-2 ${compact ? "justify-start" : "justify-center"}`}>
       {actions.map((action) => (
         <button
           key={action}
           onClick={() => onSelect(action)}
-          className="rounded-full bg-violet-600/10 text-violet-600 px-3 py-1.5 text-xs font-medium hover:bg-violet-600/20 transition-colors"
+          className="rounded-xl border border-white/[0.06] bg-white/[0.03] px-3.5 py-2 text-xs font-medium text-white/50 transition-all duration-200 hover:border-violet-500/30 hover:bg-violet-500/10 hover:text-violet-300 active:scale-95"
         >
           {action}
         </button>
