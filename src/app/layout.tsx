@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Toaster } from "sonner";
+import { RAGProvider } from "@/components/rag/RAGProvider";
+import { RAGWidget } from "@/components/rag/RAGWidget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +27,16 @@ export const metadata: Metadata = {
   title: "Sneakora — Premium Sneakers",
   description:
     "Premium sneakers for every step. Streetwear culture meets performance.",
+  icons: {
+    icon: "/icon",
+    apple: "/apple-icon",
+  },
+  openGraph: {
+    title: "Sneakora — Premium Sneakers",
+    description: "Premium sneakers for every step. Streetwear culture meets performance.",
+    siteName: "Sneakora",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -40,9 +52,12 @@ export default function RootLayout({
     >
       <body className="min-h-dvh flex flex-col bg-background font-sans antialiased">
         <ThemeProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <RAGProvider>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <RAGWidget />
+          </RAGProvider>
         </ThemeProvider>
         <Toaster
           position="bottom-left"

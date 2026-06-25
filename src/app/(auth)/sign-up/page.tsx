@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-import { Eye, EyeOff, Check, X, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Check, X, AlertCircle, ArrowLeft } from "lucide-react";
+import { SpinnerOverlay } from "@/components/shared/SpinnerOverlay";
 
 const passwordRules = [
   { label: "At least 8 characters", test: (v: string) => v.length >= 8 },
@@ -217,7 +218,9 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-background to-muted/20">
+    <>
+      <SpinnerOverlay isVisible={loading} message="Creating your account..." />
+      <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-background to-muted/20">
       <motion.div
         initial="hidden"
         animate="visible"
@@ -322,14 +325,7 @@ export default function SignUpPage() {
               disabled={loading}
               className="w-full h-12 rounded-full flex items-center justify-center gap-2 bg-foreground text-background transition-all duration-300 hover:opacity-90 active:scale-[0.98] disabled:opacity-50"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                "Create Account"
-              )}
+              Create Account
             </motion.button>
           </motion.div>
         </motion.form>
@@ -345,5 +341,6 @@ export default function SignUpPage() {
         </motion.div>
       </motion.div>
     </div>
+    </>
   );
 }

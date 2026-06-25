@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Filter, Search } from "lucide-react";
 import { ProductCard } from "@/components/product/ProductCard";
+import { SkeletonCard } from "@/components/shared/SkeletonCard";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -399,17 +400,7 @@ export default function ShopPage() {
         {loading ? (
           <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="animate-pulse rounded-xl border border-border/50 bg-card overflow-hidden">
-                <div className="aspect-square bg-muted/30" />
-                <div className="p-4 space-y-3">
-                  <div className="h-4 bg-muted/40 rounded w-3/4" />
-                  <div className="h-3 bg-muted/30 rounded w-1/2" />
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="h-5 bg-muted/40 rounded w-20" />
-                    <div className="h-4 bg-muted/30 rounded w-12" />
-                  </div>
-                </div>
-              </div>
+              <SkeletonCard key={i} variant="product" />
             ))}
           </div>
         ) : products.length > 0 ? (

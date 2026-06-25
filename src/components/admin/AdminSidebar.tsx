@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogoIcon } from "@/components/brand/LogoIcon";
 import {
   Sidebar,
   SidebarContent,
@@ -53,8 +54,8 @@ export function AdminSidebar() {
           href="/admin"
           className="flex items-center gap-2 px-2 py-1"
         >
-          <div className="flex size-8 items-center justify-center rounded-lg bg-foreground text-background text-xs font-bold">
-            S
+          <div className="flex size-8 items-center justify-center">
+            <LogoIcon size={28} />
           </div>
           <span className="font-semibold text-sm group-data-[collapsible=icon]:hidden">
             Sneakora Admin

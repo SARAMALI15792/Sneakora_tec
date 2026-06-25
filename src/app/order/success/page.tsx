@@ -1,5 +1,6 @@
 import Link from "next/link";
 import prisma from "@/lib/db";
+import { getStripeClient } from "@/lib/stripe";
 import { OrderAnimation } from "@/components/order/OrderAnimation";
 
 type PageProps = {
@@ -10,10 +11,34 @@ export default async function OrderSuccessPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const sessionId = sp.session_id;
   const orderId = sp.order_id;
-  console.log(`[OrderSuccess] session_id: ${sessionId}, order_id: ${orderId}`);
+  const paymentIntentId = sp.payment_intent;
 
   let order = null;
-  if (sessionId) {
+
+  if (paymentIntentId) {
+    console.log(`[OrderSuccess] Looking up order by paymentIntentId: ${paymentIntentId}`);
+    try {
+      const stripe = getStripeClient();
+      if (stripe) {
+        const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
+        const metaOrderId = pi.metadata?.orderId;
+        if (metaOrderId) {
+          order = await prisma.order.findUnique({
+            where: { id: metaOrderId },
+            include: {
+              items: {
+                include: { product: { select: { name: true, images: true } } },
+              },
+            },
+          });
+        }
+      }
+    } catch (err) {
+      console.error(`[OrderSuccess] Failed to lookup paymentIntent:`, err);
+    }
+  }
+
+  if (!order && sessionId) {
     console.log(`[OrderSuccess] Looking up order by stripeSessionId: ${sessionId}`);
     order = await prisma.order.findUnique({
       where: { stripeSessionId: sessionId },
@@ -23,7 +48,7 @@ export default async function OrderSuccessPage({ searchParams }: PageProps) {
         },
       },
     });
-  } else if (orderId) {
+  } else if (!order && orderId) {
     console.log(`[OrderSuccess] Looking up order by id: ${orderId}`);
     order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -34,7 +59,6 @@ export default async function OrderSuccessPage({ searchParams }: PageProps) {
       },
     });
   }
-  console.log(`[OrderSuccess] Found order:`, order ? `id=${order.id}, status=${order.status}, userId=${order.userId}` : "null");
 
   if (!order) {
     return (

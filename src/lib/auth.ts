@@ -3,6 +3,10 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins/admin";
 import prisma from "./db";
+import { sendEmail } from "./email";
+import VerificationEmail from "@/emails/VerificationEmail";
+import WelcomeEmail from "@/emails/WelcomeEmail";
+import PasswordResetEmail from "@/emails/PasswordResetEmail";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -10,6 +14,32 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: false,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset Your Password - Sneakora",
+        react: PasswordResetEmail({
+          email: user.email,
+          resetUrl: url,
+        }),
+      });
+    },
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Verify Your Email - Sneakora",
+        react: VerificationEmail({
+          email: user.email,
+          verificationUrl: url,
+        }),
+      });
+    },
+    sendOnSignUp: true,
+    expiresIn: 3600,
+    autoSignInAfterVerification: false,
   },
   user: {
     additionalFields: {
@@ -41,11 +71,36 @@ export const auth = betterAuth({
   },
   trustedOrigins: ["http://localhost:3000", "http://192.168.1.6:3000"],
   plugins: [
-    nextCookies(),
     admin({
       adminRoles: ["admin"],
     }),
+    nextCookies(),
   ],
+  advanced: {
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (_user) => {
+            return {};
+          },
+          after: async (user) => {
+            if (user.email) {
+              try {
+                await sendEmail({
+                  to: user.email,
+                  subject: "Welcome to Sneakora!",
+                  react: WelcomeEmail({ name: user.name || "Sneakora Fan" }),
+                });
+              } catch (err) {
+                console.error("[Auth] Failed to send welcome email:", err);
+              }
+            }
+            return {};
+          },
+        },
+      },
+    },
+  },
 });
 
 export type Session = typeof auth.$Infer.Session;

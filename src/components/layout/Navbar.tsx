@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingCart, Menu, X, User, LogOut, Package, Heart } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
 import { authClient, useSession } from "@/lib/auth-client";
 import {
   DropdownMenu,
@@ -155,21 +156,13 @@ export function Navbar() {
             whileTap={{ scale: 0.95 }}
           >
             <Link href="/" className="flex items-center gap-2.5 shrink-0">
-              <motion.span
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex h-7 w-7 items-center justify-center bg-foreground text-background text-xs font-bold"
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
               >
-                S
-              </motion.span>
-              <motion.span
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                className="font-heading text-base font-bold tracking-wide"
-              >
-                Sneakora
-              </motion.span>
+                <Logo size="sm" />
+              </motion.div>
             </Link>
           </motion.div>
 
@@ -294,10 +287,9 @@ export function Navbar() {
               <motion.div variants={itemVariants}>
                 <Link
                   href="/"
-                  className="font-heading text-base font-bold tracking-wide"
                   onClick={() => setMobileOpen(false)}
                 >
-                  Sneakora
+                  <Logo size="sm" />
                 </Link>
               </motion.div>
               <motion.button

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Loader2, Check } from "lucide-react";
+import { Logo } from "@/components/brand/Logo";
 
 const footerLinks = {
   Shop: [
@@ -64,8 +65,8 @@ export function Footer() {
           {/* Brand + Newsletter */}
           <div className="space-y-6">
             <div className="space-y-4">
-              <Link href="/" className="font-heading text-xl font-bold tracking-wide">
-                Sneakora
+              <Link href="/">
+                <Logo size="md" />
               </Link>
               <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
                 Premium sneakers for every step. Heritage craft meets modern performance.
