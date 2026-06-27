@@ -1,13 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth, getSession } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { z } from "zod";
 
 const createSchema = z.object({
-  code: z.string().min(1).toUpperCase(),
+  title: z.string().min(1),
+  slug: z.string().min(1),
+  description: z.string().optional(),
+  badge: z.string().default("Sale"),
   discount: z.coerce.number().positive(),
-  type: z.enum(["percentage", "flat"]),
-  maxUses: z.coerce.number().int().positive().optional(),
+  type: z.enum(["percentage", "flat"]).default("percentage"),
+  image: z.string().optional(),
+  category: z.string().optional(),
+  productIds: z.array(z.string()).default([]),
+  active: z.boolean().default(true),
+  sortOrder: z.coerce.number().int().default(0),
+  startsAt: z.string().optional(),
   expiresAt: z.string().optional(),
 });
 
@@ -17,18 +25,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const coupons = await prisma.coupon.findMany({
-    orderBy: { createdAt: "desc" },
+  const deals = await prisma.deal.findMany({
+    orderBy: { sortOrder: "asc" },
   });
 
-  const serialized = coupons.map((c) => ({
-    ...c,
-    discount: Number(c.discount),
-    expiresAt: c.expiresAt?.toISOString() || null,
-    createdAt: c.createdAt.toISOString(),
-  }));
-
-  return NextResponse.json({ coupons: serialized });
+  return NextResponse.json({ deals });
 }
 
 export async function POST(request: NextRequest) {
@@ -46,25 +47,23 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const existing = await prisma.coupon.findUnique({
-    where: { code: parsed.data.code },
+  const existing = await prisma.deal.findUnique({
+    where: { slug: parsed.data.slug },
   });
   if (existing) {
     return NextResponse.json(
-      { error: "A coupon with this code already exists" },
+      { error: "A deal with this slug already exists" },
       { status: 409 }
     );
   }
 
-  const coupon = await prisma.coupon.create({
+  const deal = await prisma.deal.create({
     data: {
       ...parsed.data,
+      startsAt: parsed.data.startsAt ? new Date(parsed.data.startsAt) : null,
       expiresAt: parsed.data.expiresAt ? new Date(parsed.data.expiresAt) : null,
     },
   });
 
-  return NextResponse.json(
-    { ...coupon, discount: Number(coupon.discount) },
-    { status: 201 }
-  );
+  return NextResponse.json(deal, { status: 201 });
 }

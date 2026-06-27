@@ -1,208 +1,264 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { Hero3D } from "@/components/hero/Hero3D";
-import { RecentlyViewed } from "@/components/product/RecentlyViewed";
-
-const categories = [
-  { name: "Men", sub: "New arrivals", href: "/shop?category=men" },
-  { name: "Women", sub: "Latest drops", href: "/shop?category=women" },
-  { name: "Running", sub: "Performance", href: "/shop?category=running" },
-  { name: "Basketball", sub: "Court ready", href: "/shop?category=basketball" },
-  { name: "Casual", sub: "Everyday wear", href: "/shop?category=casual" },
-  { name: "Training", sub: "Built to move", href: "/shop?category=training" },
-  { name: "Kids", sub: "Little legends", href: "/shop?category=kids" },
-  { name: "Lifestyle", sub: "Street culture", href: "/shop?category=lifestyle" },
-];
-
-const features = [
-  { label: "01", title: "Free Shipping", body: "On all orders over $100. Delivered in 3–5 days." },
-  { label: "02", title: "Authenticity Guaranteed", body: "Every pair verified. Money-back promise." },
-  { label: "03", title: "Easy Returns", body: "30-day hassle-free returns, no questions asked." },
-  { label: "04", title: "Size Exchange", body: "Wrong fit? Free exchange within 14 days." },
-];
+import { ArrowRight, Shield, RefreshCw, Undo2, Award } from "lucide-react";
+import { HeroCarousel } from "@/components/hero/HeroCarousel";
+import { Marquee } from "@/components/hero/Marquee";
+import { FeaturedSection } from "@/components/product/FeaturedSection";
 
 export default function Home() {
   return (
     <>
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative min-h-[100dvh] flex flex-col">
-        {/* Content sits below fixed navbar (h-16) */}
-        <div className="flex-1 mx-auto grid w-full max-w-7xl grid-cols-1 lg:grid-cols-2 gap-0 px-6 pt-32 pb-12 lg:pt-28 lg:pb-8">
+      <section className="relative h-[100dvh] min-h-[600px] w-full overflow-hidden">
+        <div className="absolute inset-0">
+          <HeroCarousel />
+        </div>
 
-          {/* ── Left: typography ─────────────────────────────── */}
-          <div className="flex flex-col justify-center py-16 lg:py-0 lg:pr-12 order-2 lg:order-1">
-            <p className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground font-medium">
-              New Collection — 2026
+        {/* Left editorial typography */}
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 z-20 pl-6 md:pl-12 hidden lg:block">
+          <div className="[writing-mode:vertical-rl] transform rotate-180">
+            <p className="text-[9px] uppercase tracking-[0.5em] text-[#8A7A67] mb-4">
+              Sneakora — Est. 2026
             </p>
-
-            <h1 className="font-heading mt-5 text-[clamp(3rem,8vw,6.5rem)] leading-[0.95] tracking-tight">
-              Step Into
-              <br />
-              <em className="not-italic text-accent">The Future</em>
-            </h1>
-
-            <p className="mt-7 max-w-sm text-sm leading-relaxed text-muted-foreground">
-              Premium footwear engineered for the uncompromising.
-              Heritage craft meets modern performance.
+            <p className="text-[9px] uppercase tracking-[0.5em] text-[#8A7A67]">
+              Heritage Collection
             </p>
-
-            <div className="mt-10 flex flex-wrap items-center gap-4">
-              <Link
-                href="/shop"
-                className="group inline-flex h-11 items-center gap-3 bg-foreground pl-6 pr-4 text-xs font-semibold uppercase tracking-widest text-background transition-all duration-300 hover:opacity-90 active:scale-[0.98]"
-              >
-                Shop Now
-                <span className="inline-flex size-7 items-center justify-center bg-background/10 transition-transform duration-300 group-hover:translate-x-0.5">
-                  <ArrowRight className="size-3" />
-                </span>
-              </Link>
-              <Link
-                href="/shop?category=running"
-                className="inline-flex h-11 items-center border border-border px-6 text-xs font-semibold uppercase tracking-widest transition-all duration-300 hover:bg-muted active:scale-[0.98]"
-              >
-                Explore
-              </Link>
-            </div>
-
-            {/* Stats strip */}
-            <div className="mt-14 flex gap-10 border-t border-border/50 pt-8">
-              {[["10k+", "Happy customers"], ["200+", "Styles in stock"], ["100%", "Authentic pairs"]].map(
-                ([stat, desc]) => (
-                  <div key={stat}>
-                    <p className="font-heading text-2xl font-bold">{stat}</p>
-                    <p className="mt-0.5 text-[10px] uppercase tracking-widest text-muted-foreground">{desc}</p>
-                  </div>
-                )
-              )}
-            </div>
           </div>
-
-          {/* ── Right: canvas ────────────────────────────────── */}
-          <div className="relative order-1 lg:order-2 flex items-center justify-center">
-            {/* Outer bezel */}
-            <div className="relative w-full h-[40vw] max-h-[360px] min-h-[200px] lg:h-[440px] overflow-hidden">
-              <Hero3D />
-            </div>
-          </div>
+          {/* Vertical line */}
+          <div className="absolute left-[4.5rem] top-0 bottom-0 w-px bg-[#C9905A]/20" />
         </div>
 
         {/* Bottom fade */}
-        <div className="pointer-events-none absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-background to-transparent" />
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#1C1917] to-transparent z-20" />
       </section>
 
-      {/* ── CATEGORIES ────────────────────────────────────────── */}
-      <section className="py-24 lg:py-32">
+      {/* ── MARQUEE TICKER ───────────────────────────────────── */}
+      <Marquee />
+
+      {/* ── FEATURED PRODUCTS ────────────────────────────────── */}
+      <FeaturedSection />
+
+      {/* ── CATEGORIES ───────────────────────────────────────── */}
+      <section className="py-24 lg:py-32 bg-[#F5F0E6]">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mb-14 flex items-end justify-between">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground">Categories</p>
-              <h2 className="font-heading mt-3 text-4xl font-bold tracking-tight lg:text-5xl">
-                Shop by Sport
+              <p className="text-[10px] uppercase tracking-[0.4em] text-[#8A7A67] font-medium">
+                Collections
+              </p>
+              <h2 className="mt-3 font-serif text-4xl font-bold tracking-tight text-[#1C1917] lg:text-5xl">
+                Shop by Style
               </h2>
             </div>
             <Link
               href="/shop"
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors duration-200"
+              className="hidden sm:inline-flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-[#8A7A67] hover:text-[#1C1917] transition-colors duration-200 border-b border-transparent hover:border-[#1C1917] pb-0.5"
             >
               View All <ArrowRight className="size-3" />
             </Link>
           </div>
 
-          <div className="grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-4">
-            {categories.map((cat) => (
+          <div className="grid gap-px bg-[#2A2520]/20 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { name: "Running", sub: "Performance", href: "/shop?category=running", img: "photo-1579338559194-a162d19bf842", color: "#C9905A" },
+              { name: "Basketball", sub: "Court Ready", href: "/shop?category=basketball", img: "photo-1542291026-7eec264c27ff", color: "#8A7A67" },
+              { name: "Casual", sub: "Everyday Wear", href: "/shop?category=casual", img: "photo-1600269452121-4f2416e55c28", color: "#C9905A" },
+              { name: "Lifestyle", sub: "Street Culture", href: "/shop?category=lifestyle", img: "photo-1595950653106-6c9ebd614d3a", color: "#8A7A67" },
+            ].map((cat) => (
               <Link
                 key={cat.name}
                 href={cat.href}
-                className="group flex h-48 flex-col justify-end bg-background p-6 transition-colors duration-300 hover:bg-muted"
+                className="group relative h-56 overflow-hidden"
               >
-                <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground transition-colors duration-300 group-hover:text-accent">
-                  {cat.sub}
-                </p>
-                <h3 className="font-heading mt-1.5 text-2xl font-bold tracking-tight">
-                  {cat.name}
-                </h3>
-                <p className="mt-2 text-[10px] uppercase tracking-widest text-muted-foreground opacity-0 -translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
-                  Browse →
-                </p>
+                {/* Background image */}
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                  style={{
+                    backgroundImage: `url(https://images.unsplash.com/${cat.img}?w=600&q=80&auto=format)`,
+                    filter: "sepia(40%) saturate(80%)",
+                  }}
+                />
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-[#1C1917]/50 group-hover:bg-[#1C1917]/40 transition-colors duration-300" />
+                {/* Vintage corner accent */}
+                <div className="absolute top-3 left-3 w-6 h-6 border-t border-l border-[#C9905A]/50" />
+                {/* Text */}
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-[#C9905A]/80 transition-colors group-hover:text-[#C9905A]">
+                    {cat.sub}
+                  </p>
+                  <h3 className="font-serif text-xl font-bold text-[#F5F0E6] mt-1 tracking-tight">
+                    {cat.name}
+                  </h3>
+                </div>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── FEATURES ──────────────────────────────────────────── */}
-      <section className="border-t border-border py-24 lg:py-32">
+      {/* ── EDITORIAL SPLIT ─────────────────────────────────── */}
+      <section className="py-24 lg:py-32 bg-[#1C1917]">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-16">
-            <p className="text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
-              The Sneakora Standard
-            </p>
-            <h2 className="font-heading mt-3 text-4xl font-bold tracking-tight lg:text-5xl">
-              Built Different
-            </h2>
-          </div>
-
-          <div className="grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((f) => (
+          <div className="grid lg:grid-cols-2 gap-0">
+            {/* Left: Image with vintage treatment */}
+            <div className="relative overflow-hidden aspect-[3/4] lg:aspect-auto">
               <div
-                key={f.label}
-                className="group bg-background p-8 transition-colors duration-300 hover:bg-muted"
-              >
-                <p className="font-heading text-5xl font-bold text-border transition-colors duration-300 group-hover:text-accent/30">
-                  {f.label}
-                </p>
-                <h3 className="font-heading mt-6 text-lg font-bold">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.body}</p>
+                className="absolute inset-0 bg-cover bg-center"
+                style={{
+                  backgroundImage: `url(https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800&q=80&auto=format)`,
+                  filter: "sepia(30%) saturate(90%)",
+                }}
+              />
+              {/* Vintage overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1C1917]/60 to-transparent" />
+              {/* Photo corner marks */}
+              <div className="absolute top-6 left-6">
+                <span className="font-mono text-[9px] uppercase tracking-widest text-[#C9905A]/60">
+                  Vol. 1 — 2026
+                </span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              <div className="absolute bottom-6 right-6">
+                <span className="font-mono text-[9px] uppercase tracking-widest text-[#C9905A]/60">
+                  Heritage Series
+                </span>
+              </div>
+            </div>
 
-      {/* ── RECENTLY VIEWED ──────────────────────────────────── */}
-      <section className="py-24 lg:py-32">
-        <div className="mx-auto max-w-7xl px-6">
-          <RecentlyViewed />
-        </div>
-      </section>
-
-      {/* ── CTA ───────────────────────────────────────────────── */}
-      <section className="py-24 lg:py-32">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="relative overflow-hidden bg-foreground px-10 py-20 sm:px-16 lg:px-24">
-            {/* Background texture number */}
-            <p
-              className="pointer-events-none absolute right-8 top-1/2 -translate-y-1/2 font-heading text-[12rem] font-bold leading-none text-background/5 select-none hidden lg:block"
-              aria-hidden
-            >
-              S
-            </p>
-
-            <div className="relative max-w-xl">
-              <p className="text-[10px] uppercase tracking-[0.4em] text-background/50">
-                Join the Movement
+            {/* Right: Text */}
+            <div className="flex flex-col justify-center p-10 lg:p-16 bg-[#F5F0E6]">
+              <p className="text-[10px] uppercase tracking-[0.4em] text-[#8A7A67] mb-3">
+                Our Story
               </p>
-              <h2 className="font-heading mt-4 text-4xl font-bold tracking-tight text-background lg:text-5xl">
-                Ready to Level Up?
+              <h2 className="font-serif text-4xl md:text-5xl font-bold text-[#1C1917] leading-tight">
+                Crafted for Those Who Know the Difference
               </h2>
-              <p className="mt-4 text-sm text-background/60">
-                Join thousands who shop smarter with Sneakora.
+              <div className="mt-2 w-16 h-0.5 bg-[#C9905A]" />
+              <p className="mt-8 text-sm leading-relaxed text-[#1C1917]/70 max-w-md">
+                Every pair in our collection tells a story. We obsess over the details — the curve of the midsole, the feel of the upper, the history stitched into each design. This isn't just footwear. It's a statement of who you are.
               </p>
-              <div className="mt-10 flex flex-wrap gap-4">
+              <p className="mt-4 text-sm leading-relaxed text-[#1C1917]/70 max-w-md">
+                From vintage-inspired silhouettes to cutting-edge performance tech, Sneakora bridges the gap between heritage craftsmanship and modern innovation. Walk a mile in a pair — you'll understand.
+              </p>
+              <div className="mt-10 flex gap-4">
                 <Link
-                  href="/shop"
-                  className="group inline-flex h-11 items-center gap-3 bg-background pl-6 pr-4 text-xs font-semibold uppercase tracking-widest text-foreground transition-all duration-300 hover:opacity-90 active:scale-[0.98]"
+                  href="/about"
+                  className="group inline-flex h-11 items-center gap-3 bg-[#1C1917] text-[#F5F0E6] pl-6 pr-4 text-[10px] font-semibold uppercase tracking-[0.2em] hover:bg-[#2A2520] active:scale-[0.98] transition-all duration-300"
                 >
-                  Shop Now
-                  <span className="inline-flex size-7 items-center justify-center bg-foreground/10 transition-transform duration-300 group-hover:translate-x-0.5">
+                  Our Story
+                  <span className="inline-flex size-7 items-center justify-center bg-[#F5F0E6]/10 group-hover:translate-x-0.5 transition-transform">
                     <ArrowRight className="size-3" />
                   </span>
                 </Link>
                 <Link
-                  href="/about"
-                  className="inline-flex h-11 items-center border border-background/20 px-6 text-xs font-semibold uppercase tracking-widest text-background transition-all duration-300 hover:bg-background/10 active:scale-[0.98]"
+                  href="/shop"
+                  className="inline-flex h-11 items-center border border-[#1C1917]/20 px-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1C1917] hover:border-[#1C1917]/50 transition-all duration-300"
                 >
-                  About Us
+                  Shop Now
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FEATURES ─────────────────────────────────────────── */}
+      <section className="py-24 lg:py-32 bg-[#F5F0E6] border-t border-[#2A2520]/20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-16">
+            <p className="text-[10px] uppercase tracking-[0.4em] text-[#8A7A67] font-medium">
+              The Sneakora Standard
+            </p>
+            <h2 className="font-serif mt-3 text-4xl font-bold text-[#1C1917] lg:text-5xl">
+              Why We Stand Apart
+            </h2>
+          </div>
+
+          <div className="grid gap-px bg-[#2A2520]/20 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                icon: Shield,
+                title: "Authenticity First",
+                body: "Every pair is verified. If it doesn't pass our 12-point inspection, it doesn't ship. No exceptions.",
+              },
+              {
+                icon: RefreshCw,
+                title: "Free Exchanges",
+                body: "Wrong size? Wrong color? We'll swap it at no cost within 14 days of delivery.",
+              },
+              {
+                icon: Undo2,
+                title: "30-Day Returns",
+                body: "Not the right fit? Send it back — no forms, no questions, no restocking fees.",
+              },
+              {
+                icon: Award,
+                title: "Heritage Craft",
+                body: "We partner with the same factories that serve the world's top athletic brands. Quality isn't a promise — it's a process.",
+              },
+            ].map((f) => {
+              const Icon = f.icon;
+              return (
+              <div
+                key={f.title}
+                className="bg-[#F5F0E6] p-8 hover:bg-[#EDE8DF] transition-colors duration-300 group"
+              >
+                <div className="size-10 mb-5 flex items-center justify-center text-[#C9905A] group-hover:scale-110 transition-transform duration-300">
+                  <Icon className="size-5" strokeWidth={1.5} />
+                </div>
+                <h3 className="font-serif text-base font-bold text-[#1C1917]">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#1C1917]/60">{f.body}</p>
+              </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ──────────────────────────────────────────────── */}
+      <section className="py-24 lg:py-32 bg-[#1C1917] overflow-hidden">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="relative overflow-hidden bg-[#F5F0E6] px-10 py-20 sm:px-16 lg:px-24">
+            {/* Background texture */}
+            <div
+              className="absolute inset-0 opacity-[0.025] pointer-events-none"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+                backgroundSize: "96px 96px",
+              }}
+            />
+
+            {/* Large decorative "S" */}
+            <span
+              className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 font-serif text-[8rem] md:text-[12rem] font-bold text-[#C9905A]/[0.06] select-none pointer-events-none leading-none"
+            >
+              S
+            </span>
+
+            <div className="relative max-w-xl">
+              <p className="text-[10px] uppercase tracking-[0.4em] text-[#8A7A67]">
+                Ready to Step Up?
+              </p>
+              <h2 className="font-serif mt-4 text-4xl font-bold text-[#1C1917] lg:text-5xl leading-tight">
+                Your Next Favorite Pair<br />Is Waiting
+              </h2>
+              <p className="mt-4 text-sm text-[#1C1917]/60 max-w-sm">
+                Browse our full collection. New drops every week, curated for those who don't settle.
+              </p>
+              <div className="mt-10 flex flex-wrap gap-4">
+                <Link
+                  href="/shop"
+                  className="group inline-flex h-11 items-center gap-3 bg-[#1C1917] text-[#F5F0E6] pl-6 pr-4 text-[10px] font-semibold uppercase tracking-[0.2em] hover:bg-[#2A2520] active:scale-[0.98] transition-all duration-300"
+                >
+                  Shop Now
+                  <span className="inline-flex size-7 items-center justify-center bg-[#F5F0E6]/10 group-hover:translate-x-0.5 transition-transform">
+                    <ArrowRight className="size-3" />
+                  </span>
+                </Link>
+                <Link
+                  href="/blog"
+                  className="inline-flex h-11 items-center border border-[#1C1917]/20 px-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#1C1917] hover:border-[#1C1917]/50 transition-all duration-300"
+                >
+                  Read the Journal
                 </Link>
               </div>
             </div>

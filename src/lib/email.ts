@@ -6,6 +6,8 @@ const resend = process.env.RESEND_API_KEY
 
 const FROM_DEV = "Sneakora <onboarding@resend.dev>";
 
+const TEST_RECIPIENT = process.env.RESEND_TEST_EMAIL || "saramsaima9914@gmail.com";
+
 interface SendEmailParams {
   to: string;
   subject: string;
@@ -20,6 +22,14 @@ export async function sendEmail({ to, subject, react, from }: SendEmailParams) {
   }
 
   const fromEmail = from || FROM_DEV;
+  const isDevFrom = fromEmail === FROM_DEV || fromEmail.includes("@resend.dev");
+  const actualTo = isDevFrom && to !== TEST_RECIPIENT ? TEST_RECIPIENT : to;
+
+  if (actualTo !== to) {
+    console.log(
+      `[Email] Dev mode: redirecting email intended for ${to} to ${actualTo}`
+    );
+  }
 
   if (fromEmail.includes("@sneakora.com")) {
     console.warn(
@@ -30,8 +40,8 @@ export async function sendEmail({ to, subject, react, from }: SendEmailParams) {
   try {
     const { data, error } = await resend.emails.send({
       from: fromEmail,
-      to: [to],
-      subject,
+      to: [actualTo],
+      subject: isDevFrom && actualTo !== to ? `[DEV → ${to}] ${subject}` : subject,
       react,
     });
 
@@ -40,7 +50,7 @@ export async function sendEmail({ to, subject, react, from }: SendEmailParams) {
       return { error };
     }
 
-    console.log(`[Email] Sent email to ${to}, messageId: ${data?.id}`);
+    console.log(`[Email] Sent email to ${actualTo}, messageId: ${data?.id}`);
     return data;
   } catch (err) {
     console.error("[Email] Unexpected error sending email:", err);

@@ -15,8 +15,6 @@ import {
   RefreshCw,
   ShoppingBag,
   ChevronLeft,
-  Shield,
-  CreditCard,
 } from "lucide-react";
 import { ProgressBar } from "@/components/shared/ProgressBar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -127,6 +125,7 @@ function CheckoutContent() {
 
   useEffect(() => {
     if (canceled === "true") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setError("Payment was canceled. Please try again.");
     }
   }, [canceled]);
@@ -163,7 +162,7 @@ function CheckoutContent() {
 
   if (loading) {
     return (
-      <div className="grid min-h-dvh md:grid-cols-2">
+      <div className="grid min-h-[100dvh] md:grid-cols-2">
         <div className="hidden md:block bg-muted/30" />
         <div className="flex items-center justify-center p-6 md:p-10">
           <div className="w-full max-w-md space-y-6">
@@ -180,8 +179,7 @@ function CheckoutContent() {
 
   if (error) {
     return (
-      <div className="flex min-h-dvh flex-col md:grid md:grid-cols-2">
-        {/* Mobile: compact slideshow */}
+      <div className="flex min-h-[100dvh] flex-col md:grid md:grid-cols-2">
         <div className="relative h-48 w-full overflow-hidden bg-zinc-950 md:hidden">
           <SneakerSlideshow />
         </div>
@@ -217,8 +215,7 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col md:grid md:grid-cols-2">
-      {/* Left Side — Brand Banner with rotating sneakers (desktop) */}
+    <div className="flex min-h-[100dvh] flex-col md:grid md:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-zinc-950 md:block">
         <SneakerSlideshow />
 
@@ -257,12 +254,19 @@ function CheckoutContent() {
         </div>
       </div>
 
-      {/* Right Side — Payment Form */}
       <div className="flex items-start justify-center overflow-y-auto p-5 pt-6 md:p-12 md:pt-24">
         <div className="w-full max-w-md">
-          {/* Mobile: compact slideshow */}
-          <div className="relative mb-6 h-32 w-full overflow-hidden rounded-xl bg-zinc-950 md:hidden">
+          <div className="relative mb-4 h-48 w-full overflow-hidden rounded-xl bg-zinc-950 md:hidden">
             <SneakerSlideshow />
+          </div>
+
+          <div className="mb-6 flex flex-wrap gap-x-4 gap-y-2 md:hidden">
+            {TRUST_BADGES.map((badge) => (
+              <div key={badge.label} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <badge.icon className="size-3.5" />
+                <span>{badge.label}</span>
+              </div>
+            ))}
           </div>
 
           <div className="mb-6 md:mb-8">

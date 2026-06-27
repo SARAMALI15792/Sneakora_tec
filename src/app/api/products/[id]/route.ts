@@ -9,8 +9,13 @@ export async function GET(
 ) {
   const { id } = await segmentData.params;
 
-  const product = await prisma.product.findUnique({
-    where: { id },
+  const product = await prisma.product.findFirst({
+    where: {
+      OR: [
+        { id },
+        { slug: id },
+      ],
+    },
     include: {
       reviews: {
         include: { user: { select: { name: true, image: true } } },

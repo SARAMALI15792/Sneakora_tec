@@ -7,6 +7,7 @@ import OrderShippedEmail from "@/emails/OrderShippedEmail";
 import OrderDeliveredEmail from "@/emails/OrderDeliveredEmail";
 import OrderCancelledEmail from "@/emails/OrderCancelledEmail";
 import { getStripeClient } from "@/lib/stripe";
+import { indexOrderInRag } from "@/lib/rag-index";
 
 function getStripe() {
   return getStripeClient() ?? new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -85,6 +86,7 @@ async function sendOrderConfirmation(order: OrderWithUser) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function sendOrderShipped(order: OrderWithUser, trackingNumber: string, carrier: string) {
   if (!order.user) return;
 
@@ -113,6 +115,7 @@ async function sendOrderShipped(order: OrderWithUser, trackingNumber: string, ca
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function sendOrderDelivered(order: OrderWithUser) {
   if (!order.user) return;
 
@@ -135,6 +138,7 @@ async function sendOrderDelivered(order: OrderWithUser) {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function sendOrderCancelled(order: OrderWithUser, reason?: string) {
   if (!order.user) return;
 
@@ -205,6 +209,7 @@ export async function POST(request: NextRequest) {
           if (order) {
             await prisma.cartItem.deleteMany({ where: { userId: order.userId } });
             console.log(`[Webhook] Cart cleared for user ${order.userId}`);
+            await indexOrderInRag(orderId);
             await sendOrderConfirmation(order);
             console.log(`[Webhook] Order confirmation email sent for order ${orderId}`);
           }
@@ -215,24 +220,6 @@ export async function POST(request: NextRequest) {
       } else {
         console.warn("[Webhook] No orderId in checkout session metadata");
       }
-      break;
-    }
-
-    case "shipping_rate.added_to_session": {
-      const shippingRate = event.data.object as Stripe.ShippingRate;
-      console.log(`[Webhook] Shipping rate added: ${shippingRate.id}`);
-      break;
-    }
-
-    case "order.payment_succeeded": {
-      const orderPayment = event.data.object as Stripe.Order;
-      console.log(`[Webhook] Order payment succeeded: ${orderPayment.id}`);
-      break;
-    }
-
-    case "order.payment_failed": {
-      const orderPayment = event.data.object as Stripe.Order;
-      console.log(`[Webhook] Order payment failed: ${orderPayment.id}`);
       break;
     }
 
@@ -252,6 +239,7 @@ export async function POST(request: NextRequest) {
           if (order) {
             await prisma.cartItem.deleteMany({ where: { userId: order.userId } });
             console.log(`[Webhook] Cart cleared for user ${order.userId}`);
+            await indexOrderInRag(paymentIntent.metadata.orderId);
             await sendOrderConfirmation(order);
             console.log(`[Webhook] Order confirmation email sent for order ${paymentIntent.metadata.orderId}`);
           }

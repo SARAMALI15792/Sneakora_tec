@@ -9,8 +9,13 @@ type Params = Promise<{ id: string }>;
 export default async function ProductPage({ params }: { params: Params }) {
   const { id } = await params;
 
-  const product = await prisma.product.findUnique({
-    where: { id },
+  const product = await prisma.product.findFirst({
+    where: {
+      OR: [
+        { id },
+        { slug: id },
+      ],
+    },
     include: {
       reviews: {
         include: { user: { select: { name: true, image: true } } },
@@ -76,11 +81,12 @@ export default async function ProductPage({ params }: { params: Params }) {
                       <span className="text-sm font-semibold">
                         {review.user.name || "Anonymous"}
                       </span>
-                      <span className="text-xs text-accent">
-                        {"★".repeat(review.rating)}
-                        <span className="text-muted-foreground">
-                          {"★".repeat(5 - review.rating)}
-                        </span>
+                      <span className="inline-flex gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <svg key={i} viewBox="0 0 20 20" className="size-3.5" fill={i < review.rating ? "currentColor" : "none"} stroke="currentColor" strokeWidth={1}>
+                            <path d="M10 1l2.39 4.84L17.6 6.7l-3.8 3.7.9 5.24L10 13.2l-4.7 2.44.9-5.24-3.8-3.7 5.21-.86L10 1z" />
+                          </svg>
+                        ))}
                       </span>
                     </div>
                     {review.title && (

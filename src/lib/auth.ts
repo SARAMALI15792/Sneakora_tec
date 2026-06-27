@@ -82,37 +82,44 @@ export const auth = betterAuth({
     }),
     nextCookies(),
   ],
-  advanced: {
-    databaseHooks: {
-      user: {
-        create: {
-          before: async (_user) => {
-            return {};
-          },
-          after: async (user) => {
-            if (user.email) {
-              const result = await sendEmail({
-                to: user.email,
-                subject: "Welcome to Sneakora!",
-                react: WelcomeEmail({ name: user.name || "Sneakora Fan" }),
-              });
-              if (result && "error" in result) {
-                console.warn("[Auth] Welcome email not sent:", result.error);
-              }
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          return { data: user };
+        },
+        after: async (user) => {
+          if (user.email) {
+            const result = await sendEmail({
+              to: user.email,
+              subject: "Welcome to Sneakora!",
+              react: WelcomeEmail({ name: user.name || "Sneakora Fan" }),
+            });
+            if (result && "error" in result) {
+              console.warn("[Auth] Welcome email not sent:", result.error);
             }
-            return {};
-          },
+          }
         },
       },
     },
   },
 });
 
-export type Session = typeof auth.$Infer.Session;
+type InferSession = typeof auth.$Infer.Session;
+
+export type Session = InferSession extends { user: infer U }
+  ? { user: U & { role: string }; session: InferSession["session"] }
+  : InferSession;
+
+export async function getSession(
+  headers: Headers
+): Promise<Session | null> {
+  return auth.api.getSession({ headers }) as Promise<Session | null>;
+}
 
 export async function isAdmin(headers: Headers): Promise<boolean> {
   try {
-    const session = await auth.api.getSession({ headers });
+    const session = await getSession(headers);
     return session?.user?.role === "admin";
   } catch {
     return false;

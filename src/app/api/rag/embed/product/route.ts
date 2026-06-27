@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { embedText } from "@/lib/gemini";
+import { embedText } from "@/lib/embeddings";
 import { z } from "zod";
 
 const embedProductSchema = z.object({
@@ -44,9 +44,11 @@ export async function POST(request: NextRequest) {
       product.description,
       `Category: ${product.category}`,
       `Price: $${product.price}`,
-      `Sizes: ${product.sizes.join(", ")}`,
-      `Colors: ${product.colors.join(", ")}`,
-      product.stock > 0 ? "In stock" : "Out of stock",
+      product.compareAt ? `Original price: $${product.compareAt}` : null,
+      `Sizes available: ${product.sizes.join(", ")}`,
+      `Colors available: ${product.colors.join(", ")}`,
+      product.stock > 0 ? `Stock: ${product.stock} units available` : "Currently out of stock",
+      product.featured ? "Featured product" : null,
     ]
       .filter(Boolean)
       .join(". ");
@@ -64,6 +66,10 @@ export async function POST(request: NextRequest) {
           slug: product.slug,
           category: product.category,
           price: product.price.toString(),
+          compareAt: product.compareAt?.toString() || null,
+          stock: product.stock,
+          featured: product.featured,
+          inStock: product.stock > 0,
           images: product.images,
         },
       },

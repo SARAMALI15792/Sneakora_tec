@@ -195,10 +195,15 @@
 }
 
 .nav-link {
-  color: hsl(var(--muted-foreground));
+  color: var(--foreground);
+  font-weight: 500;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.15);
   transition: color 200ms ease, transform 200ms ease;
 }
+.dark .nav-link {
+  text-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+}
 .nav-link:hover {
-  color: hsl(var(--foreground));
+  color: var(--accent);
   transform: translateY(-2px);
 }

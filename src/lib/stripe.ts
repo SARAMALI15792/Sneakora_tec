@@ -9,7 +9,7 @@ const fastDnsAgent = new https.Agent({
   lookup: (hostname, opts, cb) => {
     dns.resolve4(hostname, (err, addresses) => {
       if (err || !addresses?.length) {
-        dns.lookup(hostname, opts as any, cb as any);
+        dns.lookup(hostname, opts, cb);
         return;
       }
       if (opts.all) {

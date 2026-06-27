@@ -104,7 +104,7 @@ export default function AdminOrderDetailPage() {
                 <div key={item.id} className="flex items-center gap-3 py-2 border-b border-border/30 last:border-0">
                   <div className="size-12 rounded-lg bg-foreground/5 flex items-center justify-center overflow-hidden shrink-0 relative">
                     {item.product.images[0] ? (
-                      <Image src={item.product.images[0]} alt="" fill sizes="48px" className="object-cover" />
+                      <Image src={item.product.images[0]} alt={item.product.name} fill sizes="48px" className="object-cover" />
                     ) : (
                       <span className="text-xs text-muted-foreground">—</span>
                     )}

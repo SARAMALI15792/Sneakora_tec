@@ -29,7 +29,6 @@ export default function OrderCancelledEmail({
 }: OrderCancelledEmailProps) {
   return (
     <Html lang="en">
-      <Head />
       <Preview>Order Cancelled - #{orderId} - Sneakora</Preview>
       <Tailwind
         config={{
@@ -43,6 +42,7 @@ export default function OrderCancelledEmail({
           },
         }}
       >
+        <Head />
         <Body className="bg-zinc-900 font-sans">
           <Container className="mx-auto max-w-xl bg-zinc-800 p-8 rounded-2xl my-10">
             <Section className="text-center mb-8">
