@@ -3,6 +3,10 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins/admin";
 import prisma from "./db";
+import { sendEmail } from "./email";
+import VerificationEmail from "@/emails/VerificationEmail";
+import WelcomeEmail from "@/emails/WelcomeEmail";
+import PasswordResetEmail from "@/emails/PasswordResetEmail";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -10,6 +14,38 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: false,
+    sendResetPassword: async ({ user, url }) => {
+      const result = await sendEmail({
+        to: user.email,
+        subject: "Reset Your Password - Sneakora",
+        react: PasswordResetEmail({
+          email: user.email,
+          resetUrl: url,
+        }),
+      });
+      if (result && "error" in result) {
+        console.warn("[Auth] Password reset email not sent:", result.error);
+      }
+    },
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      const result = await sendEmail({
+        to: user.email,
+        subject: "Verify Your Email - Sneakora",
+        react: VerificationEmail({
+          email: user.email,
+          verificationUrl: url,
+        }),
+      });
+      if (result && "error" in result) {
+        console.warn("[Auth] Verification email not sent:", result.error);
+      }
+    },
+    sendOnSignUp: true,
+    expiresIn: 3600,
+    autoSignInAfterVerification: false,
   },
   user: {
     additionalFields: {
@@ -41,11 +77,35 @@ export const auth = betterAuth({
   },
   trustedOrigins: ["http://localhost:3000", "http://192.168.1.6:3000"],
   plugins: [
-    nextCookies(),
     admin({
       adminRoles: ["admin"],
     }),
+    nextCookies(),
   ],
+  advanced: {
+    databaseHooks: {
+      user: {
+        create: {
+          before: async (_user) => {
+            return {};
+          },
+          after: async (user) => {
+            if (user.email) {
+              const result = await sendEmail({
+                to: user.email,
+                subject: "Welcome to Sneakora!",
+                react: WelcomeEmail({ name: user.name || "Sneakora Fan" }),
+              });
+              if (result && "error" in result) {
+                console.warn("[Auth] Welcome email not sent:", result.error);
+              }
+            }
+            return {};
+          },
+        },
+      },
+    },
+  },
 });
 
 export type Session = typeof auth.$Infer.Session;

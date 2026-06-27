@@ -4,7 +4,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-import { Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
+import { SpinnerOverlay } from "@/components/shared/SpinnerOverlay";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -31,6 +32,7 @@ export default function SignInPage() {
       { email, password, callbackURL: "/" },
       {
         onSuccess: () => {
+          document.cookie = "sneakora_recently_viewed=; path=/; max-age=0";
           toast.success("Welcome back", {
             description: "You've been signed in successfully.",
           });
@@ -54,7 +56,9 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-6 py-24">
+    <>
+      <SpinnerOverlay isVisible={loading} message="Signing you in..." />
+      <div className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-6 py-24">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -179,14 +183,7 @@ export default function SignInPage() {
             disabled={loading}
             className="w-full h-12 bg-foreground text-xs font-semibold uppercase tracking-widest text-background hover:opacity-90 transition-all duration-300 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              "Sign in"
-            )}
+            Sign in
           </motion.button>
         </motion.form>
 
@@ -257,5 +254,6 @@ export default function SignInPage() {
         </motion.p>
       </motion.div>
     </div>
+    </>
   );
 }

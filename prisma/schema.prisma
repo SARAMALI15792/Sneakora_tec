@@ -205,3 +205,17 @@ model ContactMessage {
   message   String
   createdAt DateTime @default(now())
 }
+
+model VectorStore {
+  id         String   @id @default(cuid())
+  sourceType String
+  sourceId   String
+  userId     String?
+  chunkText  String
+  embedding  Float[]
+  metadata   Json
+  createdAt  DateTime @default(now())
+
+  @@index([sourceType, sourceId])
+  @@index([userId])
+}

@@ -23,55 +23,39 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  if (!session) {
-    // Return products from cookie only
-    const products = await prisma.product.findMany({
-      where: { id: { in: recentlyViewed } },
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        price: true,
-        compareAt: true,
-        images: true,
-        category: true,
+  if (session) {
+    const dbItems = await prisma.recentlyViewed.findMany({
+      where: { userId: session.user.id },
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            price: true,
+            compareAt: true,
+            images: true,
+            category: true,
+          },
+        },
       },
-      orderBy: [{ id: "desc" }],
+      orderBy: { createdAt: "desc" },
       take: 10,
     });
 
-    return NextResponse.json({
-      items: products.map((p) => ({ ...p, price: Number(p.price), compareAt: p.compareAt ? Number(p.compareAt) : null })),
+    const response = NextResponse.json({
+      items: dbItems.map((item) => ({
+        ...item.product,
+        price: Number(item.product.price),
+        compareAt: item.product.compareAt ? Number(item.product.compareAt) : null,
+      })),
     });
+    response.cookies.set("sneakora_recently_viewed", "", { path: "/", maxAge: 0 });
+    return response;
   }
 
-  // For logged-in users, check database first, then merge with cookie
-  const dbItems = await prisma.recentlyViewed.findMany({
-    where: { userId: session.user.id },
-    include: {
-      product: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          price: true,
-          compareAt: true,
-          images: true,
-          category: true,
-        },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 10,
-  });
-
-  const dbProductIds = dbItems.map((item) => item.productId);
-  const cookieProductIds = recentlyViewed.filter(
-    (id: string) => !dbProductIds.includes(id)
-  );
-
-  const cookieProducts = await prisma.product.findMany({
-    where: { id: { in: cookieProductIds } },
+  const products = await prisma.product.findMany({
+    where: { id: { in: recentlyViewed } },
     select: {
       id: true,
       name: true,
@@ -81,15 +65,12 @@ export async function GET(request: NextRequest) {
       images: true,
       category: true,
     },
+    orderBy: [{ id: "desc" }],
+    take: 10,
   });
 
-  const allProducts = [
-    ...dbItems.map((item) => item.product),
-    ...cookieProducts,
-  ].slice(0, 10);
-
   return NextResponse.json({
-    items: allProducts.map((p) => ({ ...p, price: Number(p.price), compareAt: p.compareAt ? Number(p.compareAt) : null })),
+    items: products.map((p) => ({ ...p, price: Number(p.price), compareAt: p.compareAt ? Number(p.compareAt) : null })),
   });
 }
 

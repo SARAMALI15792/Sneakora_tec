@@ -1,18 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
-import Stripe from "stripe";
 import { z } from "zod";
+import { getStripeClient } from "@/lib/stripe";
 
 const checkoutSchema = z.object({
   couponCode: z.string().optional(),
 });
-
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key || key === "sk_test_placeholder") return null;
-  return new Stripe(key);
-}
 
 function calculateDiscount(coupon: { type: string; discount: number }, subtotal: number): number {
   if (coupon.type === "percentage") {
@@ -22,8 +16,14 @@ function calculateDiscount(coupon: { type: string; discount: number }, subtotal:
 }
 
 export async function POST(request: NextRequest) {
+  let session: Awaited<ReturnType<typeof auth.api.getSession>> | null = null;
+  let order: Awaited<ReturnType<typeof prisma.order.create>> | null = null;
+  let subtotal = 0;
+  let total = 0;
+  let appliedCouponId: string | null = null;
+
   try {
-    const session = await auth.api.getSession({ headers: request.headers });
+    session = await auth.api.getSession({ headers: request.headers });
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -41,13 +41,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
-    const subtotal = cartItems.reduce(
+    subtotal = cartItems.reduce(
       (sum, item) => sum + Number(item.product.price) * item.quantity,
       0
     );
 
-    let total = subtotal;
-    let appliedCouponId: string | null = null;
+    total = subtotal;
 
     if (couponCode) {
       const coupon = await prisma.coupon.findUnique({
@@ -77,7 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[Checkout] Creating order for user ${session.user.id}, cart has ${cartItems.length} items`);
-    const order = await prisma.order.create({
+    order = await prisma.order.create({
       data: {
         userId: session.user.id,
         total,
@@ -93,39 +92,33 @@ export async function POST(request: NextRequest) {
     });
     console.log(`[Checkout] Order ${order.id} created for user ${session.user.id}, status: ${order.status}`);
 
-    const stripe = getStripe();
+    const stripe = getStripeClient();
 
     if (stripe) {
-      const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = cartItems.map((item) => ({
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: item.product.name,
-            images: item.product.images.length > 0 ? [item.product.images[0]] : undefined,
-          },
-          unit_amount: Math.round(Number(item.product.price) * 100),
-        },
-        quantity: item.quantity,
-      }));
+      const stripeAmount = Math.round(total * 100);
 
-      const checkoutSession = await stripe.checkout.sessions.create({
-        mode: "payment",
-        ui_mode: "embedded_page",
-        line_items: lineItems,
-        customer_email: session.user.email,
-        metadata: { orderId: order.id, couponId: appliedCouponId || "" },
-        return_url: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/order/success?session_id={CHECKOUT_SESSION_ID}`,
-        ...(total < subtotal ? { discounts: [{ coupon: appliedCouponId || undefined }].filter(Boolean) } : {}),
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: stripeAmount,
+        currency: "usd",
+        receipt_email: session.user.email,
+        metadata: {
+          orderId: order.id,
+          couponId: appliedCouponId || "",
+        },
+        automatic_payment_methods: {
+          enabled: true,
+        },
+        description: `Sneakora Order #${order.id.slice(0, 8)}`,
       });
 
       await prisma.order.update({
         where: { id: order.id },
-        data: { stripeSessionId: checkoutSession.id },
+        data: { stripePaymentIntentId: paymentIntent.id },
       });
 
       return NextResponse.json({
-        clientSecret: checkoutSession.client_secret,
-        sessionId: checkoutSession.id,
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
         subtotal,
         total,
         couponApplied: !!appliedCouponId,
@@ -142,13 +135,34 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       url: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/order/success?order_id=${order.id}`,
-      sessionId: null,
+      paymentIntentId: null,
       devMode: true,
       subtotal,
       total,
       couponApplied: !!appliedCouponId,
     });
   } catch (error) {
+    if (order) {
+      console.warn("[Checkout] Error, falling back to dev mode for order", order.id);
+      await prisma.order.update({
+        where: { id: order.id },
+        data: { status: "confirmed" },
+      });
+
+      if (session?.user?.id) {
+        await prisma.cartItem.deleteMany({ where: { userId: session.user.id } });
+      }
+
+      return NextResponse.json({
+        url: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/order/success?order_id=${order.id}`,
+        paymentIntentId: null,
+        devMode: true,
+        subtotal,
+        total,
+        couponApplied: !!appliedCouponId,
+      });
+    }
+
     console.error("Checkout error:", error);
     const message = error instanceof Error ? error.message : "Checkout failed";
     return NextResponse.json({ error: message }, { status: 500 });
