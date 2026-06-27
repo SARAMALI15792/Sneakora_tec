@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { z } from "zod";
 import { getStripeClient } from "@/lib/stripe";
+import { indexOrderInRag } from "@/lib/rag-index";
 
 const checkoutSchema = z.object({
   couponCode: z.string().optional(),
@@ -131,6 +132,7 @@ export async function POST(request: NextRequest) {
       data: { status: "confirmed" },
     });
 
+    await indexOrderInRag(order.id);
     await prisma.cartItem.deleteMany({ where: { userId: session.user.id } });
 
     return NextResponse.json({
@@ -148,6 +150,8 @@ export async function POST(request: NextRequest) {
         where: { id: order.id },
         data: { status: "confirmed" },
       });
+
+      await indexOrderInRag(order.id);
 
       if (session?.user?.id) {
         await prisma.cartItem.deleteMany({ where: { userId: session.user.id } });

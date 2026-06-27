@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth, getSession } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { z } from "zod";
 
@@ -11,7 +11,7 @@ const querySchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
-  const session = await auth.api.getSession({ headers: request.headers });
+  const session = await getSession(request.headers);
   if (!session || session.user.role !== "admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

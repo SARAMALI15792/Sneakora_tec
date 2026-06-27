@@ -94,10 +94,18 @@ export function RAGProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const loaded = loadConversations();
-    setConversations(loaded);
-    if (loaded.length > 0) {
-      setActiveConversationId(loaded[0].id);
+    if (loaded.length === 0) {
+      loaded.push({
+        id: generateId(),
+        name: "New Chat",
+        messages: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setConversations(loaded);
+    setActiveConversationId(loaded[0].id);
     setInitialized(true);
   }, []);
 

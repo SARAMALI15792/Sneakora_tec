@@ -147,7 +147,7 @@ export function Navbar() {
         style={{ viewTransitionName: "site-header" }}
         className={`fixed inset-x-0 top-0 z-40 transition-all duration-500 ${scrolled
           ? "bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-sm"
-          : "bg-transparent"
+          : "bg-background/30 backdrop-blur-lg"
         }`}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">

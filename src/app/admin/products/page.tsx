@@ -174,7 +174,7 @@ export default function AdminProductsPage() {
                             {product.images[0] ? (
                               <Image
                                 src={product.images[0]}
-                                alt=""
+                                alt={product.name}
                                 fill
                                 sizes="40px"
                                 className="object-cover"

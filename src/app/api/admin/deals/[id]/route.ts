@@ -1,22 +1,24 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { auth, getSession } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { z } from "zod";
 
 type Params = Promise<{ id: string }>;
 
 const updateSchema = z.object({
-  name: z.string().min(1).optional(),
+  title: z.string().min(1).optional(),
   slug: z.string().min(1).optional(),
   description: z.string().optional(),
-  price: z.coerce.number().positive().optional(),
-  compareAt: z.coerce.number().positive().nullable().optional(),
-  category: z.string().min(1).optional(),
-  images: z.array(z.string()).optional(),
-  sizes: z.array(z.string()).optional(),
-  colors: z.array(z.string()).optional(),
-  stock: z.coerce.number().int().min(0).optional(),
-  featured: z.boolean().optional(),
+  badge: z.string().optional(),
+  discount: z.coerce.number().positive().optional(),
+  type: z.enum(["percentage", "flat"]).optional(),
+  image: z.string().nullable().optional(),
+  category: z.string().nullable().optional(),
+  productIds: z.array(z.string()).optional(),
+  active: z.boolean().optional(),
+  sortOrder: z.coerce.number().int().optional(),
+  startsAt: z.string().nullable().optional(),
+  expiresAt: z.string().nullable().optional(),
 });
 
 export async function GET(
@@ -29,16 +31,12 @@ export async function GET(
   }
 
   const { id } = await params;
-  const product = await prisma.product.findUnique({ where: { id } });
-  if (!product) {
-    return NextResponse.json({ error: "Product not found" }, { status: 404 });
+  const deal = await prisma.deal.findUnique({ where: { id } });
+  if (!deal) {
+    return NextResponse.json({ error: "Deal not found" }, { status: 404 });
   }
 
-  return NextResponse.json({
-    ...product,
-    price: Number(product.price),
-    compareAt: product.compareAt ? Number(product.compareAt) : null,
-  });
+  return NextResponse.json(deal);
 }
 
 export async function PUT(
@@ -60,16 +58,16 @@ export async function PUT(
     );
   }
 
-  const product = await prisma.product.update({
-    where: { id },
-    data: parsed.data,
-  });
+  const data: Record<string, unknown> = { ...parsed.data };
+  if (parsed.data.startsAt !== undefined) {
+    data.startsAt = parsed.data.startsAt ? new Date(parsed.data.startsAt) : null;
+  }
+  if (parsed.data.expiresAt !== undefined) {
+    data.expiresAt = parsed.data.expiresAt ? new Date(parsed.data.expiresAt) : null;
+  }
 
-  return NextResponse.json({
-    ...product,
-    price: Number(product.price),
-    compareAt: product.compareAt ? Number(product.compareAt) : null,
-  });
+  const deal = await prisma.deal.update({ where: { id }, data });
+  return NextResponse.json(deal);
 }
 
 export async function DELETE(
@@ -82,6 +80,6 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  await prisma.product.delete({ where: { id } });
+  await prisma.deal.delete({ where: { id } });
   return NextResponse.json({ deleted: true });
 }

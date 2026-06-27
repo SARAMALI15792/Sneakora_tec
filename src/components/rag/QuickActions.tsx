@@ -6,10 +6,14 @@ interface QuickActionsProps {
 }
 
 const QUICK_ACTIONS = [
-  "What sneakers do you recommend?",
+  "What sneakers do you recommend for running?",
   "Show me your best sellers",
-  "Any deals available?",
+  "Any deals or discounts available?",
   "Help me find my size",
+  "What are people saying about Air Pulse Max?",
+  "Do you have anything under $100?",
+  "What's your return policy?",
+  "I need sneakers for the gym",
 ];
 
 export function QuickActions({ onSelect, compact = false }: QuickActionsProps) {

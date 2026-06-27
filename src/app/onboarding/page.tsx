@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { authClient, useSession } from "@/lib/auth-client";
@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import {
   Check, ChevronRight, Loader2, ArrowLeft, RefreshCw,
   Sparkles, Bell, Zap, Heart, Truck,
+  User, Palette, Ruler,
 } from "lucide-react";
 
 const styleCategories = [
@@ -26,64 +27,159 @@ const sizeData: Record<string, string[]> = {
 };
 
 const welcomeHighlights = [
-  { icon: Zap, label: "Lightning Deals", desc: "Exclusive drops" },
-  { icon: Heart, label: "Wishlist Sync", desc: "Save favorites" },
-  { icon: Truck, label: "Free Shipping", desc: "Orders $100+" },
+  { icon: Zap, label: "Lightning Deals", desc: "Exclusive drops on new arrivals" },
+  { icon: Heart, label: "Wishlist Sync", desc: "Save & track your favorites" },
+  { icon: Truck, label: "Free Shipping", desc: "On all orders over $100" },
 ];
 
 function generateAvatarUrl(seed: string) {
   return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(seed)}&backgroundColor=0f0f23`;
 }
 
-const springTransition = {
-  type: "spring" as const,
-  stiffness: 280,
-  damping: 24,
-  mass: 0.8,
-};
+const steps = [
+  { id: "profile", label: "Profile", short: "You", icon: User },
+  { id: "style", label: "Style", short: "Vibe", icon: Palette },
+  { id: "sizes", label: "Sizes", short: "Fit", icon: Ruler },
+  { id: "notifications", label: "Notifications", short: "Alerts", icon: Bell },
+];
 
-const springFast = {
-  type: "spring" as const,
-  stiffness: 400,
-  damping: 30,
-};
+const springNav = { type: "spring" as const, stiffness: 400, damping: 28, mass: 0.6 };
+const springBouncy = { type: "spring" as const, stiffness: 350, damping: 20, mass: 0.7 };
+const springGentle = { type: "spring" as const, stiffness: 280, damping: 30, mass: 0.9 };
+const bezierSmooth = { duration: 0.7, ease: [0.32, 0.72, 0, 1] as const };
 
-const easeOut = [0.32, 0.72, 0, 1];
-
-const slideVariants = {
-  enter: (dir: number) => ({
-    x: dir > 0 ? 48 : -48,
-    opacity: 0,
-    scale: 0.98,
-  }),
-  center: {
-    x: 0,
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
     opacity: 1,
-    scale: 1,
-    transition: springTransition,
+    transition: { staggerChildren: 0.07, delayChildren: 0.05 },
   },
-  exit: (dir: number) => ({
-    x: dir > 0 ? -48 : 48,
-    opacity: 0,
-    scale: 0.98,
-    transition: { duration: 0.18, ease: easeOut as unknown as undefined },
-  }),
 };
 
-const fadeUp = {
-  hidden: { y: 20, opacity: 0 },
-  visible: (i: number) => ({
-    y: 0,
-    opacity: 1,
-    transition: { delay: i * 0.06, type: "spring" as const, stiffness: 400, damping: 30 },
-  }),
+const itemVariants = {
+  hidden: { opacity: 0, y: 18, filter: "blur(4px)" },
+  visible: {
+    opacity: 1, y: 0, filter: "blur(0px)",
+    transition: { duration: 0.7, ease: [0.32, 0.72, 0, 1] as const },
+  },
 };
+
+const pageVariants = {
+  initial: { opacity: 0, y: 24, filter: "blur(6px)" },
+  animate: {
+    opacity: 1, y: 0, filter: "blur(0px)",
+    transition: { duration: 0.7, ease: [0.32, 0.72, 0, 1] as const },
+  },
+  exit: {
+    opacity: 0, y: -24, filter: "blur(6px)",
+    transition: { duration: 0.4, ease: [0.32, 0.72, 0, 1] as const },
+  },
+};
+
+function EyebrowTag({ text }: { text: string }) {
+  return (
+    <motion.span
+      variants={itemVariants}
+      className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-white/30 ring-1 ring-white/[0.06]"
+    >
+      <span className="size-1 rounded-full bg-violet-400/60" />
+      {text}
+    </motion.span>
+  );
+}
+
+function DoubleBezel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`p-[1.5px] rounded-[1.75rem] sm:rounded-[2rem] bg-gradient-to-b from-white/[0.08] to-white/[0.02] ${className}`}>
+      <div className="rounded-[calc(1.75rem-1.5px)] sm:rounded-[calc(2rem-1.5px)] bg-[#0a0a0a] shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)] p-6 sm:p-10">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function NestedButton({
+  children,
+  onClick,
+  variant = "primary",
+  disabled = false,
+  loading = false,
+  icon,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  variant?: "primary" | "ghost";
+  disabled?: boolean;
+  loading?: boolean;
+  icon?: React.ReactNode;
+}) {
+  const base = variant === "primary"
+    ? "bg-white text-black hover:bg-white/90"
+    : "bg-white/[0.04] text-white/60 hover:text-white hover:bg-white/[0.08] ring-1 ring-white/[0.06] hover:ring-white/[0.12]";
+
+  return (
+    <motion.button
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.97 }}
+      onClick={onClick}
+      disabled={disabled || loading}
+      className={`group relative inline-flex h-11 items-center gap-3 rounded-full px-6 text-xs font-semibold uppercase tracking-[0.12em] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] disabled:opacity-40 ${base}`}
+    >
+      {loading && (
+        <Loader2 className="size-3.5 animate-spin" />
+      )}
+      <span className="relative">{children}</span>
+      <span className="inline-flex size-7 items-center justify-center rounded-full bg-black/[0.06] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:bg-black/[0.1]">
+        {icon || <ChevronRight className="size-3.5" />}
+      </span>
+    </motion.button>
+  );
+}
+
+function BackButton({ onClick }: { onClick: () => void }) {
+  return (
+    <motion.button
+      whileHover={{ scale: 1.01 }}
+      whileTap={{ scale: 0.97 }}
+      onClick={onClick}
+      className="group inline-flex h-11 items-center gap-2 rounded-full bg-white/[0.03] px-5 text-xs font-medium text-white/40 ring-1 ring-white/[0.06] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:text-white hover:bg-white/[0.06] hover:ring-white/[0.12]"
+    >
+      <ArrowLeft className="size-3.5 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:-translate-x-0.5" />
+      Back
+    </motion.button>
+  );
+}
+
+function NotificationSwitch({
+  enabled,
+  onToggle,
+}: {
+  enabled: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={enabled}
+      onClick={(e) => { e.stopPropagation(); onToggle(); }}
+      className={`relative h-6 w-11 shrink-0 rounded-full transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+        enabled ? "bg-violet-500" : "bg-white/[0.08]"
+      }`}
+    >
+      <motion.div
+        animate={{ x: enabled ? 20 : 2 }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        className="absolute top-[3px] left-0 size-[18px] rounded-full bg-white shadow-sm"
+      />
+    </button>
+  );
+}
 
 export default function OnboardingPage() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const [step, setStep] = useState(0);
-  const [direction, setDirection] = useState(1);
   const [avatarSeed, setAvatarSeed] = useState(() => Math.random().toString(36).substring(2));
   const [name, setName] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -91,6 +187,7 @@ export default function OnboardingPage() {
   const [notifications, setNotifications] = useState({ email: true, sms: false, push: true });
   const [isLoading, setIsLoading] = useState(false);
   const shouldReduceMotion = useReducedMotion();
+  const mainRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -106,13 +203,13 @@ export default function OnboardingPage() {
   }, [isPending, router]);
 
   const goNext = useCallback(() => {
-    setDirection(1);
     setStep((p) => Math.min(p + 1, 4));
+    mainRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const goBack = useCallback(() => {
-    setDirection(-1);
     setStep((p) => Math.max(p - 1, 0));
+    mainRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
   const handleComplete = async () => {
@@ -136,25 +233,22 @@ export default function OnboardingPage() {
 
   if (isPending) {
     return (
-      <div className="min-h-[100dvh] flex items-center justify-center bg-[#050507]">
-        <div className="w-full max-w-md px-6">
-          <div className="flex justify-center mb-12">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-[#050505]">
+        <div className="flex flex-col items-center gap-6">
+          <div className="flex gap-1.5">
             {Array.from({ length: 5 }).map((_, i) => (
               <motion.div
                 key={i}
-                animate={{ scale: 1, backgroundColor: "hsl(262 83% 58%)", opacity: 0.6 }}
-                transition={{ delay: i * 0.05, ...springFast }}
-                className="size-2.5 rounded-full mx-1"
+                animate={{ scale: [1, 1.4, 1], opacity: [0.3, 0.8, 0.3] }}
+                transition={{ repeat: Infinity, duration: 1.4, delay: i * 0.12, ease: [0.32, 0.72, 0, 1] as const }}
+                className="size-2 rounded-full bg-violet-500/60"
               />
             ))}
           </div>
-          <div className="space-y-6 animate-pulse">
-            <div className="flex justify-center">
-              <div className="size-16 rounded-2xl bg-white/5" />
-            </div>
-            <div className="h-8 bg-white/5 rounded-xl w-2/3 mx-auto" />
-            <div className="h-4 bg-white/5 rounded-xl w-1/2 mx-auto" />
-            <div className="h-48 bg-white/5 rounded-2xl mt-8" />
+          <div className="flex flex-col items-center gap-3">
+            <div className="size-12 rounded-2xl bg-white/[0.03] ring-1 ring-white/[0.06] animate-pulse" />
+            <div className="h-5 w-40 rounded-lg bg-white/[0.03] ring-1 ring-white/[0.06] animate-pulse" />
+            <div className="h-3 w-24 rounded-lg bg-white/[0.02] ring-1 ring-white/[0.06] animate-pulse" />
           </div>
         </div>
       </div>
@@ -162,214 +256,219 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-[#050507] overflow-hidden relative">
-      {/* Ambient background orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="min-h-[100dvh] bg-[#050505] relative overflow-hidden">
+      {/* ── Ambient Orbs ── */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden>
         <motion.div
-          animate={{ x: shouldReduceMotion ? 0 : [0, 30, 0], y: shouldReduceMotion ? 0 : [0, -20, 0] }}
-          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full bg-[#8b5cf6]/10 blur-[100px]"
+          animate={shouldReduceMotion ? {} : { x: [0, 30, 0], y: [0, -20, 0] }}
+          transition={{ duration: 20, repeat: Infinity, ease: [0.32, 0.72, 0, 1] as const }}
+          className="absolute top-[15%] -left-[10%] w-[600px] h-[600px] rounded-full bg-violet-500/12 blur-[160px]"
         />
         <motion.div
-          animate={{ x: shouldReduceMotion ? 0 : [0, -30, 0], y: shouldReduceMotion ? 0 : [0, 25, 0] }}
-          transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-          className="absolute bottom-1/3 right-1/4 w-80 h-80 rounded-full bg-[#06b6d4]/8 blur-[80px]"
+          animate={shouldReduceMotion ? {} : { x: [0, -25, 0], y: [0, 25, 0] }}
+          transition={{ duration: 25, repeat: Infinity, ease: [0.32, 0.72, 0, 1], delay: 5 }}
+          className="absolute bottom-[20%] -right-[10%] w-[500px] h-[500px] rounded-full bg-cyan-400/8 blur-[140px]"
+        />
+        <motion.div
+          animate={shouldReduceMotion ? {} : { x: [0, 15, 0], y: [0, -30, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: [0.32, 0.72, 0, 1], delay: 2 }}
+          className="absolute top-[55%] left-[30%] w-[400px] h-[400px] rounded-full bg-fuchsia-500/6 blur-[120px]"
         />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-        className="relative z-10 w-full max-w-md px-6 py-10"
-      >
-        {/* Glass card */}
-        <div className="relative">
-          {/* Outer ring glow */}
-          <div className="absolute -inset-px rounded-[2rem] bg-gradient-to-b from-white/10 to-transparent pointer-events-none" />
-          {/* Inner glass card */}
-          <div className="relative rounded-[2rem] bg-black/40 backdrop-blur-2xl border border-white/[0.06] shadow-2xl shadow-black/50 overflow-hidden">
-            <div className="px-8 py-8">
-              {/* Step dot indicator */}
-              <div className="flex items-center justify-center mb-10">
-                {Array.from({ length: 5 }).map((_, i) => {
-                  const isActive = step === i;
-                  const isDone = step > i;
-                  return (
-                    <div key={i} className="flex items-center">
-                      <motion.div
-                        animate={{
-                          scale: isActive ? 1.35 : 1,
-                          backgroundColor: isDone || isActive ? "hsl(262 83% 58%)" : "hsl(0 0 50% / 0.15)",
-                          boxShadow: isActive
-                            ? "0 0 16px 2px hsl(262 83% 58% / 0.3)"
-                            : "0 0 0px 0px transparent",
-                        }}
-                        transition={springFast}
-                        className="size-2.5 rounded-full"
-                      />
-                      {i < 4 && (
-                        <motion.div
-                          animate={{
-                            backgroundColor: step > i ? "hsl(262 83% 58%)" : "hsl(0 0 50% / 0.15)",
-                            opacity: step > i ? 1 : 0.4,
-                          }}
-                          transition={{ duration: 0.3 }}
-                          className="w-8 h-px mx-1"
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+      {/* ── Grain Overlay ── */}
+      <div
+        className="fixed inset-0 pointer-events-none z-[60] opacity-[0.025]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
+          backgroundSize: "180px 180px",
+        }}
+      />
 
-              {/* Step content */}
-              <AnimatePresence mode="wait" custom={direction}>
+      {/* ── Fluid Island Nav ── */}
+      <nav className="fixed top-5 left-1/2 -translate-x-1/2 z-50">
+        <div className="p-1 rounded-full bg-black/75 backdrop-blur-2xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+          <div className="flex items-center gap-0.5">
+            {steps.map((s, i) => {
+              const active = step === i;
+              const done = step > i;
+              return (
+                <div key={s.id} className="relative px-3 py-1.5 sm:px-4 sm:py-2">
+                  {active && (
+                    <motion.div
+                      layoutId="nav-active-pill"
+                      className="absolute inset-0 rounded-full bg-white/[0.08]"
+                      transition={springNav}
+                    />
+                  )}
+                  <div className="relative z-10 flex items-center gap-2.5">
+                    <div
+                      className={`size-1.5 rounded-full transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                        done ? "bg-violet-400 shadow-[0_0_8px_rgba(139,92,246,0.4)]" : active ? "bg-white" : "bg-white/[0.15]"
+                      }`}
+                    />
+                    <span
+                      className={`text-[10px] sm:text-[11px] font-medium tracking-wider transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                        active ? "text-white" : done ? "text-white/50" : "text-white/20"
+                      }`}
+                    >
+                      <span className="hidden sm:inline">{s.short}</span>
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </nav>
+
+      {/* ── Page progress (subtle bottom bar) ── */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 h-0.5 bg-white/[0.03]">
+        <motion.div
+          animate={{ width: `${(step / (steps.length - 1)) * 100}%` }}
+          transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1] as const }}
+          className="h-full bg-gradient-to-r from-violet-500 to-cyan-400"
+        />
+      </div>
+
+      {/* ── Main content ── */}
+      <div
+        ref={mainRef}
+        className="relative z-10 flex flex-col min-h-[100dvh] overflow-y-auto"
+        style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.08) transparent" }}
+      >
+        <div className="flex-1 flex items-center justify-center py-28 sm:py-32 px-4">
+          <div className="w-full max-w-[580px]">
+            <AnimatePresence mode="wait">
+              {/* ════════════════════ STEP 0: PROFILE ════════════════════ */}
+              {step === 0 && (
                 <motion.div
-                  key={step}
-                  custom={direction}
-                  variants={slideVariants}
-                  initial="enter"
-                  animate="center"
+                  key="step-0"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
                   exit="exit"
                 >
-                  {/* Step 0: Profile */}
-                  {step === 0 && (
-                    <div className="space-y-6">
-                      <div className="text-center space-y-1">
-                        <p className="text-[10px] uppercase tracking-[0.25em] text-white/30 font-medium">
-                          Step 1 of 4
-                        </p>
+                  <DoubleBezel>
+                    <motion.div
+                      variants={containerVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="space-y-8"
+                    >
+                      <div className="space-y-4">
+                        <EyebrowTag text="Step 01" />
                         <motion.h2
-                          variants={fadeUp}
-                          custom={0}
-                          initial="hidden"
-                          animate="visible"
-                          className="text-2xl font-bold tracking-tight text-white"
+                          variants={itemVariants}
+                          className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-[1.08]"
                         >
-                          Create your profile
+                          Create your<br />profile
                         </motion.h2>
                         <motion.p
-                          variants={fadeUp}
-                          custom={1}
-                          initial="hidden"
-                          animate="visible"
-                          className="text-sm text-white/40"
+                          variants={itemVariants}
+                          className="text-sm text-white/30 leading-relaxed max-w-sm"
                         >
-                          Pick your style identity
+                          Pick your identity — you can always change this later.
                         </motion.p>
                       </div>
 
-                      <motion.div
-                        variants={fadeUp}
-                        custom={2}
-                        initial="hidden"
-                        animate="visible"
-                        className="flex flex-col items-center gap-3"
-                      >
-                        {/* Avatar */}
-                        <div className="relative group">
-                          <motion.img
-                            key={avatarSeed}
-                            initial={{ scale: 0.85, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={springFast}
-                            src={generateAvatarUrl(avatarSeed)}
-                            alt="Avatar"
-                            className="size-20 rounded-2xl ring-1 ring-white/10"
-                          />
+                      <motion.div variants={itemVariants} className="flex flex-col items-center gap-6">
+                        <div className="group relative">
+                          <div className="p-[1.5px] rounded-2xl bg-gradient-to-b from-white/[0.12] to-white/[0.04]">
+                            <motion.img
+                              key={avatarSeed}
+                              initial={{ scale: 0.9, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              transition={springGentle}
+                              src={generateAvatarUrl(avatarSeed)}
+                              alt="Avatar"
+                              className="size-24 rounded-[calc(1rem-1.5px)] bg-[#050505]"
+                            />
+                          </div>
                           <motion.button
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.92 }}
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 15, delay: 0.3 }}
+                            whileHover={{ scale: 1.1, rotate: 90 }}
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => setAvatarSeed(Math.random().toString(36).substring(2))}
-                            className="absolute -bottom-1.5 -right-1.5 size-7 rounded-full bg-[#8b5cf6] flex items-center justify-center shadow-lg shadow-purple-500/30"
+                            className="absolute -bottom-1.5 -right-1.5 size-8 rounded-full bg-violet-500 flex items-center justify-center shadow-lg shadow-violet-500/30 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:shadow-violet-500/50"
                           >
-                            <RefreshCw className="size-3 text-white" />
+                            <RefreshCw className="size-3.5 text-white" />
                           </motion.button>
                         </div>
 
-                        {/* Name input */}
-                        <input
-                          type="text"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          placeholder="What should we call you?"
-                          className="w-full h-11 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white placeholder:text-white/20 text-center outline-none transition-all duration-300
-                            focus:border-[#8b5cf6]/50 focus:bg-white/[0.06] focus:shadow-[0_0_0_3px_rgba(139,92,246,0.12)]"
-                        />
+                        <div className="w-full p-[1px] rounded-xl bg-white/[0.06] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus-within:bg-violet-500/30">
+                          <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="What should we call you?"
+                            className="w-full rounded-[calc(0.75rem-1px)] bg-[#0a0a0a] px-4 py-3 text-sm text-white placeholder:text-white/[0.15] outline-none transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] focus:bg-[#0d0d0d]"
+                          />
+                        </div>
                       </motion.div>
 
-                      <motion.div
-                        variants={fadeUp}
-                        custom={3}
-                        initial="hidden"
-                        animate="visible"
-                        className="flex justify-center"
-                      >
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.96 }}
-                          onClick={goNext}
-                          className="inline-flex h-11 items-center gap-2.5 bg-white text-black rounded-full px-8 text-xs font-semibold tracking-widest transition-all hover:bg-white/90 active:scale-95"
-                        >
-                          Get Started <ChevronRight className="size-4" />
-                        </motion.button>
+                      <motion.div variants={itemVariants} className="flex justify-end">
+                        <NestedButton onClick={goNext}>
+                          Continue
+                        </NestedButton>
                       </motion.div>
 
                       <motion.p
-                        variants={fadeUp}
-                        custom={4}
-                        initial="hidden"
-                        animate="visible"
-                        className="text-center text-[10px] text-white/20"
+                        variants={itemVariants}
+                        className="text-center text-[10px] text-white/[0.12] tracking-wider"
                       >
-                        All steps optional — edit anytime in profile
+                        ALL STEPS OPTIONAL — EDIT ANYTIME IN PROFILE
                       </motion.p>
-                    </div>
-                  )}
+                    </motion.div>
+                  </DoubleBezel>
+                </motion.div>
+              )}
 
-                  {/* Step 1: Style */}
-                  {step === 1 && (
-                    <div className="space-y-6">
-                      <div className="text-center space-y-1">
-                        <p className="text-[10px] uppercase tracking-[0.25em] text-white/30 font-medium">
-                          Step 2 of 4
-                        </p>
+              {/* ════════════════════ STEP 1: STYLE ════════════════════ */}
+              {step === 1 && (
+                <motion.div
+                  key="step-1"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                  <DoubleBezel>
+                    <motion.div
+                      variants={containerVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="space-y-8"
+                    >
+                      <div className="space-y-4">
+                        <EyebrowTag text="Step 02" />
                         <motion.h2
-                          variants={fadeUp}
-                          custom={0}
-                          initial="hidden"
-                          animate="visible"
-                          className="text-2xl font-bold tracking-tight text-white"
+                          variants={itemVariants}
+                          className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-[1.08]"
                         >
                           What&apos;s your vibe?
                         </motion.h2>
                         <motion.p
-                          variants={fadeUp}
-                          custom={1}
-                          initial="hidden"
-                          animate="visible"
-                          className="text-sm text-white/40"
+                          variants={itemVariants}
+                          className="text-sm text-white/30 leading-relaxed"
                         >
-                          Select all that fit your style
+                          Select all that fit your style — we&apos;ll tailor your feed.
                         </motion.p>
                       </div>
 
                       <motion.div
-                        variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
-                        initial="hidden"
-                        animate="visible"
-                        className="space-y-2"
+                        variants={itemVariants}
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                       >
-                        {styleCategories.map((cat) => {
+                        {styleCategories.map((cat, i) => {
                           const selected = selectedCategories.includes(cat.id);
+                          const isLarge = i === 0;
                           return (
                             <motion.button
                               key={cat.id}
-                              variants={fadeUp}
-                              custom={2}
+                              variants={itemVariants}
                               whileHover={{ scale: 1.01 }}
                               whileTap={{ scale: 0.98 }}
                               onClick={() =>
@@ -377,335 +476,341 @@ export default function OnboardingPage() {
                                   prev.includes(cat.id) ? prev.filter((c) => c !== cat.id) : [...prev, cat.id]
                                 )
                               }
-                              className={`w-full flex items-center gap-4 p-4 rounded-2xl border text-left transition-all duration-200 ${
-                                selected
-                                  ? "border-[#8b5cf6]/50 bg-[#8b5cf6]/10"
-                                  : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]"
+                              className={`group relative text-left transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                                isLarge ? "sm:col-span-2" : ""
                               }`}
                             >
-                              <span className="text-xl">{cat.emoji}</span>
-                              <div className="flex-1">
-                                <p className="text-sm font-semibold text-white">{cat.label}</p>
-                                <p className="text-[10px] text-white/30">{cat.desc}</p>
+                              <div className={`p-[1px] rounded-2xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                                selected
+                                  ? "bg-violet-500/50"
+                                  : "bg-white/[0.06] hover:bg-white/[0.1]"
+                              }`}>
+                                <div className={`rounded-[calc(1rem-1px)] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                                  selected
+                                    ? "bg-violet-500/10"
+                                    : "bg-[#0a0a0a] group-hover:bg-white/[0.02]"
+                                }`}>
+                                  <div className="flex items-center gap-4 p-4 sm:p-5">
+                                    <span className="text-2xl">{cat.emoji}</span>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-semibold text-white">
+                                        {cat.label}
+                                      </p>
+                                      <p className="text-[10px] text-white/25 mt-0.5">
+                                        {cat.desc}
+                                      </p>
+                                    </div>
+                                    <motion.div
+                                      animate={{
+                                        scale: selected ? 1 : 0,
+                                        opacity: selected ? 1 : 0,
+                                      }}
+                                      transition={springBouncy}
+                                      className="size-6 rounded-full bg-violet-500 flex items-center justify-center shrink-0"
+                                    >
+                                      <Check className="size-3 text-white" />
+                                    </motion.div>
+                                  </div>
+                                </div>
                               </div>
-                              <motion.div
-                                animate={{
-                                  scale: selected ? 1 : 0,
-                                  opacity: selected ? 1 : 0,
-                                }}
-                                transition={springFast}
-                                className="size-5 rounded-full bg-[#8b5cf6] flex items-center justify-center shrink-0"
-                              >
-                                <Check className="size-3 text-white" />
-                              </motion.div>
                             </motion.button>
                           );
                         })}
                       </motion.div>
 
-                      <motion.div
-                        variants={fadeUp}
-                        custom={3}
-                        initial="hidden"
-                        animate="visible"
-                        className="flex justify-between pt-2"
-                      >
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.96 }}
-                          onClick={goBack}
-                          className="inline-flex h-11 items-center gap-2 border border-white/[0.1] rounded-full px-5 text-xs font-semibold text-white/50 hover:text-white hover:border-white/[0.2] transition-all"
-                        >
-                          <ArrowLeft className="size-3.5" /> Back
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.96 }}
-                          onClick={goNext}
-                          className="inline-flex h-11 items-center gap-2 bg-white text-black rounded-full px-6 text-xs font-semibold tracking-widest hover:bg-white/90 transition-all"
-                        >
-                          Next <ChevronRight className="size-4" />
-                        </motion.button>
+                      <motion.div variants={itemVariants} className="flex items-center justify-between pt-2">
+                        <BackButton onClick={goBack} />
+                        <NestedButton onClick={goNext}>
+                          Next
+                        </NestedButton>
                       </motion.div>
-                    </div>
-                  )}
+                    </motion.div>
+                  </DoubleBezel>
+                </motion.div>
+              )}
 
-                  {/* Step 2: Sizes */}
-                  {step === 2 && (
-                    <div className="space-y-6">
-                      <div className="text-center space-y-1">
-                        <p className="text-[10px] uppercase tracking-[0.25em] text-white/30 font-medium">
-                          Step 3 of 4
-                        </p>
+              {/* ════════════════════ STEP 2: SIZES ════════════════════ */}
+              {step === 2 && (
+                <motion.div
+                  key="step-2"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                  <DoubleBezel>
+                    <motion.div
+                      variants={containerVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="space-y-8"
+                    >
+                      <div className="space-y-4">
+                        <EyebrowTag text="Step 03" />
                         <motion.h2
-                          variants={fadeUp}
-                          custom={0}
-                          initial="hidden"
-                          animate="visible"
-                          className="text-2xl font-bold tracking-tight text-white"
+                          variants={itemVariants}
+                          className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-[1.08]"
                         >
                           Your perfect fit
                         </motion.h2>
                         <motion.p
-                          variants={fadeUp}
-                          custom={1}
-                          initial="hidden"
-                          animate="visible"
-                          className="text-sm text-white/40"
+                          variants={itemVariants}
+                          className="text-sm text-white/30 leading-relaxed"
                         >
-                          Pick your size for each category
+                          Pick your size for each category.
                         </motion.p>
                       </div>
 
                       <motion.div
-                        variants={{ visible: { transition: { staggerChildren: 0.04 } } }}
-                        initial="hidden"
-                        animate="visible"
-                        className="space-y-4 max-h-[280px] overflow-y-auto pr-1 scrollbar-hide"
+                        variants={itemVariants}
+                        className="space-y-5 max-h-[360px] overflow-y-auto pr-1"
+                        style={{ scrollbarWidth: "thin", scrollbarColor: "rgba(255,255,255,0.06) transparent" }}
                       >
-                        {["men", "women", "sports", "casual"].map((catId) => {
+                        {["men", "women", "sports", "casual"].map((catId, idx) => {
                           const cat = styleCategories.find((c) => c.id === catId);
                           const sizes = sizeData[catId];
-                          return (
-                            <div key={catId} className="space-y-2">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-sm">{cat?.emoji}</span>
-                                <p className="text-[10px] uppercase tracking-widest text-white/30 font-medium">
-                                  {cat?.label}
-                                  {selectedSizes[catId] && (
-                                    <span className="ml-1.5 text-[#8b5cf6]">— US {selectedSizes[catId]}</span>
-                                  )}
-                                </p>
-                              </div>
-                              <div className="flex gap-1.5 flex-wrap">
-                                {sizes.map((size) => (
-                                  <button
-                                    key={size}
-                                    onClick={() =>
-                                      setSelectedSizes((prev) => ({
-                                        ...prev,
-                                        [catId]: prev[catId] === size ? "" : size,
-                                      }))
-                                    }
-                                    className={`h-8 rounded-lg border text-[11px] font-medium px-2.5 transition-all active:scale-95 ${
-                                      selectedSizes[catId] === size
-                                        ? "bg-[#8b5cf6] border-[#8b5cf6] text-white shadow-md shadow-purple-500/20"
-                                        : "border-white/[0.08] text-white/50 hover:border-white/[0.2] hover:text-white/70"
-                                    }`}
-                                  >
-                                    US {size}
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </motion.div>
-
-                      <motion.div
-                        variants={fadeUp}
-                        custom={3}
-                        initial="hidden"
-                        animate="visible"
-                        className="flex justify-between pt-2"
-                      >
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.96 }}
-                          onClick={goBack}
-                          className="inline-flex h-11 items-center gap-2 border border-white/[0.1] rounded-full px-5 text-xs font-semibold text-white/50 hover:text-white hover:border-white/[0.2] transition-all"
-                        >
-                          <ArrowLeft className="size-3.5" /> Back
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.96 }}
-                          onClick={goNext}
-                          className="inline-flex h-11 items-center gap-2 bg-white text-black rounded-full px-6 text-xs font-semibold tracking-widest hover:bg-white/90 transition-all"
-                        >
-                          Next <ChevronRight className="size-4" />
-                        </motion.button>
-                      </motion.div>
-                    </div>
-                  )}
-
-                  {/* Step 3: Notifications */}
-                  {step === 3 && (
-                    <div className="space-y-6">
-                      <div className="text-center space-y-1">
-                        <p className="text-[10px] uppercase tracking-[0.25em] text-white/30 font-medium">
-                          Step 4 of 4
-                        </p>
-                        <motion.h2
-                          variants={fadeUp}
-                          custom={0}
-                          initial="hidden"
-                          animate="visible"
-                          className="text-2xl font-bold tracking-tight text-white"
-                        >
-                          Stay in the loop
-                        </motion.h2>
-                        <motion.p
-                          variants={fadeUp}
-                          custom={1}
-                          initial="hidden"
-                          animate="visible"
-                          className="text-sm text-white/40"
-                        >
-                          Choose how you want to hear from us
-                        </motion.p>
-                      </div>
-
-                      <motion.div
-                        variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
-                        initial="hidden"
-                        animate="visible"
-                        className="space-y-3"
-                      >
-                        {[
-                          { key: "email", label: "Email Updates", desc: "Order confirmations, drops & exclusive offers" },
-                          { key: "sms", label: "SMS Alerts", desc: "Flash sales & order updates" },
-                          { key: "push", label: "Push Notifications", desc: "Real-time wishlist alerts & new drops" },
-                        ].map(({ key, label, desc }) => {
-                          const enabled = notifications[key as keyof typeof notifications];
+                          if (!cat || !sizes) return null;
                           return (
                             <motion.div
-                              key={key}
-                              variants={fadeUp}
-                              custom={2}
-                              whileHover={{ scale: 1.01 }}
-                              whileTap={{ scale: 0.99 }}
-                              onClick={() =>
-                                setNotifications((prev) => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))
-                              }
-                              className={`w-full flex items-center gap-4 p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer ${
-                                enabled
-                                  ? "border-[#8b5cf6]/40 bg-[#8b5cf6]/8"
-                                  : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]"
-                              }`}
+                              key={catId}
+                              initial={{ opacity: 0, y: 12 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: idx * 0.08, ...bezierSmooth }}
                             >
-                              <div className={`size-9 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-200 ${
-                                enabled ? "bg-[#8b5cf6]/20" : "bg-white/[0.05]"
-                              }`}>
-                                <Bell className={`size-4 ${enabled ? "text-[#8b5cf6]" : "text-white/30"}`} />
-                              </div>
-                              <div className="flex-1">
-                                <p className="text-sm font-semibold text-white">{label}</p>
-                                <p className="text-[10px] text-white/30">{desc}</p>
-                              </div>
-                              <div
-                                role="switch"
-                                aria-checked={enabled}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setNotifications((prev) => ({ ...prev, [key]: !prev[key as keyof typeof prev] }));
-                                }}
-                                className="relative shrink-0 cursor-pointer"
-                              >
-                                <motion.div
-                                  animate={{
-                                    backgroundColor: enabled ? "hsl(262 83% 58%)" : "hsl(0 0 0% / 0.3)",
-                                  }}
-                                  transition={springFast}
-                                  className="size-9 rounded-full flex items-center justify-center"
-                                >
-                                  <motion.div
-                                    animate={{ x: enabled ? 0 : -16 }}
-                                    transition={springFast}
-                                    className="absolute size-4 rounded-full bg-white shadow-sm"
-                                  />
-                                </motion.div>
+                              <div className="p-[1px] rounded-xl bg-white/[0.04]">
+                                <div className="rounded-[calc(0.75rem-1px)] bg-[#0a0a0a] p-4 sm:p-5">
+                                  <div className="flex items-center gap-2 mb-3.5">
+                                    <span className="text-base">{cat.emoji}</span>
+                                    <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-white/25">
+                                      {cat.label}
+                                      {selectedSizes[catId] && (
+                                        <span className="ml-2 text-violet-400/80">— US {selectedSizes[catId]}</span>
+                                      )}
+                                    </p>
+                                  </div>
+                                  <div className="flex gap-2 flex-wrap">
+                                    {sizes.map((size) => {
+                                      const active = selectedSizes[catId] === size;
+                                      return (
+                                        <button
+                                          key={size}
+                                          onClick={() =>
+                                            setSelectedSizes((prev) => ({
+                                              ...prev,
+                                              [catId]: prev[catId] === size ? "" : size,
+                                            }))
+                                          }
+                                          className={`relative px-3.5 py-2 rounded-lg text-[11px] font-medium transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-95 ${
+                                            active
+                                              ? "bg-violet-500 text-white shadow-md shadow-violet-500/20"
+                                              : "bg-white/[0.03] text-white/40 ring-1 ring-white/[0.06] hover:bg-white/[0.06] hover:text-white/60 hover:ring-white/[0.12]"
+                                          }`}
+                                        >
+                                          US {size}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
                               </div>
                             </motion.div>
                           );
                         })}
                       </motion.div>
 
-                      <motion.div
-                        variants={fadeUp}
-                        custom={3}
-                        initial="hidden"
-                        animate="visible"
-                        className="flex justify-between pt-2"
-                      >
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.96 }}
-                          onClick={goBack}
-                          className="inline-flex h-11 items-center gap-2 border border-white/[0.1] rounded-full px-5 text-xs font-semibold text-white/50 hover:text-white hover:border-white/[0.2] transition-all"
-                        >
-                          <ArrowLeft className="size-3.5" /> Back
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.96 }}
-                          onClick={handleComplete}
-                          disabled={isLoading}
-                          className="inline-flex h-11 items-center gap-2 bg-white text-black rounded-full px-6 text-xs font-semibold tracking-widest hover:bg-white/90 transition-all disabled:opacity-50"
-                        >
-                          {isLoading ? (
-                            <><Loader2 className="size-4 animate-spin" /> Setting up...</>
-                          ) : (
-                            <><Check className="size-4" /> Complete Setup</>
-                          )}
-                        </motion.button>
+                      <motion.div variants={itemVariants} className="flex items-center justify-between pt-2">
+                        <BackButton onClick={goBack} />
+                        <NestedButton onClick={goNext}>
+                          Next
+                        </NestedButton>
                       </motion.div>
-                    </div>
-                  )}
-
-                  {/* Step 4: Welcome */}
-                  {step === 4 && (
-                    <div className="text-center space-y-6 py-4">
-                      <motion.div variants={fadeUp} custom={0} initial="hidden" animate="visible">
-                        <div className="inline-flex items-center justify-center size-16 rounded-2xl bg-gradient-to-br from-[#8b5cf6]/30 to-[#06b6d4]/10 ring-1 ring-white/10 mb-4">
-                          <Sparkles className="size-8 text-[#8b5cf6]" />
-                        </div>
-                        <h2 className="text-2xl font-bold tracking-tight text-white">
-                          Welcome{name ? `, ${name}` : ""}!
-                        </h2>
-                        <p className="text-sm text-white/40 mt-1">
-                          Your profile is ready. Let&apos;s find your perfect pair.
-                        </p>
-                      </motion.div>
-
-                      <motion.div
-                        variants={{ visible: { transition: { staggerChildren: 0.08 } } }}
-                        initial="hidden"
-                        animate="visible"
-                        className="grid grid-cols-3 gap-3"
-                      >
-                        {welcomeHighlights.map(({ icon: Icon, label, desc }, i) => (
-                          <motion.div
-                            key={label}
-                            variants={fadeUp}
-                            custom={i + 1}
-                            className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-center"
-                          >
-                            <Icon className="size-5 text-[#8b5cf6] mx-auto" />
-                            <p className="text-xs font-semibold text-white mt-2">{label}</p>
-                            <p className="text-[10px] text-white/25 mt-0.5">{desc}</p>
-                          </motion.div>
-                        ))}
-                      </motion.div>
-
-                      <motion.div variants={fadeUp} custom={4} initial="hidden" animate="visible">
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.96 }}
-                          onClick={() => router.push("/shop")}
-                          className="inline-flex h-12 items-center gap-2.5 bg-white text-black rounded-full px-8 text-xs font-semibold uppercase tracking-widest transition-all hover:bg-white/90"
-                        >
-                          Start Shopping <ChevronRight className="size-4" />
-                        </motion.button>
-                      </motion.div>
-                    </div>
-                  )}
+                    </motion.div>
+                  </DoubleBezel>
                 </motion.div>
-              </AnimatePresence>
-            </div>
+              )}
+
+              {/* ════════════════════ STEP 3: NOTIFICATIONS ════════════════════ */}
+              {step === 3 && (
+                <motion.div
+                  key="step-3"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                  <DoubleBezel>
+                    <motion.div
+                      variants={containerVariants}
+                      initial="hidden"
+                      animate="visible"
+                      className="space-y-8"
+                    >
+                      <div className="space-y-4">
+                        <EyebrowTag text="Step 04" />
+                        <motion.h2
+                          variants={itemVariants}
+                          className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-[1.08]"
+                        >
+                          Stay in the loop
+                        </motion.h2>
+                        <motion.p
+                          variants={itemVariants}
+                          className="text-sm text-white/30 leading-relaxed"
+                        >
+                          Choose how you want to hear from us — we&apos;ll keep it worthwhile.
+                        </motion.p>
+                      </div>
+
+                      <motion.div variants={itemVariants} className="space-y-3">
+                        {[
+                          { key: "email" as const, label: "Email Updates", desc: "Order confirmations, drops & exclusive offers" },
+                          { key: "sms" as const, label: "SMS Alerts", desc: "Flash sales & order updates on the go" },
+                          { key: "push" as const, label: "Push Notifications", desc: "Real-time wishlist alerts & new drops" },
+                        ].map(({ key, label, desc }, idx) => {
+                          const enabled = notifications[key];
+                          return (
+                            <motion.div
+                              key={key}
+                              initial={{ opacity: 0, y: 12 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: idx * 0.08, ...bezierSmooth }}
+                              whileHover={{ scale: 1.003 }}
+                              whileTap={{ scale: 0.997 }}
+                              onClick={() =>
+                                setNotifications((prev) => ({ ...prev, [key]: !prev[key] }))
+                              }
+                              className="cursor-pointer"
+                            >
+                              <div className={`p-[1px] rounded-2xl transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                                enabled
+                                  ? "bg-violet-500/40"
+                                  : "bg-white/[0.04] hover:bg-white/[0.08]"
+                              }`}>
+                                <div className={`rounded-[calc(1rem-1px)] transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                                  enabled
+                                    ? "bg-violet-500/8"
+                                    : "bg-[#0a0a0a]"
+                                }`}>
+                                  <div className="flex items-center gap-4 p-4 sm:p-5">
+                                    <div className={`size-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                                      enabled ? "bg-violet-500/20" : "bg-white/[0.04]"
+                                    }`}>
+                                      <Bell className={`size-4 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] ${
+                                        enabled ? "text-violet-400" : "text-white/20"
+                                      }`} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-semibold text-white">{label}</p>
+                                      <p className="text-[10px] text-white/25 mt-0.5">{desc}</p>
+                                    </div>
+                                    <NotificationSwitch
+                                      enabled={enabled}
+                                      onToggle={() =>
+                                        setNotifications((prev) => ({ ...prev, [key]: !prev[key] }))
+                                      }
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </motion.div>
+
+                      <motion.div variants={itemVariants} className="flex items-center justify-between pt-2">
+                        <BackButton onClick={goBack} />
+                        <NestedButton
+                          onClick={handleComplete}
+                          loading={isLoading}
+                          icon={isLoading ? undefined : <Check className="size-3.5" />}
+                        >
+                          {isLoading ? "Setting up..." : "Complete Setup"}
+                        </NestedButton>
+                      </motion.div>
+                    </motion.div>
+                  </DoubleBezel>
+                </motion.div>
+              )}
+
+              {/* ════════════════════ STEP 4: WELCOME ════════════════════ */}
+              {step === 4 && (
+                <motion.div
+                  key="step-4"
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                >
+                  <div className="text-center">
+                    <div className="p-[1.5px] rounded-[2rem] bg-gradient-to-b from-white/[0.08] to-white/[0.02]">
+                      <div className="rounded-[calc(2rem-1.5px)] bg-[#0a0a0a] shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)] p-8 sm:p-12">
+                        <motion.div
+                          variants={containerVariants}
+                          initial="hidden"
+                          animate="visible"
+                          className="space-y-8"
+                        >
+                          <motion.div variants={itemVariants} className="space-y-5">
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{ type: "spring", stiffness: 300, damping: 15, delay: 0.2 }}
+                              className="inline-flex items-center justify-center"
+                            >
+                              <div className="size-16 rounded-2xl bg-gradient-to-br from-violet-500/30 to-cyan-500/10 ring-1 ring-white/[0.08] flex items-center justify-center">
+                                <Sparkles className="size-7 text-violet-400" />
+                              </div>
+                            </motion.div>
+                            <motion.h2
+                              variants={itemVariants}
+                              className="text-3xl sm:text-4xl font-bold tracking-tight text-white leading-[1.08]"
+                            >
+                              Welcome{name ? `, ${name}` : ""}!
+                            </motion.h2>
+                            <motion.p
+                              variants={itemVariants}
+                              className="text-sm text-white/30 leading-relaxed max-w-sm mx-auto"
+                            >
+                              Your profile is ready. Let&apos;s find your perfect pair.
+                            </motion.p>
+                          </motion.div>
+
+                          <motion.div
+                            variants={itemVariants}
+                            className="grid grid-cols-1 sm:grid-cols-3 gap-3"
+                          >
+                            {welcomeHighlights.map(({ icon: Icon, label, desc }, i) => (
+                              <motion.div
+                                key={label}
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.3 + i * 0.1, ...bezierSmooth }}
+                                className={`p-[1px] rounded-xl bg-white/[0.04] ${i === 0 ? "sm:col-span-3" : ""}`}
+                              >
+                                <div className="rounded-[calc(0.75rem-1px)] bg-[#0a0a0a] p-4 sm:p-5 text-center">
+                                  <Icon className="size-5 text-violet-400 mx-auto" />
+                                  <p className="text-xs font-semibold text-white mt-2">{label}</p>
+                                  <p className="text-[10px] text-white/25 mt-0.5">{desc}</p>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </motion.div>
+
+                          <motion.div variants={itemVariants}>
+                            <NestedButton onClick={() => router.push("/shop")} icon={<Sparkles className="size-3.5" />}>
+                              Start Shopping
+                            </NestedButton>
+                          </motion.div>
+                        </motion.div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

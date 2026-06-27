@@ -9,8 +9,10 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
-      { protocol: "https", hostname: "**" },
+      { protocol: "https", hostname: "plus.unsplash.com" },
     ],
+    dangerouslyAllowSVG: true,
+    unoptimized: true,
   },
 };
 

@@ -25,7 +25,6 @@ export default function OrderDeliveredEmail({
 }: OrderDeliveredEmailProps) {
   return (
     <Html lang="en">
-      <Head />
       <Preview>Your Order Has Been Delivered! - #{orderId} - Sneakora</Preview>
       <Tailwind
         config={{
@@ -39,6 +38,7 @@ export default function OrderDeliveredEmail({
           },
         }}
       >
+        <Head />
         <Body className="bg-zinc-900 font-sans">
           <Container className="mx-auto max-w-xl bg-zinc-800 p-8 rounded-2xl my-10">
             <Section className="text-center mb-8">

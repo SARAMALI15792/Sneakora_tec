@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence, useSpring, useTransform } from "framer-motion";
+import { motion, useSpring, useTransform } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const SNEAKER_IMAGES = [
@@ -30,8 +30,12 @@ const SNEAKER_IMAGES = [
 
 const NUM_IMAGES = SNEAKER_IMAGES.length;
 const ANGLE_STEP = 360 / NUM_IMAGES;
-const RADIUS = 180;
 const AUTO_ROTATE_INTERVAL = 4000;
+
+const MOBILE_RADIUS = 220;
+const DESKTOP_RADIUS = 340;
+const MOBILE_IMAGE_SIZE = { width: 150, height: 150 };
+const DESKTOP_IMAGE_SIZE = { width: 220, height: 220 };
 
 export function SneakerSlideshow() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,15 +43,24 @@ export function SneakerSlideshow() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragAngle, setDragAngle] = useState(0);
   const dragStartX = useRef(0);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Target rotation based on current index
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const radius = isMobile ? MOBILE_RADIUS : DESKTOP_RADIUS;
+  const imageSize = isMobile ? MOBILE_IMAGE_SIZE : DESKTOP_IMAGE_SIZE;
+
   const targetRotation = -(currentIndex * ANGLE_STEP) + dragAngle;
 
-  // Spring-based rotation for smooth physics
   const rotationSpring = useSpring(0, {
-    stiffness: 80,
-    damping: 18,
-    mass: 0.8,
+    stiffness: 60,
+    damping: 22,
+    mass: 0.6,
     restDelta: 0.1,
   });
 
@@ -55,7 +68,6 @@ export function SneakerSlideshow() {
     rotationSpring.set(targetRotation);
   }, [rotationSpring, targetRotation]);
 
-  // Transform spring value to angle for CSS
   const rotation = useTransform(rotationSpring, (v) => v);
 
   const goTo = useCallback((index: number) => {
@@ -73,14 +85,12 @@ export function SneakerSlideshow() {
     setCurrentIndex((prev) => (prev - 1 + NUM_IMAGES) % NUM_IMAGES);
   }, []);
 
-  // Auto-rotate when idle
   useEffect(() => {
     if (isHovered || isDragging) return;
     const interval = setInterval(goNext, AUTO_ROTATE_INTERVAL);
     return () => clearInterval(interval);
   }, [goNext, isHovered, isDragging]);
 
-  // Track drag for manual rotation
   const handlePointerDown = (e: React.PointerEvent) => {
     setIsDragging(true);
     dragStartX.current = e.clientX;
@@ -89,15 +99,15 @@ export function SneakerSlideshow() {
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return;
     const delta = e.clientX - dragStartX.current;
-    const angleDelta = (delta / 300) * ANGLE_STEP;
+    const sensitivity = isMobile ? 200 : 300;
+    const angleDelta = (delta / sensitivity) * ANGLE_STEP;
     setDragAngle(angleDelta);
   };
 
   const handlePointerUp = () => {
     if (!isDragging) return;
     setIsDragging(false);
-    // Snap to nearest image if drag was significant
-    if (Math.abs(dragAngle) > ANGLE_STEP * 0.3) {
+    if (Math.abs(dragAngle) > ANGLE_STEP * 0.15) {
       if (dragAngle > 0) goPrev();
       else goNext();
     } else {
@@ -115,10 +125,9 @@ export function SneakerSlideshow() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* 3D Carousel */}
       <div
         className="absolute inset-0 flex items-center justify-center"
-        style={{ perspective: "1000px" }}
+        style={{ perspective: isMobile ? "800px" : "1200px" }}
       >
         <motion.div
           className="relative"
@@ -138,22 +147,22 @@ export function SneakerSlideshow() {
                 key={image.src}
                 className="absolute"
                 style={{
-                  transform: `rotateY(${angle}deg) translateZ(${RADIUS}px)`,
+                  transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
                   transformStyle: "preserve-3d",
                   backfaceVisibility: "visible",
-                  width: 220,
-                  height: 220,
-                  marginLeft: -110,
-                  marginTop: -110,
+                  width: imageSize.width,
+                  height: imageSize.height,
+                  marginLeft: -imageSize.width / 2,
+                  marginTop: -imageSize.height / 2,
                 }}
               >
                 <div
                   className={`relative h-full w-full transition-all duration-500 ${
-                    isActive ? "scale-110 opacity-100" : "scale-85 opacity-30"
+                    isActive ? "scale-105 opacity-100" : "scale-90 opacity-60"
                   }`}
                   style={{
                     backfaceVisibility: "visible",
-                    filter: isActive ? "none" : "blur(2px) brightness(0.6)",
+                    filter: isActive ? "none" : "blur(1px) brightness(0.8)",
                   }}
                 >
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-violet-600/30 to-indigo-600/30 p-[2px]">
@@ -164,12 +173,11 @@ export function SneakerSlideshow() {
                         fill
                         className="object-contain p-3"
                         priority={index < 2}
-                        sizes="220px"
+                        sizes="(max-width: 768px) 150px, 220px"
                         draggable={false}
                       />
                     </div>
                   </div>
-                  {/* Reflection/shine overlay */}
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-white/5 via-transparent to-transparent opacity-50 pointer-events-none" />
                 </div>
               </motion.div>
@@ -178,11 +186,9 @@ export function SneakerSlideshow() {
         </motion.div>
       </div>
 
-      {/* Subtle gradient overlays for depth */}
       <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/60 via-transparent to-zinc-950/60 pointer-events-none" />
       <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-zinc-950/30 pointer-events-none" />
 
-      {/* Arrow controls */}
       <button
         onClick={(e) => { e.stopPropagation(); goPrev(); }}
         className="absolute left-3 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white/70 backdrop-blur-md transition-all hover:bg-white/20 hover:text-white active:scale-90 z-10"
@@ -198,7 +204,6 @@ export function SneakerSlideshow() {
         <ChevronRight className="h-5 w-5" />
       </button>
 
-      {/* Indicator dots */}
       <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2.5 z-10">
         {SNEAKER_IMAGES.map((_, index) => (
           <button

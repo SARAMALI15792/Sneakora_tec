@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { embedText } from "@/lib/gemini";
+import { embedText } from "@/lib/embeddings";
 import { z } from "zod";
 
 const embedBlogSchema = z.object({

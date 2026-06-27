@@ -168,6 +168,25 @@ model RecentlyViewed {
   @@unique([userId, productId])
 }
 
+model Deal {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  badge       String   @default("Sale")
+  discount    Decimal  @db.Decimal(5, 2)
+  type        String   @default("percentage")
+  image       String?
+  category    String?
+  productIds  String[]
+  active      Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  startsAt    DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Coupon {
   id         String   @id @default(cuid())
   code       String   @unique

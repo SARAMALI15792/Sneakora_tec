@@ -19,7 +19,6 @@ interface WelcomeEmailProps {
 export default function WelcomeEmail({ name }: WelcomeEmailProps) {
   return (
     <Html lang="en">
-      <Head />
       <Preview>Welcome to Sneakora - Your Account is Verified</Preview>
       <Tailwind
         config={{
@@ -33,6 +32,7 @@ export default function WelcomeEmail({ name }: WelcomeEmailProps) {
           },
         }}
       >
+        <Head />
         <Body className="bg-zinc-900 font-sans">
           <Container className="mx-auto max-w-xl bg-zinc-800 p-8 rounded-2xl my-10">
             <Section className="text-center mb-8">

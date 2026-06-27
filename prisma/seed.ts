@@ -589,6 +589,12 @@ const products = [
 async function main() {
   console.log("Seeding database...");
 
+  // Delete in correct order due to foreign key constraints
+  await prisma.order.deleteMany();        // cascades to OrderItem
+  await prisma.cartItem.deleteMany();
+  await prisma.review.deleteMany();
+  await prisma.wishlistItem.deleteMany();
+  await prisma.recentlyViewed.deleteMany();
   await prisma.product.deleteMany();
   await prisma.blogPost.deleteMany();
   await prisma.coupon.deleteMany();
@@ -666,11 +672,54 @@ async function main() {
     },
   ];
 
-  for (const post of blogPosts) {
+  const moreBlogPosts = [
+    {
+      title: "The Best Sneakers for Wide Feet: Comfort Meets Style",
+      slug: "best-sneakers-for-wide-feet",
+      content: `Finding stylish sneakers for wide feet used to be a challenge — but not anymore.\n\n**What Makes a Sneaker Wide-Foot Friendly?**\nLook for brands that offer wide sizing options (often labeled "D" for wide or "2E/4E" for extra wide). Also pay attention to the toe box shape — round or anatomical toe boxes give your toes room to splay naturally.\n\n**Key Features to Look For**\n- Stretchy knit or mesh uppers that conform to your foot shape\n- Removable insoles so you can swap in orthotics if needed\n- Wide-specific lasts (the mold the shoe is built on)\n- Minimal internal seams that could cause irritation\n\n**Our Top Wide-Foot Picks**\n1. Knit sneakers with stretchy uppers — they adapt to your foot shape\n2. Brands that specifically offer wide and extra-wide sizing\n3. Styles with lacing systems that allow for volume adjustment\n\n**Pro Tips**\nAlways measure your feet at the end of the day when they're slightly swollen. Wear the socks you plan to use with the sneakers when trying them on. And remember — if it pinches anywhere in the store, it will only get worse with wear.`,
+      excerpt: "Don't let wide feet stop you from stepping out in style. Here are our top sneaker picks.",
+      image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=800",
+      published: true,
+    },
+    {
+      title: "Athleisure Trend: How Sneakers Took Over Fashion",
+      slug: "athleisure-trend-sneakers-fashion",
+      content: `The rise of athleisure has blurred the line between activewear and everyday fashion. At the center of this revolution? The sneaker.\n\n**The Athleisure Revolution**\nAthleisure isn't just about being comfortable — it's about looking good while feeling good. Sneakers have become the cornerstone of this movement, evolving from purely functional athletic gear to style statements.\n\n**Why Sneakers Won**\n- Versatility: Sneakers work with jeans, suits, dresses, and shorts alike\n- Technology: Modern cushioning makes them genuinely comfortable for all-day wear\n- Culture: Sneaker culture has mainstream acceptance like never before\n- Innovation: Designers are creating sneakers that are both beautiful and functional\n\n**How to Style Sneakers for Athleisure**\n- Pair clean white sneakers with tailored joggers and a blazer\n- Wear technical running shoes with leggings and an oversized hoodie\n- Style retro basketball sneakers with cargo pants and a vintage tee\n- Match minimalist sneakers with slip dresses for an edgy contrast\n\nThe athleisure trend isn't going anywhere — and sneakers will continue leading the charge.`,
+      excerpt: "How the humble sneaker became the most important piece in modern fashion.",
+      image: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800",
+      published: true,
+    },
+    {
+      title: "How to Spot Fake Sneakers: A Complete Authentication Guide",
+      slug: "how-to-spot-fake-sneakers",
+      content: `With the sneaker resale market booming, counterfeit shoes have become increasingly sophisticated. Here's how to spot fakes.\n\n**The Box**\nCounterfeiters often overlook the box. Check the font, spacing, and label quality. Authentic boxes have crisp printing and consistent branding.\n\n**The Stitching**\nLegitimate sneakers have clean, even stitching. Look for loose threads, inconsistent stitch length, or wonky patterns — these are red flags.\n\n**The Materials**\n- Real leather smells like leather; synthetic fakes smell like plastic\n- Premium materials have a specific feel and weight\n- Check the inside of the shoe for quality lining materials\n\n**The Sole**\nCompare the tread pattern, color, and flexibility against official photos. Counterfeit soles often use cheaper rubber that feels different.\n\n**The Price**\nIf a deal seems too good to be true, it probably is. Always buy from authorized retailers or reputable resale platforms.\n\n**Quick Checklist**\n- [ ] Box quality and labeling\n- [ ] Stitching consistency\n- [ ] Material smell and feel\n- [ ] Sole construction\n- [ ] Price relative to market`,
+      excerpt: "Expert tips to help you authenticate sneakers and avoid buying counterfeit kicks.",
+      image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800",
+      published: true,
+    },
+    {
+      title: "The Science of Sneaker Cushioning: Air, Foam, and Gel Explained",
+      slug: "science-of-sneaker-cushioning",
+      content: `Not all cushioning is created equal. Here's what's actually inside your sneakers.\n\n**Air Cushioning**\nPopularized by Nike's Air technology, air cushioning uses pressurized air units in the heel and/or forefoot. These units compress on impact and rebound, providing responsive cushioning. The air is typically pressurized between 5-25 PSI, with higher pressures offering more responsiveness.\n\n**Foam Cushioning**\nFoam is the most common cushioning material. Modern foams fall into categories:\n- EVA (Ethylene-Vinyl Acetate): Lightweight and affordable, but compresses over time\n- PU (Polyurethane): More durable but heavier than EVA\n- PEBA (Polyether Block Amide): Premium foam used in high-end running shoes — lightweight, resilient, and expensive\n- Supercritical foams: Created using nitrogen or CO2 infusion for optimal energy return\n\n**Gel Cushioning**\nASICS pioneered gel cushioning with silicone-based gel inserts placed in strategic zones. Gel excels at shock absorption but is less energy-returning than modern foams.\n\n**Combination Systems**\nMany premium sneakers combine multiple technologies — like a foam midsole with an air unit in the heel, or gel pods embedded in a foam base. These hybrid systems aim to deliver the best of all worlds.\n\n**Choosing What's Right for You**\n- Daily walking: Soft, plush foam for comfort\n- Running: Responsive foam with some structure\n- Training: Firmer, more stable cushioning\n- Basketball: Impact protection with court feel`,
+      excerpt: "From Air to ZoomX — a deep dive into what makes your sneakers comfortable.",
+      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
+      published: true,
+    },
+    {
+      title: "How to Start a Sneaker Collection on a Budget",
+      slug: "start-sneaker-collection-budget",
+      content: `You don't need unlimited funds to build an impressive sneaker rotation. Here's how to start smart.\n\n**Set Your Focus**\nBefore buying anything, decide what kind of collection you want:\n- Daily wearers: Focus on versatile, comfortable shoes\n- Hype/limited editions: Target key releases and collaborations\n- Vintage/retro: Hunt for classic silhouettes\n- Performance: Invest in sport-specific technology\n\n**Smart Buying Strategies**\n- Sign up for brand newsletters to get early access to sales\n- Follow release calendars to plan purchases\n- Join sneaker communities for trade and advice\n- Consider outlet stores for last season's models at deep discounts\n\n**Where to Save**\n- Buy previous colorways of popular models instead of the newest drop\n- Shop end-of-season sales for deep discounts\n- Consider gently used sneakers from reputable resale platforms\n- Focus on quality over quantity — five great pairs beat twenty mediocre ones\n\n**The Starter Rotation**\n1. One clean white sneaker (goes with everything)\n2. One all-black sneaker (practical and stylish)\n3. One lifestyle/running hybrid (comfort first)\n4. One statement pair (expresses your personal style)\n5. One retro/heritage pair (connects you to sneaker history)\n\nRemember: a collection should reflect your taste, not your wallet. Take your time and buy what you love.`,
+      excerpt: "Build an impressive sneaker collection without breaking the bank. Smart strategies for new collectors.",
+      image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=800",
+      published: true,
+    },
+  ];
+
+  for (const post of [...blogPosts, ...moreBlogPosts]) {
     await prisma.blogPost.create({ data: post });
   }
 
-  console.log(`Seeded ${blogPosts.length} blog posts`);
+  console.log(`Seeded ${blogPosts.length + moreBlogPosts.length} blog posts`);
 
   const coupons = [
     { code: "WELCOME10", discount: 10, type: "percentage", maxUses: 100, usedCount: 0 },
