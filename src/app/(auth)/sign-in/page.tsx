@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-import { Eye, EyeOff, AlertCircle, ArrowRight, Check, Shield, Zap, Truck, Star } from "lucide-react";
-import { SpinnerOverlay } from "@/components/shared/SpinnerOverlay";
+import { Eye, EyeOff, AlertCircle, ArrowRight, Shield, Zap, Truck, Star } from "lucide-react";
 
 const stagger = {
   hidden: { opacity: 0 },
@@ -21,6 +20,18 @@ const fadeUp = {
   visible: {
     opacity: 1, y: 0, filter: "blur(0px)",
     transition: { duration: 0.7, ease: [0.32, 0.72, 0, 1] as const },
+  },
+};
+
+const pageVariants = {
+  hidden: { opacity: 0, scale: 0.98, filter: "blur(6px)" },
+  visible: {
+    opacity: 1, scale: 1, filter: "blur(0px)",
+    transition: { duration: 0.8, ease: [0.32, 0.72, 0, 1] as const },
+  },
+  exit: {
+    opacity: 0, scale: 0.98, filter: "blur(6px)",
+    transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] as const },
   },
 };
 
@@ -40,15 +51,62 @@ function EyebrowTag({ text }: { text: string }) {
   );
 }
 
-/* ─────────────── DoubleBezel ─────────────── */
-function DoubleBezel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`p-[1.5px] rounded-[1.75rem] sm:rounded-[2rem] bg-gradient-to-b from-white/[0.08] to-white/[0.02] ${className}`}>
-      <div className="rounded-[calc(1.75rem-1.5px)] sm:rounded-[calc(2rem-1.5px)] bg-[#0a0a0a] shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)] p-6 sm:p-10">
-        {children}
-      </div>
-    </div>
-  );
+/* ─────────────── Floating Particles ─────────────── */
+function Particles() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    let animId: number;
+    const particles: { x: number; y: number; size: number; speedX: number; speedY: number; opacity: number }[] = [];
+
+    function resize() {
+      canvas!.width = window.innerWidth;
+      canvas!.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: Math.random() * canvas!.width,
+        y: Math.random() * canvas!.height,
+        size: Math.random() * 2 + 0.5,
+        speedX: (Math.random() - 0.5) * 0.3,
+        speedY: (Math.random() - 0.5) * 0.3,
+        opacity: Math.random() * 0.5 + 0.1,
+      });
+    }
+
+    function animate() {
+      context!.clearRect(0, 0, canvas!.width, canvas!.height);
+      particles.forEach((p) => {
+        p.x += p.speedX;
+        p.y += p.speedY;
+        if (p.x < 0) p.x = canvas!.width;
+        if (p.x > canvas!.width) p.x = 0;
+        if (p.y < 0) p.y = canvas!.height;
+        if (p.y > canvas!.height) p.y = 0;
+        context!.beginPath();
+        context!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        context!.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+        context!.fill();
+      });
+      animId = requestAnimationFrame(animate);
+    }
+    animate();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-[5]" />;
 }
 
 /* ─────────────── Brand Side ─────────────── */
@@ -78,7 +136,6 @@ function BrandSide() {
         Sign in to manage your orders, save your favorites, and stay informed on every release that matters to you.
       </motion.p>
 
-      {/* Quick Stats */}
       <motion.div variants={fadeUp} className="mt-10 flex flex-wrap gap-x-10 gap-y-4">
         {[
           { value: "10K+", label: "Products" },
@@ -92,7 +149,6 @@ function BrandSide() {
         ))}
       </motion.div>
 
-      {/* Perks */}
       <motion.div variants={fadeUp} className="mt-12 space-y-5">
         {perkList.map((item) => {
           const Icon = item.icon;
@@ -110,7 +166,6 @@ function BrandSide() {
         })}
       </motion.div>
 
-      {/* Testimonial */}
       <motion.div variants={fadeUp} className="mt-12 pt-8 border-t border-white/[0.06]">
         <div className="flex gap-1 mb-3">
           {[...Array(5)].map((_, i) => (
@@ -276,7 +331,7 @@ function FormSide() {
       {/* Divider */}
       <motion.div variants={fadeUp} className="mt-8 relative">
         <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-white/[0.06]" /></div>
-        <div className="relative flex justify-center text-[10px] uppercase tracking-widest"><span className="bg-[#0a0a0a] px-3 text-white/20">Or continue with</span></div>
+        <div className="relative flex justify-center text-[10px] uppercase tracking-widest"><span className="bg-[#050505] px-3 text-white/20">Or continue with</span></div>
       </motion.div>
 
       {/* Social */}
@@ -315,45 +370,57 @@ function FormSide() {
 /* ═══════════════ PAGE ═══════════════ */
 export default function SignInPage() {
   return (
-    <>
-      <div className="min-h-[100dvh] bg-[#050505] text-white relative overflow-hidden">
-        {/* Ambient Orbs */}
-        <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden>
-          <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 20, repeat: Infinity, ease: [0.32, 0.72, 0, 1] }}
-            className="absolute top-[5%] -left-[8%] w-[700px] h-[700px] rounded-full bg-violet-500/10 blur-[180px]" />
-          <motion.div animate={{ x: [0, -25, 0], y: [0, 25, 0] }} transition={{ duration: 22, repeat: Infinity, ease: [0.32, 0.72, 0, 1], delay: 4 }}
-            className="absolute bottom-[10%] -right-[8%] w-[500px] h-[500px] rounded-full bg-cyan-400/6 blur-[150px]" />
-          <motion.div animate={{ x: [0, 15, 0], y: [0, -15, 0] }} transition={{ duration: 18, repeat: Infinity, ease: [0.32, 0.72, 0, 1], delay: 2 }}
-            className="absolute top-[40%] left-[50%] w-[350px] h-[350px] rounded-full bg-fuchsia-500/4 blur-[120px]" />
-        </div>
-
-        {/* Grain Overlay */}
-        <div className="fixed inset-0 pointer-events-none z-[60] opacity-[0.025]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
-            backgroundSize: "180px 180px",
-          }}
-        />
-
-        {/* ══ Split Layout ══ */}
-        <div className="relative z-10 min-h-[100dvh] flex flex-col lg:flex-row">
-          {/* ── Brand Content (left) — hidden on mobile ── */}
-          <div className="hidden lg:flex lg:w-1/2 lg:min-h-[100dvh] items-center overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-violet-500/4 to-transparent pointer-events-none" />
-            <BrandSide />
+    <AnimatePresence mode="wait">
+      <motion.div
+        key="signin-page"
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        variants={pageVariants}
+      >
+        <div className="min-h-[100dvh] bg-[#050505] text-white relative overflow-hidden">
+          {/* Ambient Orbs */}
+          <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden>
+            <motion.div animate={{ x: [0, 30, 0], y: [0, -20, 0] }} transition={{ duration: 20, repeat: Infinity, ease: [0.32, 0.72, 0, 1] }}
+              className="absolute top-[5%] -left-[8%] w-[700px] h-[700px] rounded-full bg-violet-500/10 blur-[180px]" />
+            <motion.div animate={{ x: [0, -25, 0], y: [0, 25, 0] }} transition={{ duration: 22, repeat: Infinity, ease: [0.32, 0.72, 0, 1], delay: 4 }}
+              className="absolute bottom-[10%] -right-[8%] w-[500px] h-[500px] rounded-full bg-cyan-400/6 blur-[150px]" />
+            <motion.div animate={{ x: [0, 15, 0], y: [0, -15, 0] }} transition={{ duration: 18, repeat: Infinity, ease: [0.32, 0.72, 0, 1], delay: 2 }}
+              className="absolute top-[40%] left-[50%] w-[350px] h-[350px] rounded-full bg-fuchsia-500/4 blur-[120px]" />
           </div>
 
-          {/* ── Form (right) ── */}
-          <div className="lg:w-1/2 lg:min-h-[100dvh] flex items-center bg-white/[0.01] relative">
-            <div className="absolute inset-0 bg-gradient-to-l from-violet-500/3 to-transparent pointer-events-none" />
-            <div className="w-full max-w-lg mx-auto">
-              <DoubleBezel>
-                <FormSide />
-              </DoubleBezel>
+          {/* Floating Particles */}
+          <Particles />
+
+          {/* Grain Overlay */}
+          <div className="fixed inset-0 pointer-events-none z-[60] opacity-[0.025]"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
+              backgroundSize: "180px 180px",
+            }}
+          />
+
+          {/* ══ Split Layout ══ */}
+          <div className="relative z-10 min-h-[100dvh] flex flex-col lg:flex-row">
+            {/* ── Brand Content (left) — hidden on mobile ── */}
+            <div className="hidden lg:flex lg:w-1/2 lg:min-h-[100dvh] items-center overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-violet-500/4 to-transparent pointer-events-none" />
+              <BrandSide />
+            </div>
+
+            {/* ── Form (right) — glass panel ── */}
+            <div className="lg:w-1/2 lg:min-h-[100dvh] flex items-center justify-center relative">
+              <div className="absolute inset-0 bg-gradient-to-l from-violet-500/3 to-transparent pointer-events-none" />
+              <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="relative rounded-[2rem] bg-white/[0.02] backdrop-blur-2xl ring-1 ring-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 sm:p-10">
+                  <div className="absolute -inset-[1px] rounded-[2rem] bg-gradient-to-b from-white/[0.08] to-transparent pointer-events-none -z-10" />
+                  <FormSide />
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </>
+      </motion.div>
+    </AnimatePresence>
   );
 }

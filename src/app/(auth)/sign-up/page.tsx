@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,7 +10,6 @@ import {
   Eye, EyeOff, AlertCircle, ArrowLeft, Check, X, Sparkles,
   Gift, Award, Users, TrendingUp,
 } from "lucide-react";
-import { SpinnerOverlay } from "@/components/shared/SpinnerOverlay";
 
 const passwordRules = [
   { label: "At least 8 characters", test: (v: string) => v.length >= 8 },
@@ -44,6 +43,18 @@ const fadeUp = {
   },
 };
 
+const pageVariants = {
+  hidden: { opacity: 0, scale: 0.98, filter: "blur(6px)" },
+  visible: {
+    opacity: 1, scale: 1, filter: "blur(0px)",
+    transition: { duration: 0.8, ease: [0.32, 0.72, 0, 1] as const },
+  },
+  exit: {
+    opacity: 0, scale: 0.98, filter: "blur(6px)",
+    transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] as const },
+  },
+};
+
 const membershipPerks = [
   { icon: Gift, label: "Early Access", desc: "First in line for limited releases and exclusive collaborations" },
   { icon: Award, label: "Reward Points", desc: "Earn with every purchase. Redeem on future orders and exclusive gear" },
@@ -60,15 +71,62 @@ function EyebrowTag({ text }: { text: string }) {
   );
 }
 
-/* ─────────────── DoubleBezel ─────────────── */
-function DoubleBezel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`p-[1.5px] rounded-[1.75rem] sm:rounded-[2rem] bg-gradient-to-b from-white/[0.08] to-white/[0.02] ${className}`}>
-      <div className="rounded-[calc(1.75rem-1.5px)] sm:rounded-[calc(2rem-1.5px)] bg-[#0a0a0a] shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)] p-6 sm:p-10">
-        {children}
-      </div>
-    </div>
-  );
+/* ─────────────── Floating Particles ─────────────── */
+function Particles() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    let animId: number;
+    const particles: { x: number; y: number; size: number; speedX: number; speedY: number; opacity: number }[] = [];
+
+    function resize() {
+      canvas!.width = window.innerWidth;
+      canvas!.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener("resize", resize);
+
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: Math.random() * canvas!.width,
+        y: Math.random() * canvas!.height,
+        size: Math.random() * 2 + 0.5,
+        speedX: (Math.random() - 0.5) * 0.3,
+        speedY: (Math.random() - 0.5) * 0.3,
+        opacity: Math.random() * 0.5 + 0.1,
+      });
+    }
+
+    function animate() {
+      context!.clearRect(0, 0, canvas!.width, canvas!.height);
+      particles.forEach((p) => {
+        p.x += p.speedX;
+        p.y += p.speedY;
+        if (p.x < 0) p.x = canvas!.width;
+        if (p.x > canvas!.width) p.x = 0;
+        if (p.y < 0) p.y = canvas!.height;
+        if (p.y > canvas!.height) p.y = 0;
+        context!.beginPath();
+        context!.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        context!.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+        context!.fill();
+      });
+      animId = requestAnimationFrame(animate);
+    }
+    animate();
+
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-[5]" />;
 }
 
 /* ─────────────── Brand Side ─────────────── */
@@ -98,7 +156,6 @@ function BrandSide() {
         Create your account to access exclusive releases, connect with serious collectors, and stay ahead of every drop.
       </motion.p>
 
-      {/* Stats */}
       <motion.div variants={fadeUp} className="mt-10 flex flex-wrap gap-x-10 gap-y-4">
         {[
           { value: "10K+", label: "Products" },
@@ -112,7 +169,6 @@ function BrandSide() {
         ))}
       </motion.div>
 
-      {/* Membership Perks */}
       <motion.div variants={fadeUp} className="mt-12 space-y-5">
         {membershipPerks.map((item) => {
           const Icon = item.icon;
@@ -130,7 +186,6 @@ function BrandSide() {
         })}
       </motion.div>
 
-      {/* Testimonial */}
       <motion.div variants={fadeUp} className="mt-12 pt-8 border-t border-white/[0.06]">
         <div className="flex gap-1 mb-3">
           {[...Array(5)].map((_, i) => (
@@ -375,23 +430,19 @@ function FormSide() {
         Already have an account?{" "}
         <Link href="/sign-in" className="ml-1 font-medium text-white/60 hover:text-white transition-colors duration-500">Sign in</Link>
       </motion.p>
+
+      <motion.div variants={fadeUp} className="mt-6 flex items-center justify-center gap-3">
+        <span className="h-px w-6 bg-white/[0.06]" />
+        <span className="text-[9px] uppercase tracking-[0.2em] text-white/[0.1] font-medium">
+          Powered by Better Auth
+        </span>
+        <span className="h-px w-6 bg-white/[0.06]" />
+      </motion.div>
     </motion.div>
   );
 }
 
 /* ═══════════════ PAGE ═══════════════ */
-const pageVariants = {
-  hidden: { opacity: 0, x: 60, filter: "blur(8px)" },
-  visible: {
-    opacity: 1, x: 0, filter: "blur(0px)",
-    transition: { duration: 0.8, ease: [0.32, 0.72, 0, 1] as const },
-  },
-  exit: {
-    opacity: 0, x: -60, filter: "blur(8px)",
-    transition: { duration: 0.5, ease: [0.32, 0.72, 0, 1] as const },
-  },
-};
-
 export default function SignUpPage() {
   return (
     <AnimatePresence mode="wait">
@@ -413,6 +464,9 @@ export default function SignUpPage() {
               className="absolute top-[40%] left-[50%] w-[350px] h-[350px] rounded-full bg-emerald-500/4 blur-[120px]" />
           </div>
 
+          {/* Floating Particles */}
+          <Particles />
+
           {/* Grain Overlay */}
           <div className="fixed inset-0 pointer-events-none z-[60] opacity-[0.025]"
             style={{
@@ -429,13 +483,14 @@ export default function SignUpPage() {
               <BrandSide />
             </div>
 
-            {/* ── Form (right) ── */}
-            <div className="lg:w-1/2 lg:min-h-[100dvh] flex items-center bg-white/[0.01] relative">
+            {/* ── Form (right) — glass panel ── */}
+            <div className="lg:w-1/2 lg:min-h-[100dvh] flex items-center justify-center relative">
               <div className="absolute inset-0 bg-gradient-to-l from-violet-500/3 to-transparent pointer-events-none" />
-              <div className="w-full max-w-lg mx-auto">
-                <DoubleBezel>
+              <div className="w-full max-w-lg mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="relative rounded-[2rem] bg-white/[0.02] backdrop-blur-2xl ring-1 ring-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 sm:p-10">
+                  <div className="absolute -inset-[1px] rounded-[2rem] bg-gradient-to-b from-white/[0.08] to-transparent pointer-events-none -z-10" />
                   <FormSide />
-                </DoubleBezel>
+                </div>
               </div>
             </div>
           </div>
