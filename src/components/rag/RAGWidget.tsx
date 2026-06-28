@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   X, Send, ChevronDown, Trash2, MessageSquare,
-  Clock, Plus,
+  Clock, Plus, ThumbsUp, ThumbsDown, ExternalLink,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRAG, type Message } from "./RAGProvider";
@@ -133,6 +133,8 @@ export function RAGWidget() {
     isTyping,
     addMessage,
     appendToLastMessage,
+    setLastMessageMeta,
+    setMessageFeedback,
     clearMessages,
     setIsOpen,
     setIsTyping,
@@ -246,6 +248,12 @@ export function RAGWidget() {
                 }
                 if (data.done) {
                   if (data.fullResponse) fullResponse = data.fullResponse;
+                  if (data.sources || data.confidence !== undefined) {
+                    setLastMessageMeta({
+                      sources: data.sources,
+                      confidence: data.confidence,
+                    });
+                  }
                 }
               } catch {
                 //
@@ -600,6 +608,74 @@ export function RAGWidget() {
                                 <span className="text-[10px]">
                                   {formatTime(message.timestamp)}
                                 </span>
+                              </div>
+                            )}
+
+                            {/* ── Source Citations ── */}
+                            {!isUser && message.sources && message.sources.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                                <div className="flex flex-wrap gap-1.5">
+                                  {message.sources.map((source) => (
+                                    <span
+                                      key={source.index}
+                                      className="inline-flex items-center gap-1 rounded-md bg-white/[0.04] px-2 py-1 text-[10px] text-white/40 border border-white/[0.04]"
+                                    >
+                                      <ExternalLink className="h-2.5 w-2.5" />
+                                      <span>{source.title}</span>
+                                      <span className="text-white/20 text-[9px] uppercase ml-0.5">
+                                        [{source.index}]
+                                      </span>
+                                    </span>
+                                  ))}
+                                </div>
+
+                                {/* ── Confidence indicator ── */}
+                                {message.confidence !== undefined && (
+                                  <div className="mt-2 flex items-center gap-2">
+                                    <div className="flex-1 h-0.5 rounded-full bg-white/[0.06] overflow-hidden">
+                                      <div
+                                        className="h-full rounded-full transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                                        style={{
+                                          width: `${Math.round(message.confidence * 100)}%`,
+                                          background: message.confidence > 0.7
+                                            ? "linear-gradient(90deg, #22c55e, #16a34a)"
+                                            : message.confidence > 0.4
+                                            ? "linear-gradient(90deg, #eab308, #ca8a04)"
+                                            : "linear-gradient(90deg, #ef4444, #dc2626)",
+                                        }}
+                                      />
+                                    </div>
+                                    <span className="text-[9px] text-white/20 font-mono">
+                                      {Math.round(message.confidence * 100)}%
+                                    </span>
+                                  </div>
+                                )}
+
+                                {/* ── Feedback buttons ── */}
+                                <div className="mt-2 flex items-center gap-1.5">
+                                  <button
+                                    onClick={() => setMessageFeedback(message.id, "up")}
+                                    className={`flex h-6 w-6 items-center justify-center rounded-lg transition-all duration-300 ${
+                                      message.feedback === "up"
+                                        ? "bg-violet-500/20 text-violet-400"
+                                        : "text-white/20 hover:text-white/40 hover:bg-white/[0.04]"
+                                    }`}
+                                    aria-label="Thumbs up"
+                                  >
+                                    <ThumbsUp className="h-3 w-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => setMessageFeedback(message.id, "down")}
+                                    className={`flex h-6 w-6 items-center justify-center rounded-lg transition-all duration-300 ${
+                                      message.feedback === "down"
+                                        ? "bg-amber-500/20 text-amber-400"
+                                        : "text-white/20 hover:text-white/40 hover:bg-white/[0.04]"
+                                    }`}
+                                    aria-label="Thumbs down"
+                                  >
+                                    <ThumbsDown className="h-3 w-3" />
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>
