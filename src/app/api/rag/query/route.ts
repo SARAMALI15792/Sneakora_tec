@@ -17,7 +17,7 @@ const querySchema = z.object({
 });
 
 function cosineSimilarity(a: number[], b: number[]): number {
-  if (a.length !== b.length) return 0;
+  if (a.length !== b.length || a.length === 0) return 0;
   let dotProduct = 0;
   let normA = 0;
   let normB = 0;
@@ -168,7 +168,7 @@ ${typeInstructions[queryType] || typeInstructions.general}
 
 Core rules:
 - Answer directly and professionally. Skip greetings, small talk, and fluff.
-- Use provided context (products, orders, blog, deals, reviews, size guide). If context is empty, say "I don't have information on that yet" — do not guess.
+- Use provided context (products, orders, blog, deals, reviews, size guide). If the context is empty or incomplete, do your best with what you have and let the user know what additional info would help.
 - Keep responses tight. 2-4 sentences unless the user asks for details.
 - For product questions: state name, price, key details. Use $ for prices.
 - For order questions: state status, items, total.
@@ -178,8 +178,9 @@ Core rules:
 - Never invent product names, prices, order data, deals, or coupons.
 - Format prices with $ and use bullet points only when listing multiple items.
 - When recommending, give 2-3 specific product names with prices and why they match.
+- When you use information from a specific source, cite it inline like [1], [2], etc. The source numbers correspond to the context sections numbered below.
 
-Context will follow below. Use it exclusively. If the context does not answer the user's question, say so plainly.`;
+Context will follow below. Use it to ground your answer. If the context partially addresses the question, say what you know and what's missing.`;
 }
 
 function buildContextPrompt(
@@ -362,6 +363,38 @@ async function dbFallbackSearch(
   return [];
 }
 
+function deduplicateChunks(
+  chunks: Array<{ chunkText: string; metadata: Record<string, unknown>; score: number }>
+): Array<{ chunkText: string; metadata: Record<string, unknown>; score: number }> {
+  const seen = new Set<string>();
+  return chunks.filter((chunk) => {
+    const key = chunk.metadata?.sourceType + ":" + (chunk.metadata?.sourceId || chunk.chunkText.slice(0, 50));
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function buildSourceList(
+  chunks: Array<{ chunkText: string; metadata: Record<string, unknown>; score: number }>
+): Array<{ index: number; type: string; title: string; id?: string; slug?: string }> {
+  return chunks.map((chunk, i) => ({
+    index: i + 1,
+    type: (chunk.metadata?.sourceType as string) || "unknown",
+    title: (chunk.metadata?.name as string) || (chunk.metadata?.title as string) || `${(chunk.metadata?.sourceType as string) || "Source"} ${i + 1}`,
+    id: (chunk.metadata?.sourceId as string) || (chunk.metadata?.productId as string) || undefined,
+    slug: (chunk.metadata?.slug as string) || undefined,
+  }));
+}
+
+function computeConfidence(chunks: Array<{ score: number }>): number {
+  if (chunks.length === 0) return 0;
+  const maxScore = Math.max(...chunks.map((c) => c.score));
+  const avgScore = chunks.reduce((sum, c) => sum + c.score, 0) / chunks.length;
+  const countBonus = Math.min(chunks.length / 5, 1) * 0.1;
+  return Math.min(maxScore * 0.6 + avgScore * 0.3 + countBonus, 1);
+}
+
 function sendPhase(
   controller: ReadableStreamDefaultController,
   encoder: TextEncoder,
@@ -405,23 +438,24 @@ export async function POST(request: NextRequest) {
         try {
           sendPhase(controller, encoder, "analyzing", "Analyzing your request...");
 
-          // Generate query embedding
-          let queryEmbedding: number[];
+          // ─── Step 1: Generate query embedding ──────────────────────
+          let queryEmbedding: number[] | null = null;
+          let embeddingOk = false;
           try {
             queryEmbedding = await embedText(query, "RETRIEVAL_QUERY");
-            if (!queryEmbedding || queryEmbedding.length === 0) {
-              queryEmbedding = new Array(768).fill(0);
+            if (queryEmbedding && queryEmbedding.length > 0) {
+              embeddingOk = true;
             }
           } catch {
-            queryEmbedding = new Array(768).fill(0);
+            queryEmbedding = null;
           }
 
-          // Generate expanded queries for better recall
+          // ─── Step 2: Expand query for better keyword recall ────────
           const expandedQueries = expandQuery(query);
 
           sendPhase(controller, encoder, "searching", "Searching products and inventory...");
 
-          // Fetch vector store candidates — include ALL sourceTypes
+          // ─── Step 3: Fetch all vector store candidates with embeddings ──
           const candidateVectors = await prisma.vectorStore.findMany({
             where: userId
               ? {
@@ -433,66 +467,54 @@ export async function POST(request: NextRequest) {
               : {
                   sourceType: { in: ["product", "blog", "deal", "review", "size_guide"] },
                 },
-            select: {
-              id: true,
-              sourceType: true,
-              sourceId: true,
-              chunkText: true,
-              metadata: true,
-            },
             take: 500,
           });
 
           sendPhase(controller, encoder, "matching", "Finding the best matches...");
 
-          // Keyword score using original + expanded queries
-          const keywordScored = candidateVectors
+          // ─── Step 4: Hybrid scoring — keyword + semantic in one pass ──
+          const scoredChunks = candidateVectors
             .map((v) => {
-              let maxKwScore = keywordMatchScore(query, v.chunkText);
+              const kwScore = keywordMatchScore(query, v.chunkText);
+              let maxKwScore = kwScore;
               for (const eq of expandedQueries) {
                 const score = keywordMatchScore(eq, v.chunkText);
                 if (score > maxKwScore) maxKwScore = score;
               }
-              return { ...v, kwScore: maxKwScore };
+
+              let embeddingScore = 0;
+              if (embeddingOk && queryEmbedding && v.embedding && v.embedding.length > 0) {
+                embeddingScore = cosineSimilarity(queryEmbedding, v.embedding);
+              }
+
+              const hybridScore = embeddingScore * 0.6 + maxKwScore * 0.4;
+
+              return {
+                id: v.id,
+                sourceType: v.sourceType,
+                sourceId: v.sourceId,
+                chunkText: v.chunkText,
+                metadata: v.metadata as Record<string, unknown>,
+                score: hybridScore,
+                kwScore: maxKwScore,
+                embeddingScore,
+              };
             })
-            .filter((v) => v.kwScore > 0.02)
-            .sort((a, b) => b.kwScore - a.kwScore)
-            .slice(0, 30);
-
-          // Fetch top 30 embeddings for semantic scoring
-          const topIds = keywordScored.map((v) => v.id);
-          const embeddingRecords = topIds.length > 0
-            ? await prisma.vectorStore.findMany({
-                where: { id: { in: topIds } },
-                select: { id: true, embedding: true },
-              })
-            : [];
-
-          const embeddingMap = new Map(embeddingRecords.map((r) => [r.id, r.embedding]));
-
-          // Final scoring — hybrid semantic + keyword (RRF-style)
-          const scoredChunks = keywordScored
-            .map((v) => {
-              const embedding = embeddingMap.get(v.id) ?? [];
-              const hasValidEmbedding = queryEmbedding.some((n) => n !== 0) && embedding.length > 0;
-              const embeddingScore = hasValidEmbedding
-                ? cosineSimilarity(queryEmbedding, embedding)
-                : 0;
-              const semanticWeight = embeddingScore > 0.2 ? embeddingScore : 0;
-              const hybridScore = semanticWeight * 0.6 + v.kwScore * 0.4;
-              return { ...v, score: hybridScore, embeddingScore };
+            .filter((v) => {
+              if (v.kwScore > 0.02) return true;
+              if (v.embeddingScore > 0.25) return true;
+              return false;
             })
-            .filter((v) => v.score > 0.05)
             .sort((a, b) => b.score - a.score)
             .slice(0, 8);
 
           let finalChunks = scoredChunks.map((v) => ({
             chunkText: v.chunkText,
-            metadata: v.metadata as Record<string, unknown>,
+            metadata: v.metadata,
             score: v.score,
           }));
 
-          // Fallback if vector store returns too few results
+          // ─── Step 5: Fallback if vector store returns too few results ──
           if (finalChunks.length < 2) {
             const fallback = await dbFallbackSearch(query, userId);
             if (fallback.length > 0) {
@@ -500,7 +522,7 @@ export async function POST(request: NextRequest) {
             }
           }
 
-          // Attach size guide if relevant
+          // ─── Step 6: Attach size guide if relevant ──────────────────
           const sizeKeywords = ["size", "sizing", "fit", "measure", "cm", "us", "eu", "uk", "half size", "heel", "foot"];
           const isSizeQuery = sizeKeywords.some((w) => query.toLowerCase().includes(w));
           if (isSizeQuery && !finalChunks.some((c) => c.metadata?.sourceType === "size_guide")) {
@@ -511,6 +533,11 @@ export async function POST(request: NextRequest) {
             });
           }
 
+          finalChunks = deduplicateChunks(finalChunks);
+
+          // ─── Step 7: Build prompts ──────────────────────────────────
+          const sources = buildSourceList(finalChunks);
+          const confidence = computeConfidence(finalChunks);
           const contextPrompt = buildContextPrompt(finalChunks);
           const systemPrompt = buildSystemPrompt(query);
           let fullPrompt = `${systemPrompt}\n\n${contextPrompt}\n\n`;
@@ -526,6 +553,7 @@ export async function POST(request: NextRequest) {
 
           sendPhase(controller, encoder, "generating", "Crafting your response...");
 
+          // ─── Step 8: Stream response ────────────────────────────────
           let assistantMessage = "";
 
           try {
@@ -550,12 +578,15 @@ export async function POST(request: NextRequest) {
             throw genError;
           }
 
+          // ─── Step 9: Send done event with sources, confidence, followups ──
           controller.enqueue(
             encoder.encode(
               `data: ${JSON.stringify({
                 text: "",
                 done: true,
                 fullResponse: assistantMessage,
+                sources,
+                confidence,
               })}\n\n`
             )
           );

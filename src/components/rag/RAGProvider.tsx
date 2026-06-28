@@ -10,11 +10,22 @@ import {
 } from "react";
 import { generateId } from "@/lib/utils";
 
+export interface Source {
+  index: number;
+  type: string;
+  title: string;
+  id?: string;
+  slug?: string;
+}
+
 export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  sources?: Source[];
+  confidence?: number;
+  feedback?: "up" | "down" | null;
 }
 
 interface Conversation {
@@ -34,6 +45,8 @@ interface RAGContextValue {
   streamingStatus: string | null;
   addMessage: (message: Omit<Message, "id" | "timestamp">) => void;
   appendToLastMessage: (text: string) => void;
+  setLastMessageMeta: (meta: { sources?: Source[]; confidence?: number }) => void;
+  setMessageFeedback: (messageId: string, feedback: "up" | "down") => void;
   clearMessages: () => void;
   setIsOpen: (open: boolean) => void;
   setIsTyping: (typing: boolean) => void;
@@ -157,6 +170,52 @@ export function RAGProvider({ children }: { children: ReactNode }) {
     [activeConversationId]
   );
 
+  const setLastMessageMeta = useCallback(
+    (meta: { sources?: Source[]; confidence?: number }) => {
+      setConversations((prev) => {
+        const existing = prev.find((c) => c.id === activeConversationId);
+        if (!existing || existing.messages.length === 0) return prev;
+        return prev.map((c) =>
+          c.id === activeConversationId
+            ? {
+                ...c,
+                messages: c.messages.map((m, i) =>
+                  i === c.messages.length - 1
+                    ? { ...m, ...meta }
+                    : m
+                ),
+                updatedAt: new Date(),
+              }
+            : c
+        );
+      });
+    },
+    [activeConversationId]
+  );
+
+  const setMessageFeedback = useCallback(
+    (messageId: string, feedback: "up" | "down") => {
+      setConversations((prev) => {
+        const existing = prev.find((c) => c.id === activeConversationId);
+        if (!existing) return prev;
+        return prev.map((c) =>
+          c.id === activeConversationId
+            ? {
+                ...c,
+                messages: c.messages.map((m) =>
+                  m.id === messageId
+                    ? { ...m, feedback: m.feedback === feedback ? null : feedback }
+                    : m
+                ),
+                updatedAt: new Date(),
+              }
+            : c
+        );
+      });
+    },
+    [activeConversationId]
+  );
+
   const appendToLastMessage = useCallback(
     (text: string) => {
       setConversations((prev) => {
@@ -232,6 +291,8 @@ export function RAGProvider({ children }: { children: ReactNode }) {
         streamingStatus,
         addMessage,
         appendToLastMessage,
+        setLastMessageMeta,
+        setMessageFeedback,
         clearMessages,
         setIsOpen,
         setIsTyping,
