@@ -7,15 +7,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import {
-  Eye, EyeOff, AlertCircle, ArrowLeft, Check, X, Sparkles,
+  Eye, EyeOff, AlertCircle, ArrowLeft, Check, X, Sparkles, Loader2,
   Gift, Award, Users, TrendingUp,
 } from "lucide-react";
 
 const passwordRules = [
-  { label: "At least 8 characters", test: (v: string) => v.length >= 8 },
-  { label: "Contains uppercase letter", test: (v: string) => /[A-Z]/.test(v) },
-  { label: "Contains lowercase letter", test: (v: string) => /[a-z]/.test(v) },
-  { label: "Contains a number", test: (v: string) => /\d/.test(v) },
+  { label: "At least 8 characters", short: "8+ chars", test: (v: string) => v.length >= 8 },
+  { label: "Contains uppercase letter", short: "Uppercase", test: (v: string) => /[A-Z]/.test(v) },
+  { label: "Contains lowercase letter", short: "Lowercase", test: (v: string) => /[a-z]/.test(v) },
+  { label: "Contains a number", short: "Number", test: (v: string) => /\d/.test(v) },
 ];
 
 function getStrength(password: string): { label: string; color: string; width: string } {
@@ -211,6 +211,15 @@ function BrandSide() {
   );
 }
 
+const creatingPhrases = [
+  "Creating your account...",
+  "Setting up your profile...",
+  "Preparing your collections...",
+  "Unlocking member perks...",
+  "Syncing your preferences...",
+  "Almost there...",
+];
+
 /* ─────────────── Form Side ─────────────── */
 function FormSide() {
   const router = useRouter();
@@ -219,6 +228,18 @@ function FormSide() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [phraseIndex, setPhraseIndex] = useState(0);
+
+  useEffect(() => {
+    if (!loading) { setPhraseIndex(0); return; }
+    const id = setInterval(() => {
+      setPhraseIndex((i) => {
+        if (i >= creatingPhrases.length - 1) { clearInterval(id); return i; }
+        return i + 1;
+      });
+    }, 1600);
+    return () => clearInterval(id);
+  }, [loading]);
 
   const strength = useMemo(() => getStrength(form.password), [form.password]);
 
@@ -261,23 +282,29 @@ function FormSide() {
     if (Object.values(newErrors).some(Boolean)) return;
 
     setLoading(true);
-    await authClient.signUp.email(
-      { name: form.name, email: form.email, password: form.password },
-      {
-        onRequest: () => setLoading(true),
-        onSuccess: () => {
-          document.cookie = "sneakora_recently_viewed=; path=/; max-age=0";
-          toast.success("Account created", { description: "Setting up your profile..." });
-          router.push("/onboarding");
-        },
-        onError: (ctx) => {
-          const msg = ctx.error.message ?? "Something went wrong";
-          toast.error("Sign up failed", { description: msg });
-          if (ctx.error.code === "USER_ALREADY_EXISTS") setErrors((p) => ({ ...p, email: "An account with this email already exists" }));
-        },
-      }
-    );
-    setLoading(false);
+    try {
+      await authClient.signUp.email(
+        { name: form.name, email: form.email, password: form.password },
+        {
+          onRequest: () => setLoading(true),
+          onSuccess: () => {
+            document.cookie = "sneakora_recently_viewed=; path=/; max-age=0";
+            toast.success("Account created", { description: "Setting up your profile..." });
+            router.push("/onboarding");
+          },
+          onError: (ctx) => {
+            const msg = ctx.error.message ?? "Something went wrong";
+            toast.error("Sign up failed", { description: msg });
+            if (ctx.error.code === "USER_ALREADY_EXISTS") setErrors((p) => ({ ...p, email: "An account with this email already exists" }));
+          },
+        }
+      );
+    } catch (err) {
+      console.error("Sign up error:", err);
+      toast.error("Sign up failed", { description: "Unable to connect. Please try again." });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -285,8 +312,107 @@ function FormSide() {
       initial="hidden"
       animate="visible"
       variants={stagger}
-      className="flex flex-col justify-center h-full px-6 sm:px-10 lg:px-12 xl:px-16 py-16 lg:py-0"
+      className="relative flex flex-col justify-center h-full px-6 sm:px-10 lg:px-12 xl:px-16 py-16 lg:py-0"
     >
+      {/* ── Creating Account Overlay ── */}
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            animate={{ opacity: 1, backdropFilter: "blur(20px)" }}
+            exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-8 rounded-[2rem] bg-[#060606]/90 overflow-hidden"
+          >
+            {/* Ambient orbs inside overlay */}
+            <div className="absolute inset-0 pointer-events-none">
+              <motion.div
+                animate={{ scale: [1, 1.3, 1], opacity: [0.12, 0.22, 0.12] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -top-16 -left-16 size-64 rounded-full bg-violet-600/30 blur-3xl"
+              />
+              <motion.div
+                animate={{ scale: [1, 1.2, 1], opacity: [0.08, 0.18, 0.08] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+                className="absolute -bottom-16 -right-16 size-64 rounded-full bg-indigo-500/25 blur-3xl"
+              />
+            </div>
+
+            {/* Spinner */}
+            <div className="relative size-24">
+              {/* Conic-gradient arc ring */}
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: "conic-gradient(from 0deg, #7c3aed 0%, #818cf8 30%, transparent 65%)",
+                  WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 2.5px), white calc(100% - 2.5px))",
+                  mask: "radial-gradient(farthest-side, transparent calc(100% - 2.5px), white calc(100% - 2.5px))",
+                }}
+              />
+              {/* Counter-rotating dashed ring */}
+              <motion.span
+                animate={{ rotate: -360 }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-[7px] rounded-full border border-dashed border-white/10 block"
+              />
+              {/* Inner pulsing glow */}
+              <motion.div
+                animate={{ scale: [0.85, 1.05, 0.85], opacity: [0.25, 0.45, 0.25] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute inset-[12px] rounded-full bg-violet-600/30 blur-sm"
+              />
+              {/* Center icon */}
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute inset-0 flex items-center justify-center"
+              >
+                <Sparkles className="size-5 text-violet-300/90" />
+              </motion.div>
+            </div>
+
+            {/* Cycling phrase */}
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-6 relative overflow-hidden w-72 flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={phraseIndex}
+                    initial={{ opacity: 0, y: 16, filter: "blur(6px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: -16, filter: "blur(6px)" }}
+                    transition={{ duration: 0.45, ease: [0.32, 0.72, 0, 1] }}
+                    className="absolute text-[15px] font-medium text-white/80 tracking-wide text-center whitespace-nowrap"
+                  >
+                    {creatingPhrases[phraseIndex]}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+
+              {/* Step counter */}
+              <p className="text-[10px] tabular-nums tracking-[0.2em] text-white/20">
+                {phraseIndex + 1} / {creatingPhrases.length}
+              </p>
+            </div>
+
+            {/* Progress bar */}
+            <div className="w-40 h-[1.5px] bg-white/[0.06] rounded-full overflow-hidden">
+              <motion.div
+                animate={{ width: `${((phraseIndex + 1) / creatingPhrases.length) * 100}%` }}
+                transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
+                className="h-full rounded-full"
+                style={{ background: "linear-gradient(90deg, #7c3aed, #818cf8)" }}
+              />
+            </div>
+
+            {/* Subtext */}
+            <p className="text-[9px] uppercase tracking-[0.3em] text-white/15 -mt-2">
+              This only takes a moment
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Header */}
       <motion.div variants={fadeUp}>
         <EyebrowTag text="Create Account" />
@@ -307,24 +433,30 @@ function FormSide() {
           <div className="relative">
             <input type="text" placeholder="John Doe" value={form.name}
               onChange={(e) => handleChange("name", e.target.value)} onBlur={() => handleBlur("name")} autoComplete="name"
-              className={`w-full h-12 px-5 text-sm bg-white/[0.02] border-b outline-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] text-white/80 placeholder-white/15 ${
+              className={`w-full h-12 px-5 pr-10 text-sm bg-white/[0.02] border-b outline-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] text-white/80 placeholder-white/15 ${
                 touched.name && errors.name ? "border-red-400/40" : touched.name && !errors.name && form.name ? "border-green-500/40" : "border-white/[0.08] focus:border-violet-400/40"
               }`}
             />
             <motion.div initial={false} animate={{ scaleX: form.name ? 1 : 0, opacity: form.name ? 1 : 0 }}
               transition={{ ease: [0.32, 0.72, 0, 1], duration: 0.4 }}
-              className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500 to-indigo-500 origin-left"
+              className="absolute bottom-0 left-0 right-0 h-[2px] origin-left"
+              style={{ background: touched.name ? errors.name ? "linear-gradient(90deg,#f87171,#ef4444)" : "linear-gradient(90deg,#4ade80,#22c55e)" : "linear-gradient(90deg,#8b5cf6,#6366f1)" }}
             />
+            <AnimatePresence>
+              {touched.name && (form.name || errors.name) && (
+                <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }}
+                  transition={{ duration: 0.2 }} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  {errors.name
+                    ? <AlertCircle className="size-3.5 text-red-400/70" />
+                    : <Check className="size-3.5 text-green-400/70" />}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           <AnimatePresence mode="wait">
             {touched.name && errors.name && (
-              <motion.p key="n-err" initial={{ opacity: 0, y: -4, height: 0 }} animate={{ opacity: 1, y: 0, height: "auto" }} exit={{ opacity: 0, y: -4, height: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-1.5 mt-1.5 text-xs text-red-400">
-                <AlertCircle className="size-3.5 shrink-0" />{errors.name}
-              </motion.p>
-            )}
-            {touched.name && !errors.name && form.name && (
-              <motion.p key="n-ok" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1.5 mt-1.5 text-xs text-green-400">
-                <Check className="size-3.5" />Looks good
+              <motion.p key="n-err" initial={{ opacity: 0, y: -4, height: 0 }} animate={{ opacity: 1, y: 0, height: "auto" }} exit={{ opacity: 0, y: -4, height: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-1.5 mt-1.5 text-xs text-red-400/80">
+                <AlertCircle className="size-3 shrink-0" />{errors.name}
               </motion.p>
             )}
           </AnimatePresence>
@@ -336,24 +468,30 @@ function FormSide() {
           <div className="relative">
             <input type="email" placeholder="you@example.com" value={form.email}
               onChange={(e) => handleChange("email", e.target.value)} onBlur={() => handleBlur("email")} autoComplete="email"
-              className={`w-full h-12 px-5 text-sm bg-white/[0.02] border-b outline-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] text-white/80 placeholder-white/15 ${
+              className={`w-full h-12 px-5 pr-10 text-sm bg-white/[0.02] border-b outline-none transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] text-white/80 placeholder-white/15 ${
                 touched.email && errors.email ? "border-red-400/40" : touched.email && !errors.email && form.email ? "border-green-500/40" : "border-white/[0.08] focus:border-violet-400/40"
               }`}
             />
             <motion.div initial={false} animate={{ scaleX: form.email ? 1 : 0, opacity: form.email ? 1 : 0 }}
               transition={{ ease: [0.32, 0.72, 0, 1], duration: 0.4 }}
-              className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-violet-500 to-indigo-500 origin-left"
+              className="absolute bottom-0 left-0 right-0 h-[2px] origin-left"
+              style={{ background: touched.email ? errors.email ? "linear-gradient(90deg,#f87171,#ef4444)" : "linear-gradient(90deg,#4ade80,#22c55e)" : "linear-gradient(90deg,#8b5cf6,#6366f1)" }}
             />
+            <AnimatePresence>
+              {touched.email && (form.email || errors.email) && (
+                <motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }}
+                  transition={{ duration: 0.2 }} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                  {errors.email
+                    ? <AlertCircle className="size-3.5 text-red-400/70" />
+                    : <Check className="size-3.5 text-green-400/70" />}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
           <AnimatePresence mode="wait">
             {touched.email && errors.email && (
-              <motion.p key="e-err" initial={{ opacity: 0, y: -4, height: 0 }} animate={{ opacity: 1, y: 0, height: "auto" }} exit={{ opacity: 0, y: -4, height: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-1.5 mt-1.5 text-xs text-red-400">
-                <AlertCircle className="size-3.5 shrink-0" />{errors.email}
-              </motion.p>
-            )}
-            {touched.email && !errors.email && form.email && (
-              <motion.p key="e-ok" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-1.5 mt-1.5 text-xs text-green-400">
-                <Check className="size-3.5" />Looks good
+              <motion.p key="e-err" initial={{ opacity: 0, y: -4, height: 0 }} animate={{ opacity: 1, y: 0, height: "auto" }} exit={{ opacity: 0, y: -4, height: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-1.5 mt-1.5 text-xs text-red-400/80">
+                <AlertCircle className="size-3 shrink-0" />{errors.email}
               </motion.p>
             )}
           </AnimatePresence>
@@ -377,34 +515,55 @@ function FormSide() {
               {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
             </button>
           </div>
-          <AnimatePresence mode="wait">
-            {touched.password && errors.password && (
-              <motion.p key="p-err" initial={{ opacity: 0, y: -4, height: 0 }} animate={{ opacity: 1, y: 0, height: "auto" }} exit={{ opacity: 0, y: -4, height: 0 }} transition={{ duration: 0.2 }} className="flex items-center gap-1.5 mt-1.5 text-xs text-red-400">
-                <AlertCircle className="size-3.5 shrink-0" />{errors.password}
-              </motion.p>
-            )}
-          </AnimatePresence>
         </div>
 
-        {/* Password Strength */}
+        {/* Password Strength + Rules */}
         {form.password && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }} className="space-y-3 -mt-1">
-            <div className="flex items-center gap-2">
-              <div className="flex-1 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                <motion.div initial={{ width: 0 }} animate={{ width: strength.width }} transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }} className={`h-full rounded-full ${strength.color}`} />
+            {/* Strength bar */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-1 rounded-full bg-white/[0.06] overflow-hidden">
+                <motion.div initial={{ width: 0 }} animate={{ width: strength.width }} transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }} className={`h-full rounded-full ${strength.color}`} />
               </div>
-              {strength.label && <span className="text-[10px] uppercase tracking-widest font-semibold text-white/40">{strength.label}</span>}
+              {strength.label && (
+                <span className="text-[10px] uppercase tracking-widest font-semibold text-white/35 w-10 text-right">{strength.label}</span>
+              )}
             </div>
-            <div className="space-y-1.5">
+            {/* Rules pill grid */}
+            <div className="grid grid-cols-2 gap-2">
               {passwordRules.map((rule) => {
                 const passed = rule.test(form.password);
                 return (
-                  <div key={rule.label} className="flex items-center gap-2">
-                    <div className={`size-4 rounded-full flex items-center justify-center transition-all duration-500 ${passed ? "bg-green-500/20" : "bg-white/[0.04]"}`}>
-                      {passed ? <Check className="size-2.5 text-green-400" /> : <X className="size-2.5 text-white/20" />}
-                    </div>
-                    <span className={`text-[11px] ${passed ? "text-green-400/80" : "text-white/25"}`}>{rule.label}</span>
-                  </div>
+                  <motion.div
+                    key={rule.label}
+                    animate={{
+                      borderColor: passed ? "rgba(74,222,128,0.28)" : "rgba(255,255,255,0.06)",
+                      backgroundColor: passed ? "rgba(74,222,128,0.06)" : "rgba(255,255,255,0.02)",
+                    }}
+                    transition={{ duration: 0.35 }}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl border"
+                  >
+                    <motion.div
+                      animate={{ backgroundColor: passed ? "rgba(74,222,128,0.15)" : "rgba(255,255,255,0.04)" }}
+                      transition={{ duration: 0.3 }}
+                      className="size-4 rounded-full flex items-center justify-center shrink-0"
+                    >
+                      <AnimatePresence mode="wait">
+                        {passed ? (
+                          <motion.div key="chk" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={{ duration: 0.18 }}>
+                            <Check className="size-2.5 text-green-400" />
+                          </motion.div>
+                        ) : (
+                          <motion.div key="dot" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={{ duration: 0.18 }}>
+                            <div className="size-1.5 rounded-full bg-white/20" />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                    <span className={`text-[11px] font-medium leading-none transition-colors duration-300 ${passed ? "text-green-400/80" : "text-white/25"}`}>
+                      {rule.short}
+                    </span>
+                  </motion.div>
                 );
               })}
             </div>
@@ -419,8 +578,12 @@ function FormSide() {
         >
           <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-[cubic-bezier(0.32,0.72,0,1)]" />
           <span className="relative z-10 flex items-center justify-center gap-2.5">
-            <Sparkles className="size-3.5" />
-            Create Account
+            {loading ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="size-3.5" />
+            )}
+            {loading ? "Creating Account..." : "Create Account"}
           </span>
         </motion.button>
       </motion.form>
