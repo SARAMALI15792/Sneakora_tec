@@ -1,16 +1,17 @@
+import { Html, Head, Preview, Body, Container, Section, Text, Button, Hr, Link } from "react-email";
 import {
-  Html,
-  Head,
-  Preview,
-  Body,
-  Container,
-  Section,
-  Text,
-  Button,
-  Tailwind,
-  Hr,
-  Link,
-} from "react-email";
+  bodyStyle,
+  containerStyle,
+  headerSection,
+  logoText,
+  taglineText,
+  contentSection,
+  buttonSecondary,
+  footerSection,
+  footerText,
+  hrStyle,
+  colors,
+} from "./shared";
 
 interface OrderDeliveredEmailProps {
   orderId: string;
@@ -25,84 +26,63 @@ export default function OrderDeliveredEmail({
 }: OrderDeliveredEmailProps) {
   return (
     <Html lang="en">
+      <Head />
       <Preview>Your Order Has Been Delivered! - #{orderId} - Sneakora</Preview>
-      <Tailwind
-        config={{
-          theme: {
-            extend: {
-              colors: {
-                brand: "#7c3aed",
-                dark: "#18181b",
-              },
-            },
-          },
-        }}
-      >
-        <Head />
-        <Body className="bg-zinc-900 font-sans">
-          <Container className="mx-auto max-w-xl bg-zinc-800 p-8 rounded-2xl my-10">
-            <Section className="text-center mb-8">
-              <Text className="text-3xl font-bold text-white tracking-tight">
-                SNEAKORA
-              </Text>
-              <Text className="text-violet-400 text-sm uppercase tracking-widest">
-                Premium Footwear
-              </Text>
-            </Section>
+      <Body style={bodyStyle}>
+        <Container style={containerStyle}>
+          <Section style={headerSection}>
+            <Text style={logoText}>SNEAKORA</Text>
+            <Text style={taglineText}>Premium Footwear</Text>
+          </Section>
 
-            <Section className="bg-zinc-900 rounded-xl p-6 mb-6">
-              <Text className="text-white text-2xl font-bold mb-2">
-                Delivered!
-              </Text>
-              <Text className="text-violet-400 font-semibold mb-4">
-                Hi, {customerName}
-              </Text>
-              <Text className="text-zinc-400 text-sm">
-                Your order #{orderId} has been delivered on {deliveredDate}.
-              </Text>
-            </Section>
+          <Section style={contentSection}>
+            <Text style={{ color: colors.text, fontSize: "22px", fontWeight: "bold", margin: "0 0 8px 0" }}>
+              Delivered!
+            </Text>
+            <Text style={{ color: colors.brand, fontWeight: 600, margin: "0 0 16px 0" }}>
+              Hi, {customerName}
+            </Text>
+            <Text style={{ color: colors.textMuted, margin: "0", lineHeight: "24px", fontSize: "14px" }}>
+              Your order #{orderId} has been delivered on {deliveredDate}.
+            </Text>
+          </Section>
 
-            <Section className="bg-zinc-900 rounded-xl p-6 mb-6">
-              <Text className="text-white font-semibold mb-2">
-                We hope you love your new gear!
-              </Text>
-              <Text className="text-zinc-400 text-sm mb-4">
-                If you have any questions about your purchase or need to make a
-                return, our support team is here to help.
-              </Text>
-            </Section>
+          <Section style={contentSection}>
+            <Text style={{ color: colors.text, fontWeight: 600, margin: "0 0 8px 0" }}>
+              We hope you love your new gear!
+            </Text>
+            <Text style={{ color: colors.textMuted, margin: "0", lineHeight: "22px", fontSize: "14px" }}>
+              If you have any questions about your purchase or need to make a return, our support team is here to help.
+            </Text>
+          </Section>
 
-            <Section className="grid grid-cols-2 gap-4 mb-6">
-              <Button
-                href="https://sneakora.com/shop"
-                className="bg-violet-600 text-white font-semibold px-4 py-3 rounded-lg text-center no-underline hover:bg-violet-500 transition-colors text-sm"
-              >
-                Shop Again
-              </Button>
-              <Button
-                href={`https://sneakora.com/profile/orders/${orderId}`}
-                className="bg-zinc-700 text-white font-semibold px-4 py-3 rounded-lg text-center no-underline hover:bg-zinc-600 transition-colors text-sm"
-              >
-                View Order
-              </Button>
-            </Section>
+          <Section style={{ ...contentSection, paddingTop: "0" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <tr>
+                <td style={{ width: "50%", paddingRight: "8px" }}>
+                  <Button href="https://sneakora.com/shop" style={buttonSecondary}>
+                    Shop Again
+                  </Button>
+                </td>
+                <td style={{ width: "50%", paddingLeft: "8px" }}>
+                  <Button href={`https://sneakora.com/profile/orders/${orderId}`} style={buttonSecondary}>
+                    View Order
+                  </Button>
+                </td>
+              </tr>
+            </table>
+          </Section>
 
-            <Hr className="border-zinc-700 my-6" />
+          <Hr style={hrStyle} />
 
-            <Section className="text-center">
-              <Text className="text-zinc-500 text-xs">
-                Sneakora, 123 Sport Street, New York, NY 10001
-              </Text>
-              <Link
-                href="#"
-                className="text-violet-500 text-xs no-underline mt-2 block"
-              >
-                Unsubscribe
-              </Link>
-            </Section>
-          </Container>
-        </Body>
-      </Tailwind>
+          <Section style={footerSection}>
+            <Text style={footerText}>Sneakora, 123 Sport Street, New York, NY 10001</Text>
+            <Link href="#" style={{ color: colors.textDim, fontSize: "12px", textDecoration: "underline" }}>
+              Unsubscribe
+            </Link>
+          </Section>
+        </Container>
+      </Body>
     </Html>
   );
 }
