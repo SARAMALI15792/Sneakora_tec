@@ -4,6 +4,8 @@ import prisma from "@/lib/db";
 import { z } from "zod";
 import { getStripeClient } from "@/lib/stripe";
 import { indexOrderInRag } from "@/lib/rag-index";
+import { sendEmail } from "@/lib/email";
+import OrderConfirmationEmail from "@/emails/OrderConfirmationEmail";
 
 const checkoutSchema = z.object({
   couponCode: z.string().optional(),
@@ -134,6 +136,36 @@ export async function POST(request: NextRequest) {
 
     await indexOrderInRag(order.id);
     await prisma.cartItem.deleteMany({ where: { userId: session.user.id } });
+
+    const orderWithUser = await prisma.order.findUnique({
+      where: { id: order.id },
+      include: {
+        user: { select: { name: true, email: true } },
+        items: { include: { product: { select: { name: true } } } },
+      },
+    });
+
+    if (orderWithUser?.user) {
+      const estimated = new Date();
+      estimated.setDate(estimated.getDate() + 5);
+      await sendEmail({
+        to: orderWithUser.user.email,
+        subject: `Order Confirmed - #${order.id} - Sneakora`,
+        react: OrderConfirmationEmail({
+          orderId: order.id,
+          customerName: orderWithUser.user.name || "Customer",
+          items: orderWithUser.items.map((i) => ({
+            name: i.product.name,
+            quantity: i.quantity,
+            price: Number(i.price),
+          })),
+          total: Number(orderWithUser.total),
+          estimatedDelivery: estimated.toLocaleDateString("en-US", {
+            month: "long", day: "numeric", year: "numeric",
+          }),
+        }),
+      });
+    }
 
     return NextResponse.json({
       url: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/order/success?order_id=${order.id}`,

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-import { Eye, EyeOff, AlertCircle, ArrowRight, Shield, Zap, Truck, Star } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, ArrowRight, Loader2, Shield, Zap, Truck, Star } from "lucide-react";
 
 const stagger = {
   hidden: { opacity: 0 },
@@ -212,23 +212,29 @@ function FormSide() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
-    const { error: err } = await authClient.signIn.email(
-      { email, password, callbackURL: "/" },
-      {
-        onSuccess: () => {
-          document.cookie = "sneakora_recently_viewed=; path=/; max-age=0";
-          toast.success("Welcome back");
-        },
-        onError: (ctx) => {
-          const msg = ctx.error.message ?? "Something went wrong";
-          toast.error("Sign in failed", { description: msg });
-          if (msg.toLowerCase().includes("email")) setErrors((p) => ({ ...p, email: msg }));
-          else setErrors((p) => ({ ...p, password: msg }));
-        },
-      }
-    );
-    if (err) setErrors((p) => ({ ...p, password: err.message ?? "Something went wrong" }));
-    setLoading(false);
+    try {
+      const { error: err } = await authClient.signIn.email(
+        { email, password, callbackURL: "/" },
+        {
+          onSuccess: () => {
+            document.cookie = "sneakora_recently_viewed=; path=/; max-age=0";
+            toast.success("Welcome back");
+          },
+          onError: (ctx) => {
+            const msg = ctx.error.message ?? "Something went wrong";
+            toast.error("Sign in failed", { description: msg });
+            if (msg.toLowerCase().includes("email")) setErrors((p) => ({ ...p, email: msg }));
+            else setErrors((p) => ({ ...p, password: msg }));
+          },
+        }
+      );
+      if (err) setErrors((p) => ({ ...p, password: err.message ?? "Something went wrong" }));
+    } catch (err) {
+      console.error("Sign in error:", err);
+      toast.error("Sign in failed", { description: "Unable to connect. Please try again." });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -322,8 +328,12 @@ function FormSide() {
         >
           <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-[cubic-bezier(0.32,0.72,0,1)]" />
           <span className="relative z-10 flex items-center justify-center gap-2.5">
-            <ArrowRight className="size-3.5" />
-            Sign in
+            {loading ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <ArrowRight className="size-3.5" />
+            )}
+            {loading ? "Signing in..." : "Sign in"}
           </span>
         </motion.button>
       </motion.form>
