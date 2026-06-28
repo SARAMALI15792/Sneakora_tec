@@ -1,16 +1,17 @@
+import { Html, Head, Preview, Body, Container, Section, Text, Button, Hr, Link } from "react-email";
 import {
-  Html,
-  Head,
-  Preview,
-  Body,
-  Container,
-  Section,
-  Text,
-  Button,
-  Tailwind,
-  Hr,
-  Link,
-} from "react-email";
+  bodyStyle,
+  containerStyle,
+  headerSection,
+  logoText,
+  taglineText,
+  contentSection,
+  buttonStyle,
+  footerSection,
+  footerText,
+  hrStyle,
+  colors,
+} from "./shared";
 
 interface OrderItem {
   name: string;
@@ -27,6 +28,41 @@ interface OrderConfirmationEmailProps {
   estimatedDelivery: string;
 }
 
+function ItemRow({ item }: { item: OrderItem }) {
+  return (
+    <tr>
+      <td style={{ padding: "12px 0", borderBottom: `1px solid ${colors.border}` }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <tr>
+            <td style={{ width: "60px", verticalAlign: "top" }}>
+              {item.image ? (
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  width="48"
+                  height="48"
+                  style={{ borderRadius: "8px", display: "block" }}
+                />
+              ) : null}
+            </td>
+            <td style={{ paddingLeft: "12px", verticalAlign: "top" }}>
+              <Text style={{ color: colors.text, fontSize: "14px", fontWeight: 600, margin: "0 0 4px 0" }}>
+                {item.name}
+              </Text>
+              <Text style={{ color: colors.textDim, fontSize: "12px", margin: "0" }}>Qty: {item.quantity}</Text>
+            </td>
+            <td style={{ textAlign: "right", verticalAlign: "top" }}>
+              <Text style={{ color: colors.text, fontSize: "14px", fontWeight: 600, margin: "0" }}>
+                ${(item.price * item.quantity).toFixed(2)}
+              </Text>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  );
+}
+
 export default function OrderConfirmationEmail({
   orderId,
   customerName,
@@ -36,95 +72,73 @@ export default function OrderConfirmationEmail({
 }: OrderConfirmationEmailProps) {
   return (
     <Html lang="en">
+      <Head />
       <Preview>Order Confirmed - #{orderId} - Sneakora</Preview>
-      <Tailwind
-        config={{
-          theme: {
-            extend: {
-              colors: {
-                brand: "#7c3aed",
-                dark: "#18181b",
-              },
-            },
-          },
-        }}
-      >
-        <Head />
-        <Body className="bg-zinc-900 font-sans">
-          <Container className="mx-auto max-w-xl bg-zinc-800 p-8 rounded-2xl my-10">
-            <Section className="text-center mb-8">
-              <Text className="text-3xl font-bold text-white tracking-tight">
-                SNEAKORA
-              </Text>
-              <Text className="text-violet-400 text-sm uppercase tracking-widest">
-                Premium Footwear
-              </Text>
-            </Section>
+      <Body style={bodyStyle}>
+        <Container style={containerStyle}>
+          <Section style={headerSection}>
+            <Text style={logoText}>SNEAKORA</Text>
+            <Text style={taglineText}>Premium Footwear</Text>
+          </Section>
 
-            <Section className="bg-zinc-900 rounded-xl p-6 mb-6">
-              <Text className="text-white text-2xl font-bold mb-2">
-                Order Confirmed!
-              </Text>
-              <Text className="text-violet-400 font-semibold mb-4">
-                Thank you, {customerName}
-              </Text>
-              <Text className="text-zinc-400 text-sm mb-1">
-                Order #{orderId}
-              </Text>
-              <Text className="text-zinc-500 text-sm mb-6">
-                Estimated delivery: {estimatedDelivery}
-              </Text>
-            </Section>
+          <Section style={contentSection}>
+            <Text style={{ color: colors.text, fontSize: "22px", fontWeight: "bold", margin: "0 0 8px 0" }}>
+              Order Confirmed!
+            </Text>
+            <Text style={{ color: colors.brand, fontWeight: 600, margin: "0 0 16px 0" }}>
+              Thank you, {customerName}
+            </Text>
+            <Text style={{ color: colors.textDim, fontSize: "14px", margin: "0 0 4px 0" }}>
+              Order #{orderId}
+            </Text>
+            <Text style={{ color: colors.textDim, fontSize: "14px", margin: "0" }}>
+              Estimated delivery: {estimatedDelivery}
+            </Text>
+          </Section>
 
-            <Section className="bg-zinc-900 rounded-xl p-6 mb-6">
-              <Text className="text-white font-semibold mb-4">Order Summary</Text>
+          <Section style={contentSection}>
+            <Text style={{ color: colors.text, fontWeight: 600, margin: "0 0 16px 0" }}>Order Summary</Text>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
               {items.map((item, index) => (
-                <Section
-                  key={index}
-                  className="flex justify-between items-center py-3 border-b border-zinc-700 last:border-0"
-                >
-                  <Section>
-                    <Text className="text-white text-sm">{item.name}</Text>
-                    <Text className="text-zinc-500 text-xs">
-                      Qty: {item.quantity}
-                    </Text>
-                  </Section>
-                  <Text className="text-white text-sm font-semibold">
-                    ${(item.price * item.quantity).toFixed(2)}
-                  </Text>
-                </Section>
+                <ItemRow key={index} item={item} />
               ))}
-              <Section className="flex justify-between items-center pt-4 mt-4 border-t border-zinc-700">
-                <Text className="text-white font-semibold">Total</Text>
-                <Text className="text-violet-400 font-bold text-lg">
-                  ${total.toFixed(2)}
-                </Text>
-              </Section>
-            </Section>
+              <tr>
+                <td style={{ paddingTop: "16px", borderTop: `1px solid ${colors.border}` }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <tr>
+                      <td>
+                        <Text style={{ color: colors.text, fontWeight: 600, margin: "0", fontSize: "16px" }}>
+                          Total
+                        </Text>
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        <Text style={{ color: colors.brand, fontWeight: "bold", margin: "0", fontSize: "18px" }}>
+                          ${total.toFixed(2)}
+                        </Text>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </Section>
 
-            <Button
-              href={`https://sneakora.com/profile/orders/${orderId}`}
-              className="bg-violet-600 text-white font-semibold px-8 py-4 rounded-lg text-center no-underline w-full block hover:bg-violet-500 transition-colors"
-            >
+          <Section style={{ ...contentSection, paddingTop: "0" }}>
+            <Button href={`https://sneakora.com/profile/orders/${orderId}`} style={buttonStyle}>
               View Order Details
             </Button>
+          </Section>
 
-            <Hr className="border-zinc-700 my-6" />
+          <Hr style={hrStyle} />
 
-            <Section className="text-center">
-              <Text className="text-zinc-500 text-xs">
-                Sneakora, 123 Sport Street, New York, NY 10001
-              </Text>
-              <Link
-                href="#"
-                className="text-violet-500 text-xs no-underline mt-2 block"
-              >
-                Unsubscribe
-              </Link>
-            </Section>
-          </Container>
-        </Body>
-      </Tailwind>
+          <Section style={footerSection}>
+            <Text style={footerText}>Sneakora, 123 Sport Street, New York, NY 10001</Text>
+            <Link href="#" style={{ color: colors.textDim, fontSize: "12px", textDecoration: "underline" }}>
+              Unsubscribe
+            </Link>
+          </Section>
+        </Container>
+      </Body>
     </Html>
   );
 }
