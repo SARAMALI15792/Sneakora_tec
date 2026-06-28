@@ -10,7 +10,12 @@ if (!connectionString) {
 const globalForPrisma = globalThis as typeof globalThis & { prisma?: PrismaClient };
 
 function createPrismaClient() {
-  const adapter = new PrismaPg({ connectionString });
+  const adapter = new PrismaPg({
+    connectionString,
+    connectionTimeoutMillis: 30000,
+    idleTimeoutMillis: 60000,
+    max: 5,
+  });
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
@@ -19,5 +24,9 @@ function createPrismaClient() {
 
 const prisma = globalForPrisma.prisma ?? createPrismaClient();
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+
+if (process.env.NODE_ENV !== "production") {
+  prisma.$queryRaw`SELECT 1`.catch(() => {});
+}
 
 export default prisma;

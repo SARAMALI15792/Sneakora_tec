@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { sendEmail } from "@/lib/email";
+import OrderCancelledEmail from "@/emails/OrderCancelledEmail";
 import { z } from "zod";
 
 type Params = Promise<{ id: string }>;
@@ -92,6 +94,32 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       cancelReason: parsed.data.reason,
     },
   });
+
+  const orderWithUser = await prisma.order.findUnique({
+    where: { id },
+    include: {
+      user: { select: { name: true, email: true, id: true } },
+    },
+  });
+
+  if (orderWithUser?.user) {
+    const refundDate = new Date();
+    refundDate.setDate(refundDate.getDate() + 7);
+
+    await sendEmail({
+      to: orderWithUser.user.email,
+      subject: `Order Cancelled - #${id} - Sneakora`,
+      react: OrderCancelledEmail({
+        orderId: id,
+        customerName: orderWithUser.user.name || "Customer",
+        refundAmount: Number(updated.total),
+        refundDate: refundDate.toLocaleDateString("en-US", {
+          month: "long", day: "numeric", year: "numeric",
+        }),
+        reason: parsed.data.reason,
+      }),
+    });
+  }
 
   return NextResponse.json({
     ...updated,
